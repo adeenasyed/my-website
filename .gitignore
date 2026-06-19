@@ -1,0 +1,5 @@
+node_modules
+.env
+server.js
+frontend/node_modules
+frontend/.next
