@@ -1,0 +1,11 @@
+.popup-link {
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+@media (min-width: 1600px) {
+  .popup.popup-static .popup-link {
+    font-size: calc(1.2vw - 3.2px);
+  }
+}

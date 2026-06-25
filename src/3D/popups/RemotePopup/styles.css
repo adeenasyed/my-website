@@ -1,0 +1,55 @@
+.remote-anchor {
+  position: fixed;
+  bottom: clamp(22px, 2.177vw, 56px);
+  right: clamp(22px, 2.177vw, 56px);
+  z-index: 30;
+}
+
+.remote-popup {
+  padding: clamp(17px, 1.633vw, 42px);
+  border-radius: clamp(8px, 0.816vw, 21px);
+  gap: 10px;
+}
+
+.remote-popup .popup-close {
+  top: clamp(7px, 0.680vw, 17px);
+  right: clamp(10px, 0.952vw, 24px);
+  font-size: clamp(14px, 1.361vw, 35px);
+}
+
+.remote-popup .popup-button {
+  font-size: clamp(11px, 0.884vw, 23px);
+  padding: clamp(6px, 0.544vw, 14px) clamp(8px, 0.816vw, 21px);
+}
+
+.remote-popup .popup-label {
+  font-size: clamp(10px, 0.816vw, 21px);
+}
+
+.remote-popup-select-label {
+  margin-bottom: 4px;
+}
+
+.remote-popup-leds-label {
+  margin-bottom: 8px;
+}
+
+.remote-led-section {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--accent-border);
+}
+
+.color-swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(4px, 0.408vw, 10px);
+}
+
+.color-swatch {
+  width: clamp(15px, 1.497vw, 38px);
+  height: clamp(15px, 1.497vw, 38px);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
