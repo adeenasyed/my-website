@@ -44,8 +44,8 @@ export async function loadDegree() {
   ) * 1.3
   const zoomOffset = new THREE.Vector3(0, 0, distance)
 
-  object.meshes = getMeshes(object, [zoomTarget])
-  object.hoverColor = 0x444444
+  object.meshes = getMeshes(object)
+  object.hoverColor = '#4A4A4A'
   object.zoom = { target: zoomTarget, offset: zoomOffset }
 
   return object

@@ -87,7 +87,7 @@ function buildInfoButton(githubButton, maxAnisotropy) {
   canvas.width = canvas.height = textureSize
   const context = canvas.getContext('2d')
   context.fillStyle = WHITE
-  context.font = `600 ${textureSize * 0.85}px "Rockwell"`
+  context.font = `${textureSize * 0.9}px "Inconsolata"`
 
   const char = 'i'
   const charBounds = context.measureText(char)
@@ -120,7 +120,6 @@ function buildInfoButton(githubButton, maxAnisotropy) {
   )
 
   group.meshes = getMeshes(group)
-  group.hoverColor = 0x666666
 
   return group
 }
