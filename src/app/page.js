@@ -1,91 +1,117 @@
 'use client'
 import '@/3D/popups/styles.css'
 import { useEffect, useRef, useState } from 'react'
-import { buildRoom } from '@/3D/index.js'
+import { createScene } from '@/3D/scene.js'
 import { PURPLE } from '@/theme.js'
 import ContactPopup from '@/3D/popups/ContactPopup'
 import AttributionsPopup from '@/3D/popups/AttributionsPopup'
 import RemotePopup from '@/3D/popups/RemotePopup'
 
+function getDevice(w) {
+  if (w >= 1024) return 'ok'
+  if (w >= 768) return 'tablet'
+  return 'mobile'
+}
+
 export default function Landing() {
+  const sceneRef = useRef(null)
   const roomRef = useRef(null)
+  const modeRef = useRef(null)
+  const [mode, setMode] = useState(null)
   const [showRemote, setShowRemote] = useState(false)
   const [ledColor, setLEDColor] = useState(PURPLE)
   const [tvZoom, setTVZoom] = useState(false)
   const [showContact, setShowContact] = useState(false)
   const [showAttributions, setShowAttributions] = useState(false)
-  const [showLanding, setShowLanding] = useState(false)
   const [device, setDevice] = useState('ok')
 
   useEffect(() => {
-    function checkDevice() {
-      const w = window.innerWidth
-      if (w >= 1024) setDevice('ok')
-      else if (w >= 768) setDevice('tablet-portrait')
-      else setDevice('mobile')
-    }
-    checkDevice()
-    window.addEventListener('resize', checkDevice)
-    return () => window.removeEventListener('resize', checkDevice)
-  }, [])
+    let currentDevice = getDevice(window.innerWidth)
+    setDevice(currentDevice)
 
-  useEffect(() => {
-    let disposed = false
-    buildRoom({
-      tv: () => {
-        setTVZoom(true)
-        openRemote()
-      },
-      remote: openRemote,
-      lightSign: () => setShowContact(true),
-      infoButton: () => setShowAttributions(true),
-      onEscape: handleEscape,
-    }).then((actions) => {
-      if (disposed) {
-        actions.dispose()
-        return
+    function onResize() {
+      currentDevice = getDevice(window.innerWidth)
+      setDevice(currentDevice)
+      if (modeRef.current === '3D') roomRef.current?.setInteractionsEnabled(currentDevice === 'ok')
+    }
+    window.addEventListener('resize', onResize)
+
+    const context = createScene()
+    sceneRef.current = context
+
+    if (currentDevice !== 'mobile') {
+      async function loadRoom() {
+        const { buildRoom } = await import('@/3D/index.js')
+        const room = await buildRoom({
+          ...context,
+          tv: () => {
+            setTVZoom(true)
+            openRemote()
+          },
+          lightSign: () => setShowContact(true),
+          infoButton: () => setShowAttributions(true),
+          remote: openRemote,
+          onEscape: handleEscape,
+        })
+        if (!sceneRef.current) {
+          room.dispose()
+          return
+        }
+        roomRef.current = room
+        if (modeRef.current === '3D' && currentDevice === 'ok') roomRef.current.startIntro()
       }
-      roomRef.current = actions
-      setShowLanding(true)
-    })
+      loadRoom()
+    }
+
     return () => {
-      disposed = true
+      window.removeEventListener('resize', onResize)
+      context.cancelLandingLoop()
       roomRef.current?.dispose()
+      context.dispose()
+      sceneRef.current = null
       roomRef.current = null
     }
   }, [])
 
+  function handleChoose3D() {
+    if (modeRef.current !== null) return
+    modeRef.current = '3D'
+    setMode('3D')
+    sceneRef.current.cancelLandingLoop()
+    roomRef.current?.startIntro()
+  }
+
   function openRemote() {
     setShowRemote(true)
-    roomRef.current?.setInteractionsEnabled(false)
+    roomRef.current.setInteractionsEnabled(false)
   }
 
   function closeRemote() {
     setShowRemote(false)
-    roomRef.current?.setInteractionsEnabled(true)
+    roomRef.current.setInteractionsEnabled(true)
   }
 
   function handleEscape() {
     setTVZoom(false)
     closeRemote()
-    roomRef.current?.resetCamera()
+    roomRef.current.resetCamera()
   }
 
   return (
     <>
-      {showLanding && (
+      {mode === null && (
         <div className='landing'>
           <button className='landing-button landing-button--disabled'>
             <span className='landing-button-mode'>2D</span>
             <span className='landing-button-note'>COMING SOON</span>
           </button>
           <button
-            className={`landing-button ${{ ok: 'landing-button--active', mobile: 'landing-button--disabled', 'tablet-portrait': 'landing-button--rotate' }[device]}`}
-            onClick={device === 'ok' ? () => { setShowLanding(false); roomRef.current?.startIntro() } : undefined}
+            className={`landing-button ${{ ok: 'landing-button--active', tablet: 'landing-button--rotate', mobile: 'landing-button--disabled' }[device]}`}
+            onClick={device === 'ok' ? handleChoose3D : undefined}
           >
             <span className='landing-button-mode'>3D</span>
-            {device === 'mobile' && <span className='landing-button-note'>UNAVAILABLE ON MOBILE</span>}
-            {device === 'tablet-portrait' && <span className='landing-button-note landing-button-note--flash'>ROTATE DEVICE</span>}
+            {device === 'mobile' && <span className='landing-button-note'>UNAVAILABLE ON MOBILE <br /> GET A BIGGER SCREEN!</span>}
+            {device === 'tablet' && <span className='landing-button-note landing-button-note--flash'>ROTATE DEVICE</span>}
           </button>
         </div>
       )}
@@ -103,10 +129,9 @@ export default function Landing() {
           }}
         />
       )}
-
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
-
       {showAttributions && <AttributionsPopup onClose={() => setShowAttributions(false)} />}
+      {(mode === '3D' && device !== 'ok') && <div className='orientation-warning'>↺</div>}
     </>
   )
 }

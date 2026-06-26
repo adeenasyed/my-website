@@ -1,8 +1,8 @@
 import * as THREE from 'three'
-import { DEFAULT_CAMERA_POSITION, CAMERA_FOV } from './constants.js'
+import { INTRO_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT, CAMERA_FOV } from './constants.js'
 import { WHITE } from '@/theme.js'
 
-const BG_COLOR = '#050309'
+const BG_COLOR = new THREE.Color('#050309')
 
 export function createScene() {
   const scene = new THREE.Scene()
@@ -13,7 +13,8 @@ export function createScene() {
   scene.add(stars)
 
   const camera = new THREE.PerspectiveCamera(CAMERA_FOV, window.innerWidth / window.innerHeight, 1, 140000)
-  camera.position.set(...DEFAULT_CAMERA_POSITION)
+  camera.position.set(...INTRO_CAMERA_POSITION)
+  camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
 
   const renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -31,12 +32,28 @@ export function createScene() {
   }
   window.addEventListener('resize', onResize)
 
-  function disposeScene() {
+  function dispose() {
     window.removeEventListener('resize', onResize)
     renderer.domElement.remove()
+    renderer.dispose()
   }
 
-  return { scene, camera, renderer, stars, disposeScene }
+  let animationId
+  let loopCancelled = false
+
+  function landingLoop() {
+    if (loopCancelled) return
+    animationId = requestAnimationFrame(landingLoop)
+    renderer.render(scene, camera)
+  }
+  landingLoop()
+
+  function cancelLandingLoop() {
+    loopCancelled = true
+    cancelAnimationFrame(animationId)
+  }
+
+  return { scene, camera, renderer, stars, cancelLandingLoop, dispose }
 }
 
 function createStars() {

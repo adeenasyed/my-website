@@ -1,4 +1,3 @@
-import { createScene } from './scene.js'
 import { setupControls } from './controls.js'
 import { buildStructure } from './structure.js'
 import { loadObjects } from './objects/index.js'
@@ -6,8 +5,7 @@ import { createInteractionManager } from './interactions.js'
 import { createZoomController } from './zoom.js'
 import { createIntro } from './intro.js'
 
-export async function buildRoom({ onEscape, ...objectCallbacks }) {
-  const { scene, camera, renderer, stars, disposeScene } = createScene()
+export async function buildRoom({ scene, camera, renderer, stars, onEscape, ...objectCallbacks }) {
   const controls = setupControls(camera, renderer)
 
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy()
@@ -53,23 +51,24 @@ export async function buildRoom({ onEscape, ...objectCallbacks }) {
     renderer.render(scene, camera)
   }
 
+  function startIntro() {
+    animate()
+    intro.start()
+  }
+
   function dispose() {
     disposed = true
     cancelAnimationFrame(animationFrameId)
     interactables.tv.dispose()
     zoomController.dispose()
-    disposeScene()
-    renderer.dispose()
   }
-
-  animate()
 
   return {
     setLEDColor: structure.setLEDColor,
     setTVMode: interactables.tv.setMode,
     setInteractionsEnabled: interactions.setEnabled,
     resetCamera: zoomController.resetCamera,
-    startIntro: intro.start,
+    startIntro,
     dispose,
   }
 }

@@ -9,9 +9,14 @@ import { loadGraduationZone } from './graduationZone/index.js'
 import { loadShelfZone } from './shelfZone/index.js'
 import { loadLoungeZone } from './loungeZone/index.js'
 import { loadTableZone } from './tableZone/index.js'
+import { FONT_FAMILY } from '@/theme.js'
 
 export async function loadObjects(maxAnisotropy) {
-  await document.fonts.ready
+  await Promise.all([
+    document.fonts.load(`1em ${FONT_FAMILY}`),
+    document.fonts.load(`italic 1em ${FONT_FAMILY}`),
+    document.fonts.load('1em "Inconsolata"', 'i'),
+  ])
 
   const [
     pacman,
@@ -28,7 +33,7 @@ export async function loadObjects(maxAnisotropy) {
   ] = await Promise.all([
     loadPacman(),
     loadRug(maxAnisotropy),
-    loadLaptop(),
+    loadLaptop(maxAnisotropy),
     loadRemote(),
     loadLightSign(),
     loadCatLightSign(),

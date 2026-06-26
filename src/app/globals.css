@@ -16,3 +16,111 @@ body {
 button {
   font-family: inherit;
 }
+
+.landing {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 7.5vw, 36px);
+}
+
+.landing-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 2.2vw, 12px);
+  width: clamp(200px, 68vw, 340px);
+  aspect-ratio: 2 / 1;
+  background: #0A0A0FBF;
+  border-radius: clamp(9px, 3.2vw, 16px);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.landing-button-mode {
+  color: #00CCFF;
+  font-size: clamp(25px, 8.2vw, 42px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.landing-button-note {
+  color: #00CCFF;
+  font-size: clamp(6px, 1.95vw, 10px);
+  letter-spacing: 0.2em;
+  opacity: 0.55;
+}
+
+@media (min-width: 1024px) {
+  .landing {
+    gap: clamp(36px, 2.8vw, 56px);
+  }
+
+  .landing-button {
+    width: clamp(340px, 26vw, 500px);
+    gap: clamp(12px, 0.94vw, 18px);
+    border-radius: clamp(16px, 1.25vw, 24px);
+  }
+
+  .landing-button-mode {
+    font-size: clamp(42px, 3.2vw, 62px);
+  }
+
+  .landing-button-note {
+    font-size: clamp(10px, 0.77vw, 15px);
+  }
+}
+
+.landing-button--disabled {
+  border: 1px solid #00CCFF44;
+  cursor: default;
+  opacity: 0.45;
+}
+
+.landing-button--active {
+  border: 1px solid #00CCFF;
+  box-shadow: 0 0 12px #00CCFF33, 0 0 32px #00CCFF1A;
+}
+
+.landing-button--active:hover {
+  box-shadow: 0 0 18px #00CCFF55, 0 0 48px #00CCFF2A;
+}
+
+.landing-button--rotate {
+  border: 1px solid #00CCFF1F;
+  background: #0A0A0F57;
+  cursor: default;
+}
+
+.landing-button--rotate .landing-button-mode {
+  opacity: 0.45;
+}
+
+@keyframes landing-flash {
+  0%, 28% { opacity: 1; }
+  42%, 70% { opacity: 0.25; }
+  84%, 100% { opacity: 1; }
+}
+
+.landing-button-note--flash {
+  opacity: 1;
+  animation: landing-flash 2.5s ease-in-out infinite;
+}
+
+.orientation-warning {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #050309;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00CCFF;
+  font-size: 20vw;
+  text-shadow: 0 0 12px #00CCFF55, 0 0 32px #00CCFF22;
+}

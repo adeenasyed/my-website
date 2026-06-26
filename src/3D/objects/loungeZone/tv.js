@@ -102,12 +102,12 @@ function buildScreen(worldBox, maxAnisotropy) {
   const material = new THREE.MeshBasicMaterial({ map: texture })
   material.toneMapped = false
 
-  const screenWidth = worldSize.z * 0.97
+  const screenWidth = worldSize.z * 0.975
   const screenHeight = screenWidth * (CANVAS_HEIGHT / CANVAS_WIDTH)
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(screenWidth, screenHeight), material)
   screen.rotation.y = -Math.PI / 2
   screen.position.set(
-    worldBox.min.x - 0.5,
+    worldBox.min.x + 1,
     (worldBox.min.y + worldBox.max.y) / 2,
     (worldBox.min.z + worldBox.max.z) / 2,
   )
@@ -257,7 +257,7 @@ function buildScreen(worldBox, maxAnisotropy) {
       const image = url ? await loadImage(url) : null
       albumOfMonth = { ...data.albumOfMonth, image }
     }
-    updateScreen()
+    if (mode === 0 ? listeningActivity : albumOfMonth) updateScreen()
   })
 
   function setMode(newMode) {

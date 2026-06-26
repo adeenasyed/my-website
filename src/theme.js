@@ -12,9 +12,9 @@ export const YELLOW = '#FFD700'
 export const LIME = '#77FF00'
 export const GREEN = '#1E9838'
 export const CYAN = '#00CCFF'
-export const BLUE = '#2C50AF'
+export const BLUE = '#2E5AD6'
 export const PURPLE = '#A23CD5'
-export const PINK = '#FF5BBF'
+export const PINK = '#F55FB6'
 export const MAGENTA = '#E5009A'
 
 export const LED_COLORS = [

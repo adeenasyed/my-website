@@ -7,9 +7,7 @@ export function setupControls(camera, renderer) {
   controls.enableDamping = true
   controls.dampingFactor = 0.05
   controls.enablePan = false
-  controls.minPolarAngle = 0.2
   controls.minDistance = 200
   controls.maxDistance = 1200
-  controls.update()
   return controls
 }

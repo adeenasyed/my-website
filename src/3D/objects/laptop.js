@@ -3,7 +3,7 @@ import { loadObject, getMeshes } from './helpers.js'
 import { FONT_FAMILY, BLACK, WHITE, GRAY, CYAN } from '@/theme.js'
 import { EXPERIENCE } from '@/data/experience.js'
 
-export async function loadLaptop() {
+export async function loadLaptop(maxAnisotropy) {
   const object = await loadObject('/objects/laptop.glb', {
     size: 85,
     rotation: { y: -Math.PI / 45 },
@@ -15,7 +15,7 @@ export async function loadLaptop() {
   })
 
   const worldBox = new THREE.Box3().setFromObject(object)
-  const { screen, scroll } = buildScreen(worldBox)
+  const { screen, scroll } = buildScreen(worldBox, maxAnisotropy)
 
   const laptop = new THREE.Group()
   laptop.add(object, screen)
@@ -52,7 +52,7 @@ const DATE_FONT = `15px ${FONT_FAMILY}`
 const COMPANY_FONT = `italic 16px ${FONT_FAMILY}`
 const DESCRIPTION_FONT = `14px ${FONT_FAMILY}`
 
-function buildScreen(worldBox) {
+function buildScreen(worldBox, maxAnisotropy) {
   const worldSize = worldBox.getSize(new THREE.Vector3())
 
   const canvas = document.createElement('canvas')
@@ -62,6 +62,7 @@ function buildScreen(worldBox) {
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
+  texture.anisotropy = maxAnisotropy
   const material = new THREE.MeshBasicMaterial({ map: texture })
   material.toneMapped = false
 

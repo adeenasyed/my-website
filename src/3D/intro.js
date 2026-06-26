@@ -1,15 +1,9 @@
 import * as THREE from 'three'
-import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT } from './constants.js'
+import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT, INTRO_CAMERA_POSITION } from './constants.js'
 
-const FINAL_CAMERA_POSITION = new THREE.Vector3(...DEFAULT_CAMERA_POSITION)
-const LOOK_AT = new THREE.Vector3(...DEFAULT_CAMERA_LOOK_AT)
+const START_POSITION = new THREE.Vector3(...INTRO_CAMERA_POSITION)
+const FINAL_POSITION = new THREE.Vector3(...DEFAULT_CAMERA_POSITION)
 const DURATION = 3.5
-const DISTANCE = 108000
-
-const INTRO_START = (() => {
-  const dir = FINAL_CAMERA_POSITION.clone().sub(LOOK_AT).normalize()
-  return LOOK_AT.clone().add(dir.multiplyScalar(DISTANCE))
-})()
 
 function ease(t) {
   const a = 0.65
@@ -22,8 +16,8 @@ function ease(t) {
 }
 
 export function createIntro(camera, scene, controls, interactions) {
-  camera.position.copy(INTRO_START)
-  camera.lookAt(LOOK_AT)
+  camera.position.copy(START_POSITION)
+  camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
   controls.enabled = false
 
   let started = false
@@ -34,8 +28,8 @@ export function createIntro(camera, scene, controls, interactions) {
     if (finished) return
     if (started) elapsed += delta
     const t = ease(Math.min(elapsed / DURATION, 1))
-    camera.position.lerpVectors(INTRO_START, FINAL_CAMERA_POSITION, t)
-    camera.lookAt(LOOK_AT)
+    camera.position.lerpVectors(START_POSITION, FINAL_POSITION, t)
+    camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
     if (elapsed >= DURATION) {
       scene.fog = null
       controls.enabled = true
