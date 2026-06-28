@@ -3,8 +3,8 @@ import { loadDegree } from './degree.js'
 import { loadChair } from './chair.js'
 import { loadBear } from './bear.js'
 
-export async function loadGraduationZone() {
-  const degree = await loadDegree()
+export async function loadGraduationZone(maxAnisotropy) {
+  const degree = await loadDegree(maxAnisotropy)
   const box = new THREE.Box3().setFromObject(degree)
   const centerX = (box.min.x + box.max.x) / 2
 

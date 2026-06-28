@@ -10,8 +10,5 @@ export function loadShelf() {
       y: ROOM_HEIGHT / 2 - (box.min.y + box.max.y) / 2,
       z: -ROOM_WIDTH / 2 - box.min.z,
     }),
-    editMesh: (mesh) => {
-      mesh.material.roughness = 1
-    },
   })
 }

@@ -1,4 +1,6 @@
-.env
+.env.local
 .next
 node_modules
-session_changes
+**/.DS_Store
+.vercel
+.env*

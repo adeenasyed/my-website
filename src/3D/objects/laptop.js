@@ -12,6 +12,14 @@ export async function loadLaptop(maxAnisotropy) {
       y: 72 - box.min.y,
       z: 10,
     }),
+    editMesh: (mesh) => {
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+      for (const mat of materials) {
+        for (const val of Object.values(mat)) {
+          if (val?.isTexture) val.anisotropy = maxAnisotropy
+        }
+      }
+    },
   })
 
   const worldBox = new THREE.Box3().setFromObject(object)

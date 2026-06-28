@@ -1,6 +1,17 @@
 import * as THREE from 'three'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+
+const fbxLoader = new FBXLoader()
+
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+
+const gltfLoader = new GLTFLoader()
+gltfLoader.setDRACOLoader(dracoLoader)
+gltfLoader.setMeshoptDecoder(MeshoptDecoder)
 
 export function loadImage(src) {
   const img = new Image()
@@ -13,11 +24,11 @@ export function loadImage(src) {
 }
 
 export function loadFBX(url) {
-  return new Promise((resolve, reject) => new FBXLoader().load(url, resolve, undefined, reject))
+  return new Promise((resolve, reject) => fbxLoader.load(url, resolve, undefined, reject))
 }
 
 export function loadGLTF(url) {
-  return new Promise((resolve, reject) => new GLTFLoader().load(url, (gltf) => resolve(gltf.scene), undefined, reject))
+  return new Promise((resolve, reject) => gltfLoader.load(url, (gltf) => resolve(gltf.scene), undefined, reject))
 }
 
 export async function loadObject(file, { size, rotation, position, editMesh }) {

@@ -1,7 +1,5 @@
-import * as THREE from 'three'
 import { loadObject } from './helpers.js'
 import { ROOM_WIDTH, BASEBOARD_THICKNESS, BASEBOARD_CAP_OVERHANG } from '../constants.js'
-import { BLACK } from '@/theme.js'
 
 export function loadPacman() {
   return loadObject('/objects/pacman.glb', {
@@ -11,8 +9,5 @@ export function loadPacman() {
       y: -box.min.y,
       z: -ROOM_WIDTH / 2 + BASEBOARD_THICKNESS + BASEBOARD_CAP_OVERHANG - box.min.z,
     }),
-    editMesh: (mesh) => {
-      if (mesh.material.name === 'scheibe') mesh.material = new THREE.MeshStandardMaterial({ color: BLACK })
-    },
   })
 }

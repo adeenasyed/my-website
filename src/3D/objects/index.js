@@ -38,7 +38,7 @@ export async function loadObjects(maxAnisotropy) {
     loadLightSign(),
     loadCatLightSign(),
     loadHeartLightSign(),
-    loadGraduationZone(),
+    loadGraduationZone(maxAnisotropy),
     loadShelfZone(maxAnisotropy),
     loadLoungeZone(maxAnisotropy),
     loadTableZone(),

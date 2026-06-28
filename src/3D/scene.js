@@ -24,6 +24,7 @@ export function createScene() {
   renderer.toneMappingExposure = 0.5
 
   document.body.appendChild(renderer.domElement)
+  renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault())
 
   function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight

@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server'
 import { spotifyFetch } from '../client.js'
+import { redis, rateLimit } from '../redis.js'
 
-const ALBUM_OF_MONTH_TTL = 24 * 60 * 60 * 1000
-let cache = null
+const CACHE_KEY = 'spotify:album-of-month'
+const CACHE_TTL = 24 * 60 * 60
 
-export async function GET() {
-  if (cache && Date.now() - cache.timestamp < ALBUM_OF_MONTH_TTL) {
-    return NextResponse.json(cache.data)
+export async function GET(request) {
+  if (!await rateLimit('album-of-month', request)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
+
+  const cached = await redis.get(CACHE_KEY)
+  if (cached) return NextResponse.json(cached)
 
   try {
     const data = await spotifyFetch('/me/top/tracks?limit=50&time_range=short_term')
@@ -28,9 +32,9 @@ export async function GET() {
     }
 
     const album = Object.values(albums).sort((a, b) => b.score - a.score)[0]
-
     const payload = { image: album.image, name: album.name, artist: album.artist }
-    cache = { data: payload, timestamp: Date.now() }
+
+    await redis.set(CACHE_KEY, payload, { ex: CACHE_TTL })
     return NextResponse.json(payload)
   } catch (err) {
     console.error('spotify album-of-month failed:', err)

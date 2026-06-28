@@ -9,8 +9,5 @@ export function loadTVStand(couchCenterZ) {
       y: -box.min.y,
       z: couchCenterZ - (box.min.z + box.max.z) / 2,
     }),
-    editMesh: (mesh) => {
-      mesh.material.roughness = 1
-    },
   })
 }

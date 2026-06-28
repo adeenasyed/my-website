@@ -22,7 +22,7 @@ export const ATTRIBUTIONS = [
   },
   {
     name: 'Bonsai Tree',
-    nameUrl: 'https://sketchfab.com/3d-models/bonsai-1fa23a78daed444d88296e25d9c19e66',
+    nameUrl: 'https://sketchfab.com/3d-models/bonsai-affd4e8893954ff58623224b6c5b5684',
     author: 'local.yany',
     authorUrl: 'https://sketchfab.com/local.yany',
     via: 'Sketchfab',
@@ -63,10 +63,10 @@ export const ATTRIBUTIONS = [
     via: 'Poly Pizza',
   },
   {
-    name: 'Frame',
-    nameUrl: 'https://sketchfab.com/3d-models/picture-frame-1520-dimensions-2a75286422e64948b1d6626bc9c6d47d',
-    author: 'Fred Drabble',
-    authorUrl: 'https://sketchfab.com/FredDrabble',
+    name: 'GitHub Button',
+    nameUrl: 'https://sketchfab.com/3d-models/3d-github-logo-441d03d1076b44f483df551e02d970fe',
+    author: 'pengedarseni',
+    authorUrl: 'https://sketchfab.com/pengedarseni',
     via: 'Sketchfab',
   },
   {
