@@ -1,11 +1,11 @@
 export const ATTRIBUTIONS = [
-  {
-    name: 'Air Max 95s',
-    nameUrl: 'https://cults3d.com/en/3d-model/fashion/nike-air-max-95-og-neon',
-    author: 'Zertux',
-    authorUrl: 'https://cults3d.com/en/users/Zertux/3d-models',
-    via: 'Cults 3D',
-  },
+  // {
+  //   name: 'Air Max 95s',
+  //   nameUrl: 'https://cults3d.com/en/3d-model/fashion/nike-air-max-95-og-neon',
+  //   author: 'Zertux',
+  //   authorUrl: 'https://cults3d.com/en/users/Zertux/3d-models',
+  //   via: 'Cults 3D',
+  // },
   {
     name: 'Basketball Net',
     nameUrl: 'https://sketchfab.com/3d-models/basketball-net-a845be1db4c141be92ceadebfb5b38f0',
