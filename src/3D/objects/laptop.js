@@ -39,7 +39,6 @@ export async function loadLaptop(maxAnisotropy) {
 }
 
 const CANVAS_WIDTH = 2048
-const CANVAS_HEIGHT = 1160
 const DRAW_WIDTH = 1024
 const DRAW_HEIGHT = 580
 const SCALE = CANVAS_WIDTH / DRAW_WIDTH
@@ -53,6 +52,8 @@ const BULLET_X = 64
 const ROW = 125
 const CONTENT_HEIGHT = START_Y + EXPERIENCE.length * ROW
 const MAX_SCROLL = Math.max(0, CONTENT_HEIGHT - DRAW_HEIGHT)
+const FULL_HEIGHT = Math.max(CONTENT_HEIGHT, DRAW_HEIGHT)
+const VISIBLE_FRACTION = DRAW_HEIGHT / FULL_HEIGHT
 
 const HEADER_FONT = `bold 30px ${FONT_FAMILY}`
 const ROLE_FONT = `bold 20px ${FONT_FAMILY}`
@@ -60,22 +61,40 @@ const DATE_FONT = `15px ${FONT_FAMILY}`
 const COMPANY_FONT = `italic 16px ${FONT_FAMILY}`
 const DESCRIPTION_FONT = `14px ${FONT_FAMILY}`
 
+function scrollBarGeometry(width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2)
+  const w = width / 2
+  const h = height / 2
+  const shape = new THREE.Shape()
+  shape.moveTo(-w + r, -h)
+  shape.lineTo(w - r, -h)
+  shape.quadraticCurveTo(w, -h, w, -h + r)
+  shape.lineTo(w, h - r)
+  shape.quadraticCurveTo(w, h, w - r, h)
+  shape.lineTo(-w + r, h)
+  shape.quadraticCurveTo(-w, h, -w, h - r)
+  shape.lineTo(-w, -h + r)
+  shape.quadraticCurveTo(-w, -h, -w + r, -h)
+  return new THREE.ShapeGeometry(shape)
+}
+
 function buildScreen(worldBox, maxAnisotropy) {
   const worldSize = worldBox.getSize(new THREE.Vector3())
 
   const canvas = document.createElement('canvas')
   canvas.width = CANVAS_WIDTH
-  canvas.height = CANVAS_HEIGHT
+  canvas.height = FULL_HEIGHT * SCALE
   const context = canvas.getContext('2d')
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
   texture.anisotropy = maxAnisotropy
+  texture.repeat.set(1, VISIBLE_FRACTION)
   const material = new THREE.MeshBasicMaterial({ map: texture })
   material.toneMapped = false
 
   const screenWidth = worldSize.x * 0.93
-  const screenHeight = screenWidth * (CANVAS_HEIGHT / CANVAS_WIDTH)
+  const screenHeight = screenWidth * (DRAW_HEIGHT / DRAW_WIDTH)
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(screenWidth, screenHeight), material)
   screen.rotation.y = -Math.PI / 45
   screen.position.set(
@@ -84,32 +103,11 @@ function buildScreen(worldBox, maxAnisotropy) {
     worldBox.max.z - worldSize.z * 0.93,
   )
 
-  let scrollY = 0
-
   function drawResume() {
     context.fillStyle = BLACK
-    context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+    context.fillRect(0, 0, canvas.width, canvas.height)
     context.save()
     context.scale(SCALE, SCALE)
-
-    if (MAX_SCROLL > 0) {
-      const trackX = DRAW_WIDTH - 10
-      const trackH = DRAW_HEIGHT - 16
-      const thumbH = Math.max(30, (DRAW_HEIGHT / CONTENT_HEIGHT) * trackH)
-      const thumbY = 8 + (scrollY / MAX_SCROLL) * (trackH - thumbH)
-
-      context.fillStyle = `${WHITE}22`
-      context.beginPath()
-      context.roundRect(trackX - 3, 8, 5, trackH, 3)
-      context.fill()
-
-      context.fillStyle = `${CYAN}88`
-      context.beginPath()
-      context.roundRect(trackX - 3, thumbY, 5, thumbH, 3)
-      context.fill()
-    }
-
-    context.translate(0, -scrollY)
 
     context.fillStyle = CYAN
     context.font = HEADER_FONT
@@ -160,13 +158,49 @@ function buildScreen(worldBox, maxAnisotropy) {
     context.restore()
   }
 
-  const scroll = (delta) => {
-    scrollY = Math.max(0, Math.min(MAX_SCROLL, scrollY + delta * 0.5))
-    drawResume()
-    texture.needsUpdate = true
-  }
-  
   drawResume()
+  texture.needsUpdate = true
+
+  let scrollY = 0
+  let thumb = null
+  let thumbTravel = 0
+
+  if (MAX_SCROLL > 0) {
+    const trackWidth = screenWidth * (5 / DRAW_WIDTH)
+    const trackHeight = screenHeight * ((DRAW_HEIGHT - 16) / DRAW_HEIGHT)
+    const trackRadius = screenWidth * (3 / DRAW_WIDTH)
+    const trackX = screenWidth / 2 - trackWidth * 1.5
+    const thumbHeight = Math.max(trackHeight * 0.06, trackHeight * (DRAW_HEIGHT / CONTENT_HEIGHT))
+    thumbTravel = trackHeight - thumbHeight
+
+    const track = new THREE.Mesh(
+      scrollBarGeometry(trackWidth, trackHeight, trackRadius),
+      new THREE.MeshBasicMaterial({ color: WHITE, transparent: true, opacity: 0.13, toneMapped: false }),
+    )
+    track.position.set(trackX, 0, 0.3)
+
+    thumb = new THREE.Mesh(
+      scrollBarGeometry(trackWidth, thumbHeight, trackRadius),
+      new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0.53, toneMapped: false }),
+    )
+    thumb.position.set(trackX, 0, 0.4)
+
+    screen.add(track, thumb)
+  }
+
+  function setScroll() {
+    texture.offset.y = 1 - VISIBLE_FRACTION - scrollY / FULL_HEIGHT
+    if (thumb) thumb.position.y = thumbTravel / 2 - (scrollY / MAX_SCROLL) * thumbTravel
+  }
+
+  setScroll()
+
+  const scroll = (delta) => {
+    const next = Math.max(0, Math.min(MAX_SCROLL, scrollY + delta * 0.5))
+    if (next === scrollY) return
+    scrollY = next
+    setScroll()
+  }
 
   return { screen, scroll }
 }

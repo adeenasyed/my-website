@@ -18,6 +18,7 @@ export function createZoomController(camera, controls, renderer, interactions, o
   let animation = null
   let escapeTarget = null
   let currentOnScroll = null
+    let touchScrollY = null
 
   function startAnimation(toPosition, toLook, onComplete) {
     animation = {
@@ -70,6 +71,21 @@ export function createZoomController(camera, controls, renderer, interactions, o
 
   renderer.domElement.addEventListener('wheel', (e) => {
     if (currentOnScroll) currentOnScroll(e.deltaY)
+  })
+
+  renderer.domElement.addEventListener('touchstart', (e) => {
+    if (currentOnScroll && e.touches.length === 1) touchScrollY = e.touches[0].clientY
+  })
+
+  renderer.domElement.addEventListener('touchmove', (e) => {
+    if (!currentOnScroll || e.touches.length !== 1 || touchScrollY === null) return
+    const y = e.touches[0].clientY
+    currentOnScroll((touchScrollY - y) * 2)
+    touchScrollY = y
+  })
+
+  renderer.domElement.addEventListener('touchend', () => {
+    touchScrollY = null
   })
 
   renderer.domElement.addEventListener('click', (e) => {

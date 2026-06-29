@@ -19,7 +19,6 @@ export async function GET(request) {
     const albums = {}
     for (const [index, track] of data.items.entries()) {
       const album = track.album
-      const score = 50 - index
       if (!albums[album.id]) {
         albums[album.id] = {
           image: album.images?.[0]?.url,
@@ -28,7 +27,7 @@ export async function GET(request) {
           score: 0,
         }
       }
-      albums[album.id].score += score
+      albums[album.id].score += (50 - index) ** 2
     }
 
     const album = Object.values(albums).sort((a, b) => b.score - a.score)[0]

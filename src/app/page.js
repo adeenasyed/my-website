@@ -24,6 +24,8 @@ export default function Landing() {
   const [showContact, setShowContact] = useState(false)
   const [showAttributions, setShowAttributions] = useState(false)
   const [device, setDevice] = useState('ok')
+  const [loading, setLoading] = useState(true)
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     let currentDevice = getDevice(window.innerWidth)
@@ -39,11 +41,14 @@ export default function Landing() {
     const context = createScene()
     sceneRef.current = context
 
-    if (currentDevice !== 'mobile') {
+    if (currentDevice === 'mobile') {
+      setLoading(false)
+    } else {
       async function loadRoom() {
         const { buildRoom } = await import('@/3D/index.js')
         const room = await buildRoom({
           ...context,
+          setProgress,
           tv: () => {
             setTVZoom(true)
             openRemote()
@@ -58,7 +63,7 @@ export default function Landing() {
           return
         }
         roomRef.current = room
-        if (modeRef.current === '3D' && currentDevice === 'ok') roomRef.current.startIntro()
+        setLoading(false)
       }
       loadRoom()
     }
@@ -74,11 +79,11 @@ export default function Landing() {
   }, [])
 
   function handleChoose3D() {
-    if (modeRef.current !== null) return
+    if (modeRef.current !== null || !roomRef.current) return
     modeRef.current = '3D'
     setMode('3D')
     sceneRef.current.cancelLandingLoop()
-    roomRef.current?.startIntro()
+    roomRef.current.startIntro()
   }
 
   function openRemote() {
@@ -99,7 +104,13 @@ export default function Landing() {
 
   return (
     <>
-      {mode === null && (
+      {loading && (
+        <div className='loading-screen'>
+          <div className='loading-bar' style={{ width: `${Math.round(progress * 100)}%` }} />
+        </div>
+      )}
+
+      {mode === null && !loading && (
         <div className='landing'>
           <button className='landing-button landing-button--disabled'>
             <span className='landing-button-mode'>2D</span>

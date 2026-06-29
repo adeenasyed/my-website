@@ -4,12 +4,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
-const fbxLoader = new FBXLoader()
+export const loadingManager = new THREE.LoadingManager()
 
-const dracoLoader = new DRACOLoader()
+const fbxLoader = new FBXLoader(loadingManager)
+
+const dracoLoader = new DRACOLoader(loadingManager)
 dracoLoader.setDecoderPath('/draco/')
 
-const gltfLoader = new GLTFLoader()
+const gltfLoader = new GLTFLoader(loadingManager)
 gltfLoader.setDRACOLoader(dracoLoader)
 gltfLoader.setMeshoptDecoder(MeshoptDecoder)
 

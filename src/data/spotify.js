@@ -31,7 +31,7 @@ export function createSpotifyConnection(onChange) {
   }
 
   pollListeningActivity()
-  fetchAlbumOfMonth()
+  // fetchAlbumOfMonth()
   const intervalId = setInterval(pollListeningActivity, 30000)
 
   return { dispose: () => clearInterval(intervalId) }

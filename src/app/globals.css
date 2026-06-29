@@ -21,6 +21,24 @@ button {
   font-family: inherit;
 }
 
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #050309;
+}
+
+.loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  min-width: 0;
+  background: #00CCFF;
+  box-shadow: 0 0 8px #00CCFF, 0 0 16px #00CCFF88;
+  transition: width 0.2s ease-out;
+}
+
 .landing {
   position: fixed;
   inset: 0;

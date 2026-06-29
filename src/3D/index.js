@@ -4,8 +4,17 @@ import { loadObjects } from './objects/index.js'
 import { createInteractionManager } from './interactions.js'
 import { createZoomController } from './zoom.js'
 import { createIntro } from './intro.js'
+import { loadingManager } from './objects/helpers.js'
 
-export async function buildRoom({ scene, camera, renderer, stars, onEscape, ...objectCallbacks }) {
+export async function buildRoom({ scene, camera, renderer, stars, setProgress, onEscape, ...objectCallbacks }) {
+  let maxProgress = 0
+  loadingManager.onProgress = (_, loaded, total) => {
+    const next = (loaded / total) * 0.9
+    if (next <= maxProgress) return
+    maxProgress = next
+    setProgress(next)
+  }
+
   const controls = setupControls(camera, renderer)
 
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy()
@@ -17,6 +26,9 @@ export async function buildRoom({ scene, camera, renderer, stars, onEscape, ...o
   }
 
   scene.add(structure, ...objects)
+
+  await renderer.compileAsync(scene, camera)
+  setProgress(1)
 
   const interactions = createInteractionManager(camera, renderer)
   const zoomController = createZoomController(camera, controls, renderer, interactions, onEscape)
@@ -31,6 +43,7 @@ export async function buildRoom({ scene, camera, renderer, stars, onEscape, ...o
   const intro = createIntro(camera, scene, controls, interactions)
 
   let lastTime = 0
+  let lastRender = 0
   let animationFrameId = null
   let disposed = false
 
@@ -38,6 +51,10 @@ export async function buildRoom({ scene, camera, renderer, stars, onEscape, ...o
     if (disposed) return
 
     animationFrameId = requestAnimationFrame(animate)
+
+    if (time - lastRender < (1000 / 60) - 1) return
+    lastRender = time
+
     const delta = Math.min((time - lastTime) / 1000, 0.1)
     lastTime = time
 

@@ -12,6 +12,7 @@ export function createInteractionManager(camera, renderer) {
 
   let currentHovered = null
   let enabled = false
+  let fading = false
 
   function add(meshes, hoverColor = HOVER_COLOR, onClick) {
     const hoverEmissive = new THREE.Color(hoverColor)
@@ -31,19 +32,29 @@ export function createInteractionManager(camera, renderer) {
   }
 
   function update() {
+    if (!fading) return
+    let allArrived = true
     for (const obj of interactables) {
       for (const [i, m] of obj.meshes.entries()) {
-        if (m.material?.emissive) {
-          m.material.emissive.lerp(obj.hovered ? obj.hoverEmissive : obj.originalEmissives[i], LERP_SPEED)
+        const emissive = m.material?.emissive
+        if (!emissive) continue
+        const target = obj.hovered ? obj.hoverEmissive : obj.originalEmissives[i]
+        emissive.lerp(target, LERP_SPEED)
+        if (Math.abs(emissive.r - target.r) + Math.abs(emissive.g - target.g) + Math.abs(emissive.b - target.b) > 0.004) {
+          allArrived = false
+        } else {
+          emissive.copy(target)
         }
       }
     }
+    if (allArrived) fading = false
   }
 
   function setEnabled(val) {
     if (!val && currentHovered) {
       currentHovered.hovered = false
       currentHovered = null
+      fading = true
       renderer.domElement.style.cursor = 'default'
     }
     enabled = val
@@ -75,6 +86,7 @@ export function createInteractionManager(camera, renderer) {
     if (hit !== currentHovered) {
       if (currentHovered) currentHovered.hovered = false
       if (hit) hit.hovered = true
+      fading = true
       renderer.domElement.style.cursor = hit ? 'pointer' : 'default'
       currentHovered = hit
     }
@@ -87,6 +99,7 @@ export function createInteractionManager(camera, renderer) {
     const hit = pick()
     if (!hit) return
     hit.hovered = false
+    fading = true
     if (currentHovered === hit) {
       currentHovered = null
       renderer.domElement.style.cursor = 'default'
