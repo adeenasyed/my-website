@@ -117,16 +117,21 @@ export async function loadLightSign() {
     group.add(underline)
   }
 
-  const signBox = new THREE.Box3().setFromObject(group)
-  const signSize = signBox.getSize(new THREE.Vector3())
-  const hitArea = new THREE.Mesh(
-    new THREE.BoxGeometry(signSize.x, signSize.y, Math.max(signSize.z, 10)),
-    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }),
-  )
-  hitArea.position.copy(signBox.getCenter(new THREE.Vector3()))
-  hitArea.updateMatrixWorld()
+  const z = new THREE.Box3().setFromObject(group).getCenter(new THREE.Vector3()).z
+  const clickAreaMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
+  const clickAreas = [line1, line2, line3].map((line) => {
+    const top = line.baselineY + line.lineHeight + (LINE_GAP / 2)
+    const bottom = line.baselineY - (LINE_GAP / 2)
+    const clickArea = new THREE.Mesh(
+      new THREE.BoxGeometry(line.maxX - line.minX + (GAP / 2) * 2, top - bottom, 10),
+      clickAreaMaterial,
+    )
+    clickArea.position.set((line.minX + line.maxX) / 2, (top + bottom) / 2, z)
+    clickArea.updateMatrixWorld()
+    return clickArea
+  })
 
-  group.meshes = getMeshes(group, [hitArea])
+  group.meshes = getMeshes(group, clickAreas)
   group.hoverColor = '#88FFFF'
 
   return group

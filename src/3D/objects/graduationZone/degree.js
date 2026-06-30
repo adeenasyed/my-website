@@ -157,16 +157,9 @@ export async function loadDegree(maxAnisotropy) {
   zoomTarget.position.set(group.position.x, group.position.y, -ROOM_WIDTH / 2 + DEPTH + 0.5)
   zoomTarget.updateMatrixWorld()
 
-  const verticalFOV = (CAMERA_FOV * Math.PI) / 180
-  const distance = Math.max(
-    FRAME_HEIGHT / 2 / Math.tan(verticalFOV / 2),
-    FRAME_WIDTH / 2 / (Math.tan(verticalFOV / 2) * (window.innerWidth / window.innerHeight)),
-  ) * 1.3
-  const zoomOffset = new THREE.Vector3(0, 0, distance)
-
   group.meshes = [top, bottom, left, right, panel]
   group.hoverColor = '#4A4A4A'
-  group.zoom = { target: zoomTarget, offset: zoomOffset }
+  group.zoom = { target: zoomTarget, offset:  new THREE.Vector3(0, 0, 148) }
 
   return group
 }

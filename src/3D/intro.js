@@ -15,7 +15,7 @@ function ease(t) {
   return pa + va * s - (va / (2 * b)) * s * s
 }
 
-export function createIntro(camera, scene, controls, interactions) {
+export function createIntro(camera, controls, interactions) {
   camera.position.copy(START_POSITION)
   camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
   controls.enabled = false
@@ -31,7 +31,6 @@ export function createIntro(camera, scene, controls, interactions) {
     camera.position.lerpVectors(START_POSITION, FINAL_POSITION, t)
     camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
     if (elapsed >= DURATION) {
-      scene.fog = null
       controls.enabled = true
       if (controls._sphericalDelta) controls._sphericalDelta.set(0, 0, 0)
       interactions.setEnabled(true)

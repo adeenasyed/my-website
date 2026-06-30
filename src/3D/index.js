@@ -40,7 +40,7 @@ export async function buildRoom({ scene, camera, renderer, stars, setProgress, o
   }
   interactions.addBlockers(scene)
 
-  const intro = createIntro(camera, scene, controls, interactions)
+  const intro = createIntro(camera, controls, interactions)
 
   let lastTime = 0
   let lastRender = 0
@@ -52,7 +52,7 @@ export async function buildRoom({ scene, camera, renderer, stars, setProgress, o
 
     animationFrameId = requestAnimationFrame(animate)
 
-    if (time - lastRender < (1000 / 60) - 1) return
+    if (time - lastRender < 1000 / 75) return
     lastRender = time
 
     const delta = Math.min((time - lastTime) / 1000, 0.1)

@@ -17,8 +17,8 @@ export function createScene() {
   camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
 
   const renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+  renderer.setSize(window.innerWidth, window.innerHeight, false)
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.5
@@ -26,15 +26,22 @@ export function createScene() {
   document.body.appendChild(renderer.domElement)
   renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault())
 
+  const canvas = renderer.domElement
   function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight
+    const w = canvas.clientWidth
+    const h = canvas.clientHeight
+    if (!w || !h) return
+    camera.aspect = w / h
     camera.updateProjectionMatrix()
-    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setSize(w, h, false)
   }
-  window.addEventListener('resize', onResize)
+  onResize()
+
+  const resizeObserver = new ResizeObserver(onResize)
+  resizeObserver.observe(canvas)
 
   function dispose() {
-    window.removeEventListener('resize', onResize)
+    resizeObserver.disconnect()
     renderer.domElement.remove()
     renderer.dispose()
   }
