@@ -6,7 +6,7 @@ import { createZoomController } from './zoom.js'
 import { createIntro } from './intro.js'
 import { loadingManager } from './objects/helpers.js'
 
-export async function buildRoom({ scene, camera, renderer, stars, setProgress, onEscape, ...objectCallbacks }) {
+export async function buildRoom({ scene, camera, renderer, celestial, setProgress, onEscape, onCelestialClick, onIntroComplete, ...objectCallbacks }) {
   let maxProgress = 0
   loadingManager.onProgress = (_, loaded, total) => {
     const next = (loaded / total) * 0.9
@@ -38,6 +38,12 @@ export async function buildRoom({ scene, camera, renderer, stars, setProgress, o
       : null
     interactions.add(obj.meshes, obj.hoverColor, zoom ? () => zoom(obj.onClick) : obj.onClick)
   }
+
+  const { interactables: celestialInteractables } = await celestial.ready
+  for (const { meshes, data } of celestialInteractables) {
+    interactions.add(meshes, undefined, () => onCelestialClick(data))
+  }
+
   interactions.addBlockers(scene)
 
   const intro = createIntro(camera, controls, interactions)
@@ -46,6 +52,7 @@ export async function buildRoom({ scene, camera, renderer, stars, setProgress, o
   let lastRender = 0
   let animationFrameId = null
   let disposed = false
+  let introNotified = false
 
   function animate(time = 0) {
     if (disposed) return
@@ -59,7 +66,11 @@ export async function buildRoom({ scene, camera, renderer, stars, setProgress, o
     lastTime = time
 
     intro.update(delta)
-    if (intro.isFinished()) stars.rotation.y += delta * (Math.PI * 2 / 3600)
+    if (!introNotified && intro.isFinished()) {
+      introNotified = true
+      onIntroComplete?.()
+    }
+    celestial.update(delta)
     for (const a of animated) a.update(delta)
     zoomController.update(delta)
     if (controls.enabled) controls.update()

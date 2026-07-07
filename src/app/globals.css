@@ -138,6 +138,20 @@ button {
   animation: landing-flash 2.5s ease-in-out infinite;
 }
 
+.sky-caption {
+  position: fixed;
+  right: clamp(12px, 1.4vw, 24px);
+  top: clamp(12px, 1.4vw, 24px);
+  z-index: 5;
+  color: #FFFFFF;
+  font-size: clamp(8px, 0.7vw, 12px);
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+  text-shadow: 0 0 8px #00000099;
+  text-align: right;
+  pointer-events: none;
+}
+
 .orientation-warning {
   position: fixed;
   inset: 0;

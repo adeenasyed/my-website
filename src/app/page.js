@@ -6,6 +6,7 @@ import { PURPLE } from '@/theme.js'
 import ContactPopup from '@/3D/popups/ContactPopup'
 import AttributionsPopup from '@/3D/popups/AttributionsPopup'
 import RemotePopup from '@/3D/popups/RemotePopup'
+import CelestialPopup from '@/3D/popups/CelestialPopup'
 
 function getDevice(w) {
   if (w >= 1024) return 'ok'
@@ -23,9 +24,12 @@ export default function Landing() {
   const [tvZoom, setTVZoom] = useState(false)
   const [showContact, setShowContact] = useState(false)
   const [showAttributions, setShowAttributions] = useState(false)
+  const [activeCelestial, setActiveCelestial] = useState(null)
   const [device, setDevice] = useState('ok')
   const [loading, setLoading] = useState(true)
   const [progress, setProgress] = useState(0)
+  const [introDone, setIntroDone] = useState(false)
+  const [clock, setClock] = useState('')
 
   useEffect(() => {
     let currentDevice = getDevice(window.innerWidth)
@@ -56,6 +60,8 @@ export default function Landing() {
           lightSign: () => setShowContact(true),
           infoButton: () => setShowAttributions(true),
           remote: openRemote,
+          onCelestialClick: (data) => setActiveCelestial(data),
+          onIntroComplete: () => setIntroDone(true),
           onEscape: handleEscape,
         })
         if (!sceneRef.current) {
@@ -76,6 +82,20 @@ export default function Landing() {
       sceneRef.current = null
       roomRef.current = null
     }
+  }, [])
+
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Toronto',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    })
+    const tick = () => setClock(fmt.format(new Date()))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
   }, [])
 
   function handleChoose3D() {
@@ -142,6 +162,10 @@ export default function Landing() {
       )}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
       {showAttributions && <AttributionsPopup onClose={() => setShowAttributions(false)} />}
+      {activeCelestial && <CelestialPopup obj={activeCelestial} onClose={() => setActiveCelestial(null)} />}
+      {(mode === '3D' && device === 'ok' && introDone) && (
+        <div className='sky-caption'>THE SKY ABOVE <br/> TORONTO, ON <br/> {clock}</div>
+      )}
       {(mode === '3D' && device !== 'ok') && <div className='orientation-warning'>↺</div>}
     </>
   )

@@ -1,0 +1,114 @@
+.celestial-popup.popup-static {
+  width: 372px;
+}
+
+.celestial-name {
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.celestial-badge {
+  align-self: center;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-top: -6px;
+}
+
+.celestial-stats {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.celestial-stats li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12.5px;
+}
+
+.celestial-stat-label {
+  color: #888888;
+  letter-spacing: 0.05em;
+}
+
+.celestial-stat-value {
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-align: right;
+}
+
+.celestial-blurb {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #cfd6da;
+}
+
+.celestial-look {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-shadow);
+  border-radius: 8px;
+  background: #00CCFF0D;
+}
+
+.celestial-look-label {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  opacity: 0.75;
+}
+
+.celestial-look-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e6ecef;
+}
+
+.celestial-look-text strong {
+  color: var(--accent);
+  text-transform: capitalize;
+}
+
+.celestial-look-note {
+  font-size: 10.5px;
+  color: #888888;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 1600px) {
+  .celestial-popup.popup-static {
+    width: calc(27.9vw - 74.4px);
+  }
+
+  .celestial-name {
+    font-size: calc(1.5vw - 4px);
+  }
+
+  .celestial-badge {
+    font-size: calc(0.825vw - 2.2px);
+  }
+
+  .celestial-stats {
+    gap: calc(0.6vw - 1.6px);
+  }
+
+  .celestial-stats li,
+  .celestial-blurb {
+    font-size: calc(0.9375vw - 2.5px);
+  }
+
+  .celestial-look-text {
+    font-size: calc(0.975vw - 2.6px);
+  }
+}
