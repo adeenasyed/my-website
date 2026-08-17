@@ -1,13 +1,3 @@
-// Curated metadata for the interactable celestial objects.
-//
-// - STARS: fixed positions (raDeg/decDeg baked from the HYG catalog by
-//   scripts/build-star-catalog.mjs) plus descriptive metadata.
-// - DEEP_SKY: fixed-position Messier objects (galaxies/nebulae/clusters).
-// - BODIES: planets + Moon — descriptive metadata only; positions are
-//   computed at runtime from the current date via astronomy-engine.
-//
-// `type` drives the popup badge and marker colour.
-
 export const CURATED_STARS = [
   {
     name: 'Sirius', type: 'star', constellation: 'Canis Major',
@@ -109,7 +99,6 @@ export const DEEP_SKY = [
   },
 ]
 
-// Positions computed at runtime via astronomy-engine; `body` matches Astronomy.Body.
 export const BODIES = [
   {
     name: 'Sun', type: 'sun', body: 'Sun', color: '#ffdf8f', magnitude: -26.7,

@@ -1,15 +1,9 @@
 import * as THREE from 'three'
-import { altAzToScene } from './coordinates.js'
-import { STAR_RADIUS } from './catalog.js'
-
-// Builds the interactive layer: a twinkling glow marker plus an invisible pick
-// sphere for each above-horizon curated object. The pick spheres are the raycast
-// targets registered with the room's interaction manager (no hover highlight).
+import { STAR_RADIUS, altAzToScene } from './catalog.js'
 
 const MARKER_RADIUS = STAR_RADIUS * 0.99
-const PICK_RADIUS = 2600 // ~1.1 deg click target at MARKER_RADIUS
+const PICK_RADIUS = 2600
 
-// Base glow diameter (world units) and twinkle amplitude per object type.
 const STYLE = {
   sun: { color: '#ffdf8f', size: 7000, amp: 0.05 },
   star: { color: '#fff4e8', size: 3400, amp: 0.42 },
@@ -20,9 +14,7 @@ const STYLE = {
   cluster: { color: '#c3e2ff', size: 4600, amp: 0.2 },
 }
 
-let glowTexture = null
-function getGlowTexture() {
-  if (glowTexture) return glowTexture
+function createGlowTexture() {
   const size = 64
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = size
@@ -34,27 +26,26 @@ function getGlowTexture() {
   g.addColorStop(1.0, 'rgba(255,255,255,0)')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
-  glowTexture = new THREE.CanvasTexture(canvas)
+  const glowTexture = new THREE.CanvasTexture(canvas)
   glowTexture.colorSpace = THREE.SRGBColorSpace
   return glowTexture
 }
 
-// items: [{ alt, az, data }] with alt/az in radians.
 export function createMarkers(items) {
   const group = new THREE.Group()
   const interactables = []
   const twinklers = []
   const pos = new THREE.Vector3()
   const pickGeometry = new THREE.SphereGeometry(PICK_RADIUS, 8, 6)
+  const glowTexture = createGlowTexture()
 
-  for (const { alt, az, data } of items) {
-    const style = STYLE[data.type] || STYLE.star
-    const color = data.color || style.color
+  for (const { alt, az, color, data } of items) {
+    const style = STYLE[data.type]
     altAzToScene(alt, az, MARKER_RADIUS, pos)
 
     const material = new THREE.SpriteMaterial({
-      map: getGlowTexture(),
-      color: new THREE.Color(color),
+      map: glowTexture,
+      color: new THREE.Color(color ?? style.color),
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -95,6 +86,7 @@ export function createMarkers(items) {
 
   function dispose() {
     pickGeometry.dispose()
+    glowTexture.dispose()
     for (const tw of twinklers) tw.material.dispose()
     for (const it of interactables) it.meshes[0].material.dispose()
   }

@@ -15,7 +15,7 @@ function ease(t) {
   return pa + va * s - (va / (2 * b)) * s * s
 }
 
-export function createIntro(camera, controls, interactions) {
+export function createIntro(camera, controls, interactions, onComplete) {
   camera.position.copy(START_POSITION)
   camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
   controls.enabled = false
@@ -35,12 +35,12 @@ export function createIntro(camera, controls, interactions) {
       if (controls._sphericalDelta) controls._sphericalDelta.set(0, 0, 0)
       interactions.setEnabled(true)
       finished = true
+      onComplete()
     }
   }
 
   return {
     update,
     start: () => { started = true },
-    isFinished: () => finished,
   }
 }

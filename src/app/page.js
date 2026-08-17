@@ -21,14 +21,14 @@ export default function Landing() {
   const [mode, setMode] = useState(null)
   const [showRemote, setShowRemote] = useState(false)
   const [ledColor, setLEDColor] = useState(PURPLE)
-  const [tvZoom, setTVZoom] = useState(false)
   const [showContact, setShowContact] = useState(false)
   const [showAttributions, setShowAttributions] = useState(false)
   const [activeCelestial, setActiveCelestial] = useState(null)
   const [device, setDevice] = useState('ok')
-  const [loading, setLoading] = useState(true)
-  const [progress, setProgress] = useState(0)
-  const [introDone, setIntroDone] = useState(false)
+  const [loading, setLoading] = useState(0)
+  const [introComplete, setIntroComplete] = useState(false)
+  const [roomZoomed, setRoomZoomed] = useState(false)
+  const [roomVisible, setRoomVisible] = useState(true)
   const [clock, setClock] = useState('')
 
   useEffect(() => {
@@ -38,7 +38,9 @@ export default function Landing() {
     function onResize() {
       currentDevice = getDevice(window.innerWidth)
       setDevice(currentDevice)
-      if (modeRef.current === '3D') roomRef.current?.setInteractionsEnabled(currentDevice === 'ok')
+      if (modeRef.current === '3D') {
+        roomRef.current?.setInteractionsEnabled(currentDevice === 'ok')
+      }
     }
     window.addEventListener('resize', onResize)
 
@@ -46,22 +48,20 @@ export default function Landing() {
     sceneRef.current = context
 
     if (currentDevice === 'mobile') {
-      setLoading(false)
+      setLoading(null)
     } else {
       async function loadRoom() {
         const { buildRoom } = await import('@/3D/index.js')
         const room = await buildRoom({
           ...context,
-          setProgress,
-          tv: () => {
-            setTVZoom(true)
-            openRemote()
-          },
+          setProgress: setLoading,
+          tv: openRemote,
           lightSign: () => setShowContact(true),
           infoButton: () => setShowAttributions(true),
           remote: openRemote,
-          onCelestialClick: (data) => setActiveCelestial(data),
-          onIntroComplete: () => setIntroDone(true),
+          onIntroComplete: () => setIntroComplete(true),
+          onCelestialClick: setActiveCelestial,
+          onZoomChange: setRoomZoomed,
           onEscape: handleEscape,
         })
         if (!sceneRef.current) {
@@ -69,7 +69,7 @@ export default function Landing() {
           return
         }
         roomRef.current = room
-        setLoading(false)
+        setLoading(null)
       }
       loadRoom()
     }
@@ -113,24 +113,30 @@ export default function Landing() {
 
   function closeRemote() {
     setShowRemote(false)
-    roomRef.current.setInteractionsEnabled(true)
+    roomRef.current.setInteractionsEnabled(getDevice(window.innerWidth) === 'ok')
   }
 
   function handleEscape() {
-    setTVZoom(false)
     closeRemote()
     roomRef.current.resetCamera()
   }
 
+  function toggleRoom() {
+    const visible = !roomVisible
+    setRoomVisible(visible)
+    roomRef.current?.setVisible(visible)
+    roomRef.current?.setInteractionsEnabled(device === 'ok')
+  }
+
   return (
     <>
-      {loading && (
+      {loading !== null && (
         <div className='loading-screen'>
-          <div className='loading-bar' style={{ width: `${Math.round(progress * 100)}%` }} />
+          <div className='loading-bar' style={{ width: `${Math.round(loading * 100)}%` }} />
         </div>
       )}
 
-      {mode === null && !loading && (
+      {mode === null && loading === null && (
         <div className='landing'>
           <button className='landing-button landing-button--disabled'>
             <span className='landing-button-mode'>2D</span>
@@ -150,7 +156,7 @@ export default function Landing() {
       {showRemote && (
         <RemotePopup
           ledColor={ledColor}
-          tvZoom={tvZoom}
+          tvZoom={roomZoomed}
           onClose={closeRemote}
           onEscape={handleEscape}
           setTVMode={(i) => roomRef.current?.setTVMode(i)}
@@ -163,10 +169,21 @@ export default function Landing() {
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
       {showAttributions && <AttributionsPopup onClose={() => setShowAttributions(false)} />}
       {activeCelestial && <CelestialPopup obj={activeCelestial} onClose={() => setActiveCelestial(null)} />}
-      {(mode === '3D' && device === 'ok' && introDone) && (
-        <div className='sky-caption'>THE SKY ABOVE <br/> TORONTO, ON <br/> {clock}</div>
+      {mode === '3D' && device === 'ok' && introComplete && !roomZoomed && (
+        <div className='sky-overlay'>
+          <div className='sky-caption'>THE SKY ABOVE <br /> TORONTO, ON <br /> {clock}</div>
+          <button
+            className='room-toggle'
+            type='button'
+            aria-pressed={!roomVisible}
+            disabled={showRemote}
+            onClick={toggleRoom}
+          >
+            {roomVisible ? 'HIDE ROOM' : 'SHOW ROOM'}
+          </button>
+        </div>
       )}
-      {(mode === '3D' && device !== 'ok') && <div className='orientation-warning'>↺</div>}
+      {mode === '3D' && device !== 'ok' && <div className='orientation-warning'>↺</div>}
     </>
   )
 }

@@ -1,13 +1,8 @@
 import * as THREE from 'three'
-import { equatorialToAltAz, altAzToScene } from './coordinates.js'
-
-// Builds the background star shell: a single THREE.Points object surrounding the
-// camera, with per-star size (from magnitude) and colour (from B-V index) driven
-// by a small ShaderMaterial. Positions are baked for a fixed Toronto orientation.
+import { SiderealTime } from 'astronomy-engine'
 
 export const STAR_RADIUS = 130000
 
-// Anchor colours for the B-V (blue-white -> orange-red) ramp.
 const BV_STOPS = [
   [-0.40, [0.61, 0.70, 1.00]],
   [0.00, [0.79, 0.85, 1.00]],
@@ -18,8 +13,7 @@ const BV_STOPS = [
   [2.00, [1.00, 0.69, 0.49]],
 ]
 
-// B-V colour index -> RGB (0..1), linearly interpolated between anchors.
-export function bvToRGB(bv) {
+function bvToRGB(bv) {
   if (bv <= BV_STOPS[0][0]) return BV_STOPS[0][1]
   const last = BV_STOPS[BV_STOPS.length - 1]
   if (bv >= last[0]) return last[1]
@@ -34,9 +28,42 @@ export function bvToRGB(bv) {
   return last[1]
 }
 
-// Apparent magnitude -> point size (px) and brightness (fainter stars dimmer).
 const magToSize = (mag) => THREE.MathUtils.clamp(4.6 - 0.7 * mag, 1.0, 6.0)
 const magToBrightness = (mag) => THREE.MathUtils.clamp(1.12 - 0.13 * mag, 0.32, 1.05)
+
+const DEG = Math.PI / 180
+const normalizeDeg = (value) => ((value % 360) + 360) % 360
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
+
+export function localSiderealTime(date, longitudeDeg) {
+  return ((SiderealTime(date) + longitudeDeg / 15) % 24 + 24) % 24
+}
+
+export function equatorialToAltAz(raDeg, decDeg, latDeg, lstHours) {
+  const hourAngle = normalizeDeg(lstHours * 15 - raDeg) * DEG
+  const dec = decDeg * DEG
+  const lat = latDeg * DEG
+  const sinDec = Math.sin(dec)
+  const cosDec = Math.cos(dec)
+  const sinLat = Math.sin(lat)
+  const cosLat = Math.cos(lat)
+  const sinAlt = clamp(sinDec * sinLat + cosDec * cosLat * Math.cos(hourAngle), -1, 1)
+  const alt = Math.asin(sinAlt)
+  const cosAlt = Math.cos(alt)
+  const sinAz = -cosDec * Math.sin(hourAngle) / cosAlt
+  const cosAz = (sinDec - sinLat * sinAlt) / (cosAlt * cosLat)
+
+  return { alt, az: Math.atan2(sinAz, cosAz) }
+}
+
+export function altAzToScene(alt, az, radius, target) {
+  const cosAlt = Math.cos(alt)
+  return target.set(
+    radius * cosAlt * Math.sin(az),
+    radius * Math.sin(alt),
+    -radius * cosAlt * Math.cos(az),
+  )
+}
 
 const VERTEX_SHADER = `
   attribute float size;
@@ -101,7 +128,7 @@ export function buildStarShell(catalog, latDeg, lstHours, pixelRatio) {
   })
 
   const points = new THREE.Points(geometry, material)
-  points.frustumCulled = false // the shell surrounds the camera
+  points.frustumCulled = false
   points.renderOrder = -1
   return points
 }

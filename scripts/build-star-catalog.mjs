@@ -1,12 +1,3 @@
-// Generates public/stars/hyg.json from the public-domain HYG database (v4.1).
-//
-// Output: a compact JSON of naked-eye stars as [raDeg, decDeg, mag, bv] tuples.
-// Also prints the catalog rows for a curated set of named stars, so their
-// coordinates can be baked into src/data/celestial.js.
-//
-// Run: node scripts/build-star-catalog.mjs
-// Needs network once; the generated JSON is committed and used offline at runtime.
-
 import { writeFile, mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -15,7 +6,6 @@ const HYG_URL =
   'https://raw.githubusercontent.com/astronexus/HYG-Database/main/hyg/CURRENT/hygdata_v41.csv'
 const MAG_LIMIT = 6.5
 
-// Curated stars we want exact coordinates for (matched on the `proper` column).
 const CURATED = [
   'Sirius', 'Vega', 'Arcturus', 'Capella', 'Rigel', 'Betelgeuse', 'Procyon',
   'Altair', 'Aldebaran', 'Deneb', 'Pollux', 'Antares', 'Spica', 'Polaris',
@@ -24,7 +14,6 @@ const CURATED = [
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = join(__dirname, '..', 'public', 'stars', 'hyg.json')
 
-// Minimal CSV line parser that respects double-quoted fields.
 function parseLine(line) {
   const out = []
   let field = ''
@@ -51,7 +40,7 @@ async function main() {
 
   const lines = text.split('\n')
   const header = parseLine(lines[0])
-  const col = Object.fromEntries(header.map((h, i) => [h.replace(/"/g, ''), i]))
+  const col = Object.fromEntries(header.map((name, i) => [name, i]))
   const { ra, dec, mag, ci, proper, spect, con, dist } = col
 
   const stars = []
@@ -62,11 +51,11 @@ async function main() {
     if (!line) continue
     const f = parseLine(line)
     const name = f[proper]
-    if (name === 'Sol') continue // the Sun
+    if (name === 'Sol') continue
     const m = parseFloat(f[mag])
     if (!Number.isFinite(m) || m > MAG_LIMIT) continue
 
-    const raDeg = parseFloat(f[ra]) * 15 // hours -> degrees
+    const raDeg = parseFloat(f[ra]) * 15
     const decDeg = parseFloat(f[dec])
     const bv = f[ci] === '' ? 0 : parseFloat(f[ci])
     if (!Number.isFinite(raDeg) || !Number.isFinite(decDeg)) continue
@@ -92,10 +81,11 @@ async function main() {
     }
   }
 
+  const output = JSON.stringify(stars)
   await mkdir(dirname(OUT), { recursive: true })
-  await writeFile(OUT, JSON.stringify(stars))
+  await writeFile(OUT, output)
   console.log(`Wrote ${stars.length} stars (mag <= ${MAG_LIMIT}) to ${OUT}`)
-  console.log(`File size: ${(JSON.stringify(stars).length / 1024).toFixed(0)} KB`)
+  console.log(`File size: ${(output.length / 1024).toFixed(0)} KB`)
 
   console.log('\n--- Curated star rows (bake into src/data/celestial.js) ---')
   for (const n of CURATED) {

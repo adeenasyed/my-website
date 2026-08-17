@@ -6,7 +6,18 @@ import { createZoomController } from './zoom.js'
 import { createIntro } from './intro.js'
 import { loadingManager } from './objects/helpers.js'
 
-export async function buildRoom({ scene, camera, renderer, celestial, setProgress, onEscape, onCelestialClick, onIntroComplete, ...objectCallbacks }) {
+export async function buildRoom({
+  scene,
+  camera,
+  renderer,
+  celestial,
+  setProgress,
+  onIntroComplete,
+  onCelestialClick,
+  onZoomChange,
+  onEscape,
+  ...objectCallbacks
+}) {
   let maxProgress = 0
   loadingManager.onProgress = (_, loaded, total) => {
     const next = (loaded / total) * 0.9
@@ -20,18 +31,26 @@ export async function buildRoom({ scene, camera, renderer, celestial, setProgres
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy()
   const structure = buildStructure(maxAnisotropy)
   const { objects, animated, interactables } = await loadObjects(maxAnisotropy)
+  structure.add(...objects)
 
   for (const [key, cb] of Object.entries(objectCallbacks)) {
     if (interactables[key]) interactables[key].onClick = cb
   }
 
-  scene.add(structure, ...objects)
+  scene.add(structure)
 
   await renderer.compileAsync(scene, camera)
   setProgress(1)
 
   const interactions = createInteractionManager(camera, renderer)
-  const zoomController = createZoomController(camera, controls, renderer, interactions, onEscape)
+  const zoomController = createZoomController(
+    camera,
+    controls,
+    renderer,
+    interactions,
+    onZoomChange,
+    onEscape,
+  )
   for (const obj of Object.values(interactables)) {
     const zoom = obj.zoom
       ? zoomController.add(obj.zoom.target, obj.zoom.offset, obj.zoom)
@@ -39,20 +58,18 @@ export async function buildRoom({ scene, camera, renderer, celestial, setProgres
     interactions.add(obj.meshes, obj.hoverColor, zoom ? () => zoom(obj.onClick) : obj.onClick)
   }
 
-  const { interactables: celestialInteractables } = await celestial.ready
-  for (const { meshes, data } of celestialInteractables) {
+  for (const { meshes, data } of await celestial.ready) {
     interactions.add(meshes, undefined, () => onCelestialClick(data))
   }
 
   interactions.addBlockers(scene)
 
-  const intro = createIntro(camera, controls, interactions)
+  const intro = createIntro(camera, controls, interactions, onIntroComplete)
 
   let lastTime = 0
   let lastRender = 0
   let animationFrameId = null
   let disposed = false
-  let introNotified = false
 
   function animate(time = 0) {
     if (disposed) return
@@ -66,10 +83,6 @@ export async function buildRoom({ scene, camera, renderer, celestial, setProgres
     lastTime = time
 
     intro.update(delta)
-    if (!introNotified && intro.isFinished()) {
-      introNotified = true
-      onIntroComplete?.()
-    }
     celestial.update(delta)
     for (const a of animated) a.update(delta)
     zoomController.update(delta)
@@ -84,6 +97,10 @@ export async function buildRoom({ scene, camera, renderer, celestial, setProgres
     intro.start()
   }
 
+function setVisible(visible) {
+  structure.visible = visible
+}
+
   function dispose() {
     disposed = true
     cancelAnimationFrame(animationFrameId)
@@ -97,6 +114,7 @@ export async function buildRoom({ scene, camera, renderer, celestial, setProgres
     setInteractionsEnabled: interactions.setEnabled,
     resetCamera: zoomController.resetCamera,
     startIntro,
+    setVisible,
     dispose,
   }
 }

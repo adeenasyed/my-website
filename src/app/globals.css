@@ -138,11 +138,18 @@ button {
   animation: landing-flash 2.5s ease-in-out infinite;
 }
 
-.sky-caption {
+.sky-overlay {
   position: fixed;
   right: clamp(12px, 1.4vw, 24px);
   top: clamp(12px, 1.4vw, 24px);
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.sky-caption {
   color: #FFFFFF;
   font-size: clamp(8px, 0.7vw, 12px);
   letter-spacing: 0.2em;
@@ -150,6 +157,31 @@ button {
   text-shadow: 0 0 8px #00000099;
   text-align: right;
   pointer-events: none;
+}
+
+.room-toggle {
+  padding: 6px 9px;
+  border: 1px solid #FFFFFF55;
+  border-radius: 3px;
+  background: #05030999;
+  color: #FFFFFFAA;
+  font-size: clamp(7px, 0.55vw, 9px);
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.room-toggle:not(:disabled):hover,
+.room-toggle:not(:disabled):focus-visible {
+  border-color: #FFFFFFAA;
+  background: #050309CC;
+  color: #FFFFFF;
+  outline: none;
+}
+
+.room-toggle:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
 .orientation-warning {

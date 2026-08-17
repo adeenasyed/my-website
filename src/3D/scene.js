@@ -1,5 +1,12 @@
 import * as THREE from 'three'
-import { INTRO_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT, CAMERA_FOV, TORONTO_LATITUDE, TORONTO_LONGITUDE, TORONTO_HEIGHT } from './constants.js'
+import {
+  INTRO_CAMERA_POSITION,
+  DEFAULT_CAMERA_LOOK_AT,
+  CAMERA_FOV,
+  TORONTO_LATITUDE,
+  TORONTO_LONGITUDE,
+  TORONTO_HEIGHT,
+} from './constants.js'
 import { createCelestialSphere } from './sky/index.js'
 
 const BG_COLOR = new THREE.Color('#050309')

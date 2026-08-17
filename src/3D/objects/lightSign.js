@@ -118,7 +118,11 @@ export async function loadLightSign() {
   }
 
   const z = new THREE.Box3().setFromObject(group).getCenter(new THREE.Vector3()).z
-  const clickAreaMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
+  const clickAreaMaterial = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+  })
   const clickAreas = [line1, line2, line3].map((line) => {
     const top = line.baselineY + line.lineHeight + (LINE_GAP / 2)
     const bottom = line.baselineY - (LINE_GAP / 2)
@@ -131,7 +135,8 @@ export async function loadLightSign() {
     return clickArea
   })
 
-  group.meshes = getMeshes(group, clickAreas)
+  group.add(...clickAreas)
+  group.meshes = getMeshes(group)
   group.hoverColor = '#88FFFF'
 
   return group

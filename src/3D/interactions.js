@@ -68,12 +68,18 @@ export function createInteractionManager(camera, renderer) {
 
   function pick() {
     const hits = raycaster.intersectObjects(allMeshes, true)
-    if (!hits.length) return null
-    let mesh = hits[0].object
-    while (mesh) {
-      const interactable = meshToInteractable.get(mesh)
-      if (interactable) return interactable
-      mesh = mesh.parent
+    for (const hit of hits) {
+      let object = hit.object
+      let interactable = null
+
+      while (object && object.visible) {
+        if (!interactable) {
+          interactable = meshToInteractable.get(object)
+        }
+        object = object.parent
+      }
+      if (object) continue
+      return interactable
     }
     return null
   }

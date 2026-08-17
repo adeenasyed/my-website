@@ -17,7 +17,6 @@ const DIRECTIONS = [
   'west', 'west-northwest', 'northwest', 'north-northwest',
 ]
 
-// Turns altitude/azimuth into a plain-language "where to look" instruction.
 function whereToLook(altDeg, azDeg) {
   const compass = DIRECTIONS[Math.round(azDeg / 22.5) % 16]
   const height = altDeg >= 80
@@ -29,45 +28,39 @@ function whereToLook(altDeg, azDeg) {
 }
 
 export default function CelestialPopup({ obj, onClose }) {
-  if (!obj) return null
-
   const stats = [
     ['Constellation', obj.constellation],
     ['Catalog', obj.catalog],
     ['Magnitude', obj.magnitude != null ? String(obj.magnitude) : null],
     ['Distance', obj.distanceText],
     ['Spectral Type', obj.spectralType],
-  ].filter(([, v]) => v)
+  ].filter(([, value]) => value)
 
-  const look = obj.altDeg != null ? whereToLook(obj.altDeg, obj.azDeg) : null
+  const look = whereToLook(obj.altDeg, obj.azDeg)
 
   return (
     <div className='popup-overlay' onClick={onClose}>
       <div className='popup celestial-popup popup-static' onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className='popup-close'>×</button>
         <div className='celestial-name'>{obj.name}</div>
-        <div className='celestial-badge'>{TYPE_LABEL[obj.type] || 'Object'}</div>
+        <div className='celestial-badge'>{TYPE_LABEL[obj.type]}</div>
         <div className='attributions-divider' />
-        {stats.length > 0 && (
-          <ul className='celestial-stats'>
-            {stats.map(([label, value]) => (
-              <li key={label}>
-                <span className='celestial-stat-label'>{label}</span>
-                <span className='celestial-stat-value'>{value}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className='celestial-stats'>
+          {stats.map(([label, value]) => (
+            <li key={label}>
+              <span className='celestial-stat-label'>{label}</span>
+              <span className='celestial-stat-value'>{value}</span>
+            </li>
+          ))}
+        </ul>
         <p className='celestial-blurb'>{obj.blurb}</p>
-        {look && (
-          <div className='celestial-look'>
-            <span className='celestial-look-label'>WHERE TO LOOK</span>
-            <span className='celestial-look-text'>
-              Face <strong>{look.compass}</strong> and look {look.height}.
-            </span>
-            <span className='celestial-look-note'>from my spot in Toronto, right now</span>
-          </div>
-        )}
+        <div className='celestial-look'>
+          <span className='celestial-look-label'>WHERE TO LOOK</span>
+          <span className='celestial-look-text'>
+            Face <strong>{look.compass}</strong> and look {look.height}.
+          </span>
+          <span className='celestial-look-note'>from my spot in Toronto, right now</span>
+        </div>
       </div>
     </div>
   )
