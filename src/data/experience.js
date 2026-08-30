@@ -2,7 +2,7 @@ export const EXPERIENCE = [
   {
     role: 'Software Engineer Intern',
     dates: 'Sep. 2025 – Dec. 2025',
-    company: 'Essos (Stealth Startup)',
+    company: 'Essos',
     location: 'New York, NY',
     description: 'Developed a facial analysis app from scratch using Apple\'s 3D face mapping technology.',
   },
@@ -23,7 +23,7 @@ export const EXPERIENCE = [
   {
     role: 'Freelance Software Engineer',
     dates: 'Sep. 2023 – Aug. 2024',
-    company: 'KbSpas + Realty Point',
+    company: 'KbSpas & Realty Point',
     location: 'Toronto, ON',
     description: 'Created booking platforms for small businesses according to their specific needs.',
   },

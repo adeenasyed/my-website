@@ -73,7 +73,7 @@ function buildInfoButton(githubButton, maxAnisotropy) {
   const body = new THREE.Mesh(
     new THREE.CylinderGeometry(radius, radius, depth, 64),
     new THREE.MeshStandardMaterial({
-      color: '#71CC71',
+      color: '#3D90D4',
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,

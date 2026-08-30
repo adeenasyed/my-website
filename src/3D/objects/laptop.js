@@ -44,7 +44,7 @@ const DRAW_HEIGHT = 580
 const SCALE = CANVAS_WIDTH / DRAW_WIDTH
 const PADDING = 48
 const TIMELINE_X = 20
-const DOT_RADIUS = 3
+const SQUARE_SIZE = 6
 const START_Y = 95
 const COMPANY_Y_OFFSET = 28
 const DESCRIPTION_Y_OFFSET = 65
@@ -129,9 +129,7 @@ function buildScreen(worldBox, maxAnisotropy) {
       context.shadowBlur = 10
       context.shadowColor = CYAN
       context.fillStyle = CYAN
-      context.beginPath()
-      context.arc(TIMELINE_X, y + 10, DOT_RADIUS, 0, Math.PI * 2)
-      context.fill()
+      context.fillRect(TIMELINE_X - SQUARE_SIZE / 2, y + 10 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE)
       context.shadowBlur = 0
 
       context.fillStyle = WHITE
@@ -144,7 +142,6 @@ function buildScreen(worldBox, maxAnisotropy) {
       context.fillText(e.role, DRAW_WIDTH - PADDING, y)
 
       context.font = COMPANY_FONT
-      context.textAlign = 'right'
       context.fillText(e.company, DRAW_WIDTH - PADDING, y + COMPANY_Y_OFFSET)
 
       if (e.description) {
