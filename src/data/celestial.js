@@ -158,7 +158,7 @@ export const OBJECTS = [
   {
     name: 'Beehive Cluster',
     type: 'cluster',
-    catalog: 'M44',
+    catalog: 'Messier 44',
     raDeg: 130.1,
     decDeg: 19.67,
     magnitude: 3.7,
@@ -178,7 +178,7 @@ export const OBJECTS = [
   {
     name: 'Hyades',
     type: 'cluster',
-    catalog: 'Melotte 25',
+    catalog: 'Caldwell 41',
     raDeg: 66.75,
     decDeg: 15.87,
     magnitude: 0.5,
@@ -188,7 +188,7 @@ export const OBJECTS = [
   {
     name: 'Pleiades',
     type: 'cluster',
-    catalog: 'M45',
+    catalog: 'Messier 45',
     raDeg: 56.75,
     decDeg: 24.117,
     magnitude: 1.6,
@@ -198,7 +198,7 @@ export const OBJECTS = [
   {
     name: 'Dumbbell Nebula',
     type: 'nebula',
-    catalog: 'M27',
+    catalog: 'Messier 27',
     raDeg: 299.901,
     decDeg: 22.721,
     magnitude: 7.5,
@@ -208,7 +208,7 @@ export const OBJECTS = [
   {
     name: 'Orion Nebula',
     type: 'nebula',
-    catalog: 'M42',
+    catalog: 'Messier 42',
     raDeg: 83.822,
     decDeg: -5.391,
     magnitude: 4.0,
@@ -218,7 +218,7 @@ export const OBJECTS = [
   {
     name: 'Ring Nebula',
     type: 'nebula',
-    catalog: 'M57',
+    catalog: 'Messier 57',
     raDeg: 283.396,
     decDeg: 33.029,
     magnitude: 8.8,
@@ -228,7 +228,7 @@ export const OBJECTS = [
   {
     name: 'Crab Nebula',
     type: 'remnant',
-    catalog: 'M1',
+    catalog: 'Messier 1',
     raDeg: 83.625,
     decDeg: 22.017,
     magnitude: 8.4,
@@ -238,7 +238,7 @@ export const OBJECTS = [
   {
     name: 'Andromeda Galaxy',
     type: 'galaxy',
-    catalog: 'M31',
+    catalog: 'Messier 31',
     raDeg: 10.685,
     decDeg: 41.269,
     magnitude: 3.4,
@@ -248,7 +248,7 @@ export const OBJECTS = [
   {
     name: 'Bode’s Galaxy',
     type: 'galaxy',
-    catalog: 'M81',
+    catalog: 'Messier 81',
     raDeg: 148.888,
     decDeg: 69.065,
     magnitude: 6.9,
@@ -258,7 +258,7 @@ export const OBJECTS = [
   {
     name: 'Triangulum Galaxy',
     type: 'galaxy',
-    catalog: 'M33',
+    catalog: 'Messier 33',
     raDeg: 23.462,
     decDeg: 30.66,
     magnitude: 5.7,
@@ -268,7 +268,7 @@ export const OBJECTS = [
   {
     name: 'Whirlpool Galaxy',
     type: 'galaxy',
-    catalog: 'M51',
+    catalog: 'Messier 51',
     raDeg: 202.475,
     decDeg: 47.2,
     magnitude: 8.4,
