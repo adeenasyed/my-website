@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { ROOM_WIDTH, ROOM_HEIGHT, CAMERA_FOV } from '../../constants.js'
+import { ROOM_WIDTH, ROOM_HEIGHT } from '../../constants.js'
 
 const FRAME_WIDTH = 140
 const FRAME_HEIGHT = 108

@@ -2,7 +2,6 @@ import { loadPacman } from './pacman.js'
 import { loadRug } from './rug.js'
 import { loadLaptop } from './laptop.js'
 import { loadRemote } from './remote.js'
-import { loadLightSign } from './lightSign.js'
 import { loadCatLightSign } from './catLightSign.js'
 import { loadHeartLightSign } from './heartLightSign.js'
 import { loadGraduationZone } from './graduationZone/index.js'
@@ -23,7 +22,6 @@ export async function loadObjects(maxAnisotropy) {
     rug,
     laptop,
     remote,
-    lightSign,
     catLightSign,
     heartLightSign,
     graduationZone,
@@ -35,7 +33,6 @@ export async function loadObjects(maxAnisotropy) {
     loadRug(maxAnisotropy),
     loadLaptop(maxAnisotropy),
     loadRemote(),
-    loadLightSign(),
     loadCatLightSign(),
     loadHeartLightSign(),
     loadGraduationZone(maxAnisotropy),
@@ -50,7 +47,6 @@ export async function loadObjects(maxAnisotropy) {
       rug,
       laptop,
       remote,
-      lightSign,
       catLightSign,
       heartLightSign,
       ...graduationZone.objects,
@@ -65,7 +61,6 @@ export async function loadObjects(maxAnisotropy) {
     interactables: {
       laptop,
       remote,
-      lightSign,
       ...graduationZone.interactables,
       ...shelfZone.interactables,
       ...loungeZone.interactables,
