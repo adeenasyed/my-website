@@ -6,9 +6,24 @@
 }
 
 .remote-popup {
+  --remote-space: clamp(6px, 0.55vw, 14px);
+  --remote-text: clamp(10px, 0.84vw, 22px);
+
+  width: clamp(139px, 11.85vw, 303px);
   padding: clamp(17px, 1.633vw, 42px);
   border-radius: clamp(8px, 0.816vw, 21px);
-  gap: 10px;
+  gap: calc(var(--remote-space) * 2);
+}
+
+.remote-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--remote-space);
+}
+
+.remote-section--divided {
+  padding-top: calc(var(--remote-space) * 2);
+  border-top: 1px solid var(--accent-border);
 }
 
 .remote-popup .popup-close {
@@ -17,39 +32,54 @@
   font-size: clamp(14px, 1.361vw, 35px);
 }
 
-.remote-popup .popup-button {
-  font-size: clamp(11px, 0.884vw, 23px);
-  padding: clamp(6px, 0.544vw, 14px) clamp(8px, 0.816vw, 21px);
+.remote-source-switch {
+  display: flex;
+  flex-direction: column;
+}
+
+.remote-source-option {
+  display: flex;
+  align-items: center;
+  gap: var(--remote-space);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: var(--remote-text);
+  letter-spacing: 0.05em;
+  line-height: 1.55;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.remote-source-option:focus-visible {
+  outline: none;
+}
+
+.remote-source-box {
+  color: var(--accent);
+  letter-spacing: 0;
+  transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+
+.remote-source-option[aria-pressed='true'] .remote-source-box {
+  text-shadow: 0 0 8px var(--accent-shadow);
 }
 
 .remote-popup .popup-label {
   font-size: clamp(10px, 0.816vw, 21px);
 }
 
-.remote-popup-select-label {
-  margin-bottom: 4px;
-}
-
-.remote-popup-leds-label {
-  margin-bottom: 8px;
-}
-
-.remote-led-section {
-  margin-top: 4px;
-  padding-top: 12px;
-  border-top: 1px solid var(--accent-border);
-}
-
 .color-swatch-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(4px, 0.408vw, 10px);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(4px, 0.33vw, 8px);
 }
 
 .color-swatch {
-  width: clamp(15px, 1.497vw, 38px);
-  height: clamp(15px, 1.497vw, 38px);
-  border-radius: 50%;
+  aspect-ratio: 1;
+  border-radius: clamp(4px, 0.408vw, 8px);
   border: none;
   cursor: pointer;
 }

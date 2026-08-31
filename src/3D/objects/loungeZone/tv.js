@@ -17,7 +17,7 @@ export async function loadTV(couchCenterZ, maxAnisotropy) {
 
   const worldBox = new THREE.Box3().setFromObject(object)
 
-  const { screen, setMode, dispose } = buildScreen(worldBox, maxAnisotropy)
+  const { screen, setSource, dispose } = buildScreen(worldBox, maxAnisotropy)
 
   const light = new THREE.PointLight(LIGHTING_COLOR, 75000)
   light.position.set(
@@ -30,7 +30,7 @@ export async function loadTV(couchCenterZ, maxAnisotropy) {
   tv.add(object, screen, light)
   tv.meshes = getMeshes(object, [screen])
   tv.zoom = { target: screen, offset: new THREE.Vector3(-310, 0, 0) }
-  tv.setMode = setMode
+  tv.setSource = setSource
   tv.dispose = dispose
 
   return tv
@@ -48,14 +48,8 @@ const ARTIST_Y = CANVAS_HEIGHT - 64
 const SCROLL_SPEED = 40
 const SCROLL_PAUSE = 2000
 
-const ALBUM_OF_MONTH_SIZE = 340
-const ALBUM_OF_MONTH_X = (CANVAS_WIDTH - ALBUM_OF_MONTH_SIZE) / 2
-const ALBUM_OF_MONTH_Y = 104
-
 const H1_FONT = `bold 48px ${FONT_FAMILY}`
-const H2_FONT = `bold 36px ${FONT_FAMILY}`
 const H3_FONT = `bold 24px ${FONT_FAMILY}`
-const BODY_FONT = `24px ${FONT_FAMILY}`
 const SCROLL_FONT = `30px ${FONT_FAMILY}`
 
 const SPOTIFY_GREEN = '#1DB954'
@@ -112,9 +106,8 @@ function buildScreen(worldBox, maxAnisotropy) {
     (worldBox.min.z + worldBox.max.z) / 2,
   )
 
-  let mode = 0
+  let source = 'spotify'
   let listeningActivity = null
-  let albumOfMonth = null
   let scrollState = null
   let lastTime = null
   let rafId = null
@@ -201,48 +194,9 @@ function buildScreen(worldBox, maxAnisotropy) {
     }
   }
 
-  function drawAlbumOfMonth() {
-    clearCanvas()
-
-    if (albumOfMonth) {
-      context.textBaseline = 'top'
-      context.textAlign = 'center'
-      context.fillStyle = SPOTIFY_GREEN
-      context.font = H1_FONT
-      context.fillText('ALBUM OF THE MONTH', CANVAS_WIDTH / 2, 32)
-
-      if (albumOfMonth.image) {
-        context.drawImage(
-          albumOfMonth.image,
-          ALBUM_OF_MONTH_X,
-          ALBUM_OF_MONTH_Y,
-          ALBUM_OF_MONTH_SIZE,
-          ALBUM_OF_MONTH_SIZE,
-        )
-      }
-
-      context.fillStyle = WHITE
-      context.font = H2_FONT
-      context.fillText(
-        albumOfMonth.name,
-        CANVAS_WIDTH / 2,
-        ALBUM_OF_MONTH_Y + ALBUM_OF_MONTH_SIZE + 25,
-      )
-
-      context.fillStyle = GRAY
-      context.font = BODY_FONT
-      context.fillText(
-        albumOfMonth.artist,
-        CANVAS_WIDTH / 2,
-        ALBUM_OF_MONTH_Y + ALBUM_OF_MONTH_SIZE + 70,
-      )
-    }
-  }
-
   function updateScreen() {
     stopScrollAnimation()
-    if (mode === 0 && listeningActivity) showListeningActivity()
-    else if (mode === 1 && albumOfMonth) drawAlbumOfMonth()
+    if (source === 'spotify' && listeningActivity) showListeningActivity()
     else clearCanvas()
   }
 
@@ -252,16 +206,11 @@ function buildScreen(worldBox, maxAnisotropy) {
       const albumImage = url ? await loadImage(url) : null
       listeningActivity = { ...data.listeningActivity, albumImage }
     }
-    if (data.albumOfMonth) {
-      const url = data.albumOfMonth.image
-      const image = url ? await loadImage(url) : null
-      albumOfMonth = { ...data.albumOfMonth, image }
-    }
-    if (mode === 0 ? listeningActivity : albumOfMonth) updateScreen()
+    if (source === 'spotify' && listeningActivity) updateScreen()
   })
 
-  function setMode(newMode) {
-    mode = newMode
+  function setSource(newSource) {
+    source = newSource
     updateScreen()
   }
 
@@ -270,5 +219,5 @@ function buildScreen(worldBox, maxAnisotropy) {
     spotifyConnection.dispose()
   }
 
-  return { screen, setMode, dispose }
+  return { screen, setSource, dispose }
 }

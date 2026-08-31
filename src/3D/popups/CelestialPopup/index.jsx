@@ -1,66 +1,95 @@
 import './styles.css'
 
-const TYPE_LABEL = {
-  sun: 'Star',
-  star: 'Star',
-  planet: 'Planet',
-  moon: 'Moon',
-  galaxy: 'Galaxy',
-  nebula: 'Nebula',
-  cluster: 'Star Cluster',
+function formatTitle(obj) {
+  return obj.catalog ? `${obj.catalog} / ${obj.name}` : obj.name
 }
 
 const DIRECTIONS = [
-  'north', 'north-northeast', 'northeast', 'east-northeast',
-  'east', 'east-southeast', 'southeast', 'south-southeast',
-  'south', 'south-southwest', 'southwest', 'west-southwest',
-  'west', 'west-northwest', 'northwest', 'north-northwest',
+  'north', 'northeast', 'east', 'southeast',
+  'south', 'southwest', 'west', 'northwest',
 ]
 
-function whereToLook(altDeg, azDeg) {
-  const compass = DIRECTIONS[Math.round(azDeg / 22.5) % 16]
-  const height = altDeg >= 80
-    ? 'almost directly overhead'
-    : altDeg >= 60 ? `high in the sky (${Math.round(altDeg)}° up)`
-    : altDeg <= 12 ? `just above the horizon (${Math.round(altDeg)}° up)`
-    : `${Math.round(altDeg)}° above the horizon`
-  return { compass, height }
+function formatDirection(altDeg, azDeg) {
+  const directionName = DIRECTIONS[Math.round(azDeg / 45) % 8]
+  const direction = `${directionName.charAt(0).toUpperCase()}${directionName.slice(1)}`
+  return `${direction}, ${Math.round(altDeg)}° above the horizon`
 }
 
-export default function CelestialPopup({ obj, onClose }) {
-  const stats = [
-    ['Constellation', obj.constellation],
-    ['Catalog', obj.catalog],
-    ['Magnitude', obj.magnitude != null ? String(obj.magnitude) : null],
-    ['Distance', obj.distanceText],
-    ['Spectral Type', obj.spectralType],
-  ].filter(([, value]) => value)
+const UNITS = {
+  ly: ['light-year', 'light-years'],
+  au: ['astronomical unit', 'astronomical units'],
+  km: ['kilometer', 'kilometers'],
+}
 
-  const look = whereToLook(obj.altDeg, obj.azDeg)
+const NUMBER_SCALES = [[1e12, 'trillion'], [1e9, 'billion'], [1e6, 'million']]
+
+function roundToThreeSignificantDigits(value) {
+  const factor = 10 ** (2 - Math.floor(Math.log10(Math.abs(value))))
+  return Math.round(value * factor) / factor
+}
+
+function formatAmount(value) {
+  const scale = NUMBER_SCALES.find(([size]) => value >= size)
+  return scale
+    ? `${roundToThreeSignificantDigits(value / scale[0])} ${scale[1]}`
+    : `${roundToThreeSignificantDigits(value)}`
+}
+
+function formatQuantity(value, unit) {
+  const [singular, plural] = UNITS[unit]
+  return `${formatAmount(value)} ${roundToThreeSignificantDigits(value) === 1 ? singular : plural}`
+}
+
+const CONVERSIONS = {
+  au: '1 astronomical unit = 150 million kilometers',
+  ly: '1 light-year = 9.46 trillion kilometers',
+}
+
+const MAGNITUDE_GAUGE = 'Smaller = brighter, naked eye limit under dark skies = 6.5'
+
+function phaseName({ illuminated, waxing }) {
+  if (illuminated < 0.02) return 'New moon'
+  if (illuminated > 0.98) return 'Full moon'
+  if (Math.abs(illuminated - 0.5) < 0.06) return waxing ? 'First quarter' : 'Last quarter'
+  const shape = illuminated < 0.5 ? 'crescent' : 'gibbous'
+  return `${waxing ? 'Waxing' : 'Waning'} ${shape}`
+}
+
+function formatPhase(phase) {
+  return `${phaseName(phase)}, ${Math.round(phase.illuminated * 100)}% lit`
+}
+
+export default function CelestialPopup({ obj, placement, onClose }) {
+  const rows = [
+    obj.magnitude != null && ['Magnitude', String(obj.magnitude), MAGNITUDE_GAUGE],
+    obj.distance && ['Distance', formatQuantity(obj.distance.value, obj.distance.unit), CONVERSIONS[obj.distance.unit]],
+    obj.phase && ['Phase', formatPhase(obj.phase)],
+    ['Look', formatDirection(obj.altDeg, obj.azDeg)],
+  ].filter(Boolean)
 
   return (
-    <div className='popup-overlay' onClick={onClose}>
-      <div className='popup celestial-popup popup-static' onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className='popup-close'>×</button>
-        <div className='celestial-name'>{obj.name}</div>
-        <div className='celestial-badge'>{TYPE_LABEL[obj.type]}</div>
-        <div className='attributions-divider' />
-        <ul className='celestial-stats'>
-          {stats.map(([label, value]) => (
-            <li key={label}>
-              <span className='celestial-stat-label'>{label}</span>
-              <span className='celestial-stat-value'>{value}</span>
-            </li>
+    <div className='popup-overlay celestial-popup-overlay' onClick={onClose}>
+      <div
+        className={`popup celestial-popup popup-static ${placement.className}`}
+        style={placement.style}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className='celestial-popup-flash' aria-hidden='true' />
+        <button type='button' aria-label='Close celestial details' onClick={onClose} className='popup-close'>×</button>
+        <header className='celestial-head'>
+          <h2 className='celestial-name'>{formatTitle(obj)}</h2>
+        </header>
+        <dl className='celestial-fields'>
+          {rows.map(([label, value, explainer]) => (
+            <div className='celestial-field' key={label}>
+              <dt>{explainer ? <span className='celestial-term'>{label}</span> : label}</dt>
+              <dd>
+                {value}
+                {explainer && <span className='celestial-explainer'>{explainer}</span>}
+              </dd>
+            </div>
           ))}
-        </ul>
-        <p className='celestial-blurb'>{obj.blurb}</p>
-        <div className='celestial-look'>
-          <span className='celestial-look-label'>WHERE TO LOOK</span>
-          <span className='celestial-look-text'>
-            Face <strong>{look.compass}</strong> and look {look.height}.
-          </span>
-          <span className='celestial-look-note'>from my spot in Toronto, right now</span>
-        </div>
+        </dl>
       </div>
     </div>
   )

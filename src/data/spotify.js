@@ -1,6 +1,5 @@
 export function createSpotifyConnection(onChange) {
   let listeningActivity = null
-  let albumOfMonth = null
 
   async function pollListeningActivity() {
     try {
@@ -15,23 +14,11 @@ export function createSpotifyConnection(onChange) {
       if (!changed) return
 
       listeningActivity = { albumImage: data.albumImage, playing: data.playing, track: data.track, artist: data.artist }
-      onChange({ listeningActivity, albumOfMonth })
-    } catch { }
-  }
-
-  async function fetchAlbumOfMonth() {
-    try {
-      const res = await fetch('/api/spotify/album-of-month')
-      const album = await res.json()
-      if (!album?.name) return
-
-      albumOfMonth = { image: album.image, name: album.name, artist: album.artist }
-      onChange({ listeningActivity, albumOfMonth })
+      onChange({ listeningActivity })
     } catch { }
   }
 
   pollListeningActivity()
-  // fetchAlbumOfMonth()
   const intervalId = setInterval(pollListeningActivity, 30000)
 
   return { dispose: () => clearInterval(intervalId) }

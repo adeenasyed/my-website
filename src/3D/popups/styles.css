@@ -26,17 +26,6 @@
   line-height: 1;
 }
 
-.popup-button {
-  background: none;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-family: inherit;
-  border-radius: clamp(4px, 0.408vw, 8px);
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  text-align: left;
-}
-
 .popup-label {
   color: var(--accent);
   letter-spacing: 0.05em;
