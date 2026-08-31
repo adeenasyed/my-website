@@ -1,7 +1,8 @@
 import * as THREE from 'three'
-import { SiderealTime } from 'astronomy-engine'
+import { altAzToScene } from './coordinates.js'
 
 export const STAR_RADIUS = 130000
+export const COLOR_SATURATION = 1.2
 
 const BV_STOPS = [
   [-0.40, [0.61, 0.70, 1.00]],
@@ -28,41 +29,24 @@ function bvToRGB(bv) {
   return last[1]
 }
 
-const magToSize = (mag) => THREE.MathUtils.clamp(4.6 - 0.7 * mag, 1.0, 6.0)
-const magToBrightness = (mag) => THREE.MathUtils.clamp(1.12 - 0.13 * mag, 0.32, 1.05)
+const magToSize = (magnitude) => THREE.MathUtils.clamp(4.6 - 0.7 * magnitude, 1.0, 6.0)
+const magToBrightness = (magnitude) => THREE.MathUtils.clamp(1.12 - 0.13 * magnitude, 0.32, 1.05)
 
-const DEG = Math.PI / 180
-const normalizeDeg = (value) => ((value % 360) + 360) % 360
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
-
-export function localSiderealTime(date, longitudeDeg) {
-  return ((SiderealTime(date) + longitudeDeg / 15) % 24 + 24) % 24
+export function starColor(bv) {
+  return saturate(bvToRGB(bv))
 }
 
-export function equatorialToAltAz(raDeg, decDeg, latDeg, lstHours) {
-  const hourAngle = normalizeDeg(lstHours * 15 - raDeg) * DEG
-  const dec = decDeg * DEG
-  const lat = latDeg * DEG
-  const sinDec = Math.sin(dec)
-  const cosDec = Math.cos(dec)
-  const sinLat = Math.sin(lat)
-  const cosLat = Math.cos(lat)
-  const sinAlt = clamp(sinDec * sinLat + cosDec * cosLat * Math.cos(hourAngle), -1, 1)
-  const alt = Math.asin(sinAlt)
-  const cosAlt = Math.cos(alt)
-  const sinAz = -cosDec * Math.sin(hourAngle) / cosAlt
-  const cosAz = (sinDec - sinLat * sinAlt) / (cosAlt * cosLat)
-
-  return { alt, az: Math.atan2(sinAz, cosAz) }
-}
-
-export function altAzToScene(alt, az, radius, target) {
-  const cosAlt = Math.cos(alt)
-  return target.set(
-    radius * cosAlt * Math.sin(az),
-    radius * Math.sin(alt),
-    -radius * cosAlt * Math.cos(az),
-  )
+function saturate(rgb) {
+  const [r, g, b] = rgb
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  const peak = Math.max(r, g, b)
+  const out = rgb.map((c) => THREE.MathUtils.clamp(
+    luminance + (c - luminance) * COLOR_SATURATION,
+    0,
+    1,
+  ))
+  const boosted = Math.max(...out)
+  return out.map((c) => c * (peak / boosted))
 }
 
 const VERTEX_SHADER = `
@@ -87,28 +71,28 @@ const FRAGMENT_SHADER = `
   }
 `
 
-export function buildStarShell(catalog, latDeg, lstHours, pixelRatio) {
+export function buildStarShell(catalog, toAltAz, pixelRatio) {
   const count = catalog.length
   const positions = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)
   const sizes = new Float32Array(count)
-  const v = new THREE.Vector3()
+  const position = new THREE.Vector3()
 
   for (let i = 0; i < count; i++) {
-    const [raDeg, decDeg, mag, bv] = catalog[i]
-    const { alt, az } = equatorialToAltAz(raDeg, decDeg, latDeg, lstHours)
-    altAzToScene(alt, az, STAR_RADIUS, v)
-    positions[i * 3] = v.x
-    positions[i * 3 + 1] = v.y
-    positions[i * 3 + 2] = v.z
+    const [raDeg, decDeg, magnitude, colorIndex] = catalog[i]
+    const { alt, az } = toAltAz(raDeg, decDeg)
+    altAzToScene(alt, az, STAR_RADIUS, position)
+    positions[i * 3] = position.x
+    positions[i * 3 + 1] = position.y
+    positions[i * 3 + 2] = position.z
 
-    const [r, g, b] = bvToRGB(bv)
-    const k = magToBrightness(mag)
-    colors[i * 3] = r * k
-    colors[i * 3 + 1] = g * k
-    colors[i * 3 + 2] = b * k
+    const [r, g, b] = starColor(colorIndex)
+    const brightness = magToBrightness(magnitude)
+    colors[i * 3] = r * brightness
+    colors[i * 3 + 1] = g * brightness
+    colors[i * 3 + 2] = b * brightness
 
-    sizes[i] = magToSize(mag)
+    sizes[i] = magToSize(magnitude)
   }
 
   const geometry = new THREE.BufferGeometry()
