@@ -8,17 +8,12 @@ const LABEL_RADIUS = STAR_RADIUS * 0.98
 const LABEL_RISE = 3
 const MAX_ARC_STEP = THREE.MathUtils.degToRad(4)
 const MAX_LABEL_ALT = THREE.MathUtils.degToRad(89)
-const LABEL_FONT = `600 44px ${FONT_FAMILY}, monospace`
+const LABEL_FONT = `600 44px ${FONT_FAMILY}`
 
-function getDirection([raDeg, decDeg], toAltAz, rise = 0) {
+function getStar([raDeg, decDeg], toAltAz, rise = 0) {
   const { alt, az } = toAltAz(raDeg, decDeg)
-  const lifted = Math.min(alt + THREE.MathUtils.degToRad(rise), MAX_LABEL_ALT)
-  return altAzToScene(lifted, az, 1, new THREE.Vector3()).normalize()
-}
-
-function getStar([raDeg, decDeg], toAltAz) {
-  const { alt, az } = toAltAz(raDeg, decDeg)
-  return { alt, direction: altAzToScene(alt, az, 1, new THREE.Vector3()).normalize() }
+  const directionAlt = rise ? Math.min(alt + THREE.MathUtils.degToRad(rise), MAX_LABEL_ALT) : alt
+  return { alt, direction: altAzToScene(directionAlt, az, 1, new THREE.Vector3()).normalize() }
 }
 
 function addArc(positions, start, end) {
@@ -86,7 +81,7 @@ export function createConstellations(patterns, toAltAz) {
     }
 
     const label = createLabel(pattern.name)
-    const direction = getDirection(pattern.labelPosition, toAltAz, LABEL_RISE)
+    const direction = getStar(pattern.labelPosition, toAltAz, LABEL_RISE).direction
     label.sprite.position.copy(direction.multiplyScalar(LABEL_RADIUS))
     labels.push(label)
     group.add(label.sprite)
@@ -101,7 +96,7 @@ export function createConstellations(patterns, toAltAz) {
   const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   const material = new THREE.LineBasicMaterial({
-    color: '#78d9ff',
+    color: '#78D9FF',
     transparent: true,
     opacity: 0.36,
     depthWrite: false,
@@ -113,6 +108,10 @@ export function createConstellations(patterns, toAltAz) {
   group.add(lines)
   group.visible = false
 
+  function setVisible(visible) { 
+    group.visible = visible
+  }
+
   function dispose() {
     disposed = true
     geometry.dispose()
@@ -123,5 +122,5 @@ export function createConstellations(patterns, toAltAz) {
     }
   }
 
-  return { group, setVisible: (visible) => { group.visible = visible }, dispose }
+  return { group, setVisible, dispose }
 }

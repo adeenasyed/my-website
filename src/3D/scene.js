@@ -16,7 +16,7 @@ export function createScene() {
   scene.background = BG_COLOR
   scene.fog = new THREE.Fog(BG_COLOR, 500, 90000)
 
-  const camera = new THREE.PerspectiveCamera(CAMERA_FOV, window.innerWidth / window.innerHeight, 1, 140000)
+  const camera = new THREE.PerspectiveCamera(CAMERA_FOV, window.innerWidth / window.innerHeight, 1, 260000)
   camera.position.set(...INTRO_CAMERA_POSITION)
   camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
 
@@ -33,6 +33,7 @@ export function createScene() {
     longitude: TORONTO_LONGITUDE,
     height: TORONTO_HEIGHT,
     pixelRatio: renderer.getPixelRatio(),
+    aspect: camera.aspect,
   })
   scene.add(celestial.group)
 

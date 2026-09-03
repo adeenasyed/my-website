@@ -4,15 +4,14 @@ import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT, INTRO_CAMERA_POSITION 
 const START_POSITION = new THREE.Vector3(...INTRO_CAMERA_POSITION)
 const FINAL_POSITION = new THREE.Vector3(...DEFAULT_CAMERA_POSITION)
 const DURATION = 3.5
+const FLIGHT_DIRECTION = FINAL_POSITION.clone().sub(START_POSITION).normalize()
+const FLIGHT_RIGHT = FLIGHT_DIRECTION.clone().cross(new THREE.Vector3(0, 1, 0)).normalize()
+const FLIGHT_UP = FLIGHT_RIGHT.clone().cross(FLIGHT_DIRECTION).normalize()
+const RIGHT_ARC = 900
+const UPPER_ARC = 350
 
-function ease(t) {
-  const a = 0.65
-  const pa = (2 * a) / (3 + a * -1)
-  if (t <= a) return (pa / (a * a * a)) * t * t * t
-  const va = (3 * pa) / a
-  const s = t - a
-  const b = 1 - a
-  return pa + va * s - (va / (2 * b)) * s * s
+function smootherstep(t) {
+  return t * t * t * (t * (t * 6 - 15) + 10)
 }
 
 export function createIntro(camera, controls, interactions, onComplete) {
@@ -20,15 +19,18 @@ export function createIntro(camera, controls, interactions, onComplete) {
   camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
   controls.enabled = false
 
-  let started = false
   let elapsed = 0
   let finished = false
 
   function update(delta) {
-    if (finished) return
-    if (started) elapsed += delta
-    const t = ease(Math.min(elapsed / DURATION, 1))
-    camera.position.lerpVectors(START_POSITION, FINAL_POSITION, t)
+    if (finished) return null
+    elapsed += delta
+    const progress = Math.min(elapsed / DURATION, 1)
+    const travelProgress = smootherstep(progress)
+    const arc = Math.sin(Math.PI * travelProgress) ** 2
+    camera.position.lerpVectors(START_POSITION, FINAL_POSITION, travelProgress)
+      .addScaledVector(FLIGHT_RIGHT, RIGHT_ARC * arc)
+      .addScaledVector(FLIGHT_UP, UPPER_ARC * arc)
     camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
     if (elapsed >= DURATION) {
       controls.enabled = true
@@ -37,10 +39,8 @@ export function createIntro(camera, controls, interactions, onComplete) {
       finished = true
       onComplete()
     }
+    return travelProgress
   }
 
-  return {
-    update,
-    start: () => { started = true },
-  }
+  return { update }
 }

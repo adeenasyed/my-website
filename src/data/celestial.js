@@ -1,13 +1,13 @@
 export const BODIES = [
-  { name: 'Sun', type: 'sun', color: '#ffdf8f', magnitude: -26.74 },
-  { name: 'Moon', type: 'moon', color: '#d9d6cf' },
-  { name: 'Mercury', type: 'planet', color: '#b9b0a4' },
-  { name: 'Venus', type: 'planet', color: '#f5e6b8' },
-  { name: 'Mars', type: 'planet', color: '#e2795b' },
-  { name: 'Jupiter', type: 'planet', color: '#e8d3a8' },
-  { name: 'Saturn', type: 'planet', color: '#e6d59a' },
-  { name: 'Uranus', type: 'planet', color: '#a8e1e8' },
-  { name: 'Neptune', type: 'planet', color: '#6f8dff' },
+  { name: 'Sun', type: 'sun', magnitude: -26.74 },
+  { name: 'Moon', type: 'moon' },
+  { name: 'Mercury', type: 'planet' },
+  { name: 'Venus', type: 'planet' },
+  { name: 'Mars', type: 'planet' },
+  { name: 'Jupiter', type: 'planet' },
+  { name: 'Saturn', type: 'planet' },
+  { name: 'Uranus', type: 'planet' },
+  { name: 'Neptune', type: 'planet' },
 ]
 
 export const OBJECTS = [
@@ -18,7 +18,6 @@ export const OBJECTS = [
     decDeg: 16.509,
     magnitude: 0.87,
     distance: 66.6,
-    spectralClass: 'K',
   },
   {
     name: 'Altair',
@@ -27,7 +26,6 @@ export const OBJECTS = [
     decDeg: 8.868,
     magnitude: 0.76,
     distance: 16.7,
-    spectralClass: 'A',
   },
   {
     name: 'Antares',
@@ -36,7 +34,6 @@ export const OBJECTS = [
     decDeg: -26.432,
     magnitude: 1.06,
     distance: 553.7,
-    spectralClass: 'M',
   },
   {
     name: 'Arcturus',
@@ -45,7 +42,6 @@ export const OBJECTS = [
     decDeg: 19.182,
     magnitude: -0.05,
     distance: 36.7,
-    spectralClass: 'K',
   },
   {
     name: 'Betelgeuse',
@@ -54,7 +50,6 @@ export const OBJECTS = [
     decDeg: 7.407,
     magnitude: 0.45,
     distance: 497.9,
-    spectralClass: 'M',
   },
   {
     name: 'Capella',
@@ -63,7 +58,6 @@ export const OBJECTS = [
     decDeg: 45.998,
     magnitude: 0.08,
     distance: 42.8,
-    spectralClass: 'G',
   },
   {
     name: 'Castor',
@@ -72,7 +66,6 @@ export const OBJECTS = [
     decDeg: 31.888,
     magnitude: 1.58,
     distance: 50.9,
-    spectralClass: 'A',
   },
   {
     name: 'Deneb',
@@ -81,7 +74,6 @@ export const OBJECTS = [
     decDeg: 45.28,
     magnitude: 1.25,
     distance: 1411.9,
-    spectralClass: 'A',
   },
   {
     name: 'Polaris',
@@ -90,7 +82,6 @@ export const OBJECTS = [
     decDeg: 89.264,
     magnitude: 1.97,
     distance: 432.6,
-    spectralClass: 'F',
   },
   {
     name: 'Pollux',
@@ -99,7 +90,6 @@ export const OBJECTS = [
     decDeg: 28.026,
     magnitude: 1.16,
     distance: 33.8,
-    spectralClass: 'K',
   },
   {
     name: 'Procyon',
@@ -108,7 +98,6 @@ export const OBJECTS = [
     decDeg: 5.225,
     magnitude: 0.4,
     distance: 11.5,
-    spectralClass: 'F',
   },
   {
     name: 'Regulus',
@@ -117,7 +106,6 @@ export const OBJECTS = [
     decDeg: 11.967,
     magnitude: 1.36,
     distance: 79.3,
-    spectralClass: 'B',
   },
   {
     name: 'Rigel',
@@ -126,7 +114,6 @@ export const OBJECTS = [
     decDeg: -8.202,
     magnitude: 0.18,
     distance: 862.8,
-    spectralClass: 'B',
   },
   {
     name: 'Sirius',
@@ -135,7 +122,6 @@ export const OBJECTS = [
     decDeg: -16.716,
     magnitude: -1.44,
     distance: 8.6,
-    spectralClass: 'A',
   },
   {
     name: 'Spica',
@@ -144,7 +130,6 @@ export const OBJECTS = [
     decDeg: -11.161,
     magnitude: 0.98,
     distance: 249.7,
-    spectralClass: 'B',
   },
   {
     name: 'Vega',
@@ -153,7 +138,6 @@ export const OBJECTS = [
     decDeg: 38.784,
     magnitude: 0.03,
     distance: 25,
-    spectralClass: 'A',
   },
   {
     name: 'Beehive Cluster',

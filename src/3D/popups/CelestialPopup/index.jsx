@@ -1,19 +1,9 @@
 import './styles.css'
 
-function formatTitle(obj) {
-  return obj.catalog ? `${obj.catalog} / ${obj.name}` : obj.name
-}
-
 const DIRECTIONS = [
   'north', 'northeast', 'east', 'southeast',
   'south', 'southwest', 'west', 'northwest',
 ]
-
-function formatDirection(altDeg, azDeg) {
-  const directionName = DIRECTIONS[Math.round(azDeg / 45) % 8]
-  const direction = `${directionName.charAt(0).toUpperCase()}${directionName.slice(1)}`
-  return `${direction}, ${Math.round(altDeg)}° above the horizon`
-}
 
 const UNITS = {
   ly: ['light-year', 'light-years'],
@@ -23,21 +13,29 @@ const UNITS = {
 
 const NUMBER_SCALES = [[1e12, 'trillion'], [1e9, 'billion'], [1e6, 'million']]
 
-function roundToThreeSignificantDigits(value) {
+function formatTitle(obj) {
+  return obj.catalog ? `${obj.catalog} / ${obj.name}` : obj.name
+}
+
+function formatDirection(altDeg, azDeg) {
+  const directionName = DIRECTIONS[Math.round(azDeg / 45) % 8]
+  const direction = `${directionName.charAt(0).toUpperCase()}${directionName.slice(1)}`
+  return `${direction}, ${Math.round(altDeg)}° above the horizon`
+}
+
+function round(value) {
   const factor = 10 ** (2 - Math.floor(Math.log10(Math.abs(value))))
   return Math.round(value * factor) / factor
 }
 
 function formatAmount(value) {
   const scale = NUMBER_SCALES.find(([size]) => value >= size)
-  return scale
-    ? `${roundToThreeSignificantDigits(value / scale[0])} ${scale[1]}`
-    : `${roundToThreeSignificantDigits(value)}`
+  return scale ? `${round(value / scale[0])} ${scale[1]}` : `${round(value)}`
 }
 
 function formatQuantity(value, unit) {
   const [singular, plural] = UNITS[unit]
-  return `${formatAmount(value)} ${roundToThreeSignificantDigits(value) === 1 ? singular : plural}`
+  return `${formatAmount(value)} ${round(value) === 1 ? singular : plural}`
 }
 
 const CONVERSIONS = {
@@ -45,7 +43,7 @@ const CONVERSIONS = {
   ly: '1 light-year = 9.46 trillion kilometers',
 }
 
-const MAGNITUDE_GAUGE = 'Smaller = brighter, naked eye limit under dark skies = 6.5'
+const MAGNITUDE_INFO = 'Smaller = brighter, naked eye limit under dark skies = 6.5'
 
 function phaseName({ illuminated, waxing }) {
   if (illuminated < 0.02) return 'New moon'
@@ -61,7 +59,7 @@ function formatPhase(phase) {
 
 export default function CelestialPopup({ obj, placement, onClose }) {
   const rows = [
-    obj.magnitude != null && ['Magnitude', String(obj.magnitude), MAGNITUDE_GAUGE],
+    obj.magnitude != null && ['Magnitude', String(obj.magnitude), MAGNITUDE_INFO],
     obj.distance && ['Distance', formatQuantity(obj.distance.value, obj.distance.unit), CONVERSIONS[obj.distance.unit]],
     obj.phase && ['Phase', formatPhase(obj.phase)],
     ['Look', formatDirection(obj.altDeg, obj.azDeg)],

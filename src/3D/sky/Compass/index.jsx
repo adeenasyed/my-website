@@ -9,6 +9,23 @@ const FACE_MARKS = [
   ...['N', 'E', 'S', 'W'].map((label, index) => ({ label, azimuth: index * 90, altitude: 0 })),
   { label: '·', azimuth: 0, altitude: 90 },
 ]
+const GRID_LINES = [
+  ...Array.from({ length: 12 }, (_, index) => {
+    const azimuth = index * 30
+    return {
+      key: `m${azimuth}`,
+      points: Array.from({ length: 46 }, (_, point) => [azimuth, -90 + point * ARC_STEP]),
+      baseOpacity: 0.05,
+      depthOpacity: 0.15,
+    }
+  }),
+  ...[-60, -30, 0, 30, 60].map((altitude) => ({
+    key: `p${altitude}`,
+    points: Array.from({ length: 91 }, (_, point) => [point * ARC_STEP, altitude]),
+    baseOpacity: altitude === 0 ? 0.22 : 0.07,
+    depthOpacity: altitude === 0 ? 0.32 : 0.12,
+  })),
+]
 
 function formatAltitude(altitude) {
   const degrees = Math.round(altitude)
@@ -62,32 +79,13 @@ function getVisibleArcs(points, cameraAzimuth, cameraAltitude) {
 }
 
 function createGridLines(azimuth, altitude) {
-  const lines = []
-  for (let meridian = 0; meridian < 360; meridian += 30) {
-    const points = []
-    for (let pointAltitude = -90; pointAltitude <= 90; pointAltitude += ARC_STEP) {
-      points.push([meridian, pointAltitude])
-    }
-    for (const arc of getVisibleArcs(points, azimuth, altitude)) {
-      lines.push({ key: `m${meridian}_${arc.points[0]}`, arc, opacity: 0.05 + 0.15 * arc.depth })
-    }
-  }
-
-  for (const parallel of [-60, -30, 0, 30, 60]) {
-    const points = []
-    for (let pointAzimuth = 0; pointAzimuth <= 360; pointAzimuth += ARC_STEP) {
-      points.push([pointAzimuth, parallel])
-    }
-    const isHorizon = parallel === 0
-    for (const arc of getVisibleArcs(points, azimuth, altitude)) {
-      lines.push({
-        key: `p${parallel}_${arc.points[0]}`,
-        arc,
-        opacity: (isHorizon ? 0.22 : 0.07) + (isHorizon ? 0.32 : 0.12) * arc.depth,
-      })
-    }
-  }
-  return lines
+  return GRID_LINES.flatMap(({ key, points, baseOpacity, depthOpacity }) => (
+    getVisibleArcs(points, azimuth, altitude).map((arc) => ({
+      key: `${key}_${arc.points[0]}`,
+      arc,
+      opacity: baseOpacity + depthOpacity * arc.depth,
+    }))
+  ))
 }
 
 function createFaceMarks(azimuth, altitude) {
