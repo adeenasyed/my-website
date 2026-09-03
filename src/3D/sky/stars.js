@@ -12,7 +12,7 @@ const STAR_SIZE_SCALE = 1.15
 
 const INTRO_STARS = {
   count: 800,
-  sizeScale: 1.08,
+  sizeScale: 1.4,
   startClearance: 1200,
   endClearance: 50,
   viewportFill: 1.08,
