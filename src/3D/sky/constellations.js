@@ -108,7 +108,7 @@ export function createConstellations(patterns, toAltAz) {
   group.add(lines)
   group.visible = false
 
-  function setVisible(visible) { 
+  function setVisible(visible) {
     group.visible = visible
   }
 

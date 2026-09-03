@@ -466,7 +466,7 @@ const CLUSTERS = {
   hyades: { seed: 41, count: 25, reach: 92, concentration: 0.6, centers: [[0, 0]] },
 }
 
-function clusterTexture({seed, count, reach, concentration, centers, haze = false}) {
+function clusterTexture({ seed, count, reach, concentration, centers, haze = false }) {
   const random = seededRandom(seed)
   const stars = []
   for (let i = 0; i < count; i++) {

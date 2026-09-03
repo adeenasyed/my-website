@@ -10,8 +10,8 @@ const INNER_WIDTH = FRAME_WIDTH - BORDER * 2
 const INNER_HEIGHT = FRAME_HEIGHT - BORDER * 2
 
 function createFrameSide(length) {
-  const HALF_LENGTH = length/2
-  const HALF_BORDER = BORDER/2
+  const HALF_LENGTH = length / 2
+  const HALF_BORDER = BORDER / 2
   const positions = new Float32Array([
     -HALF_LENGTH, -HALF_BORDER, 0,
      HALF_LENGTH, -HALF_BORDER, 0,
@@ -159,7 +159,7 @@ export async function loadDegree(maxAnisotropy) {
 
   group.meshes = [top, bottom, left, right, panel]
   group.hoverColor = '#4A4A4A'
-  group.zoom = { target: zoomTarget, offset:  new THREE.Vector3(0, 0, 148) }
+  group.zoom = { target: zoomTarget, offset: new THREE.Vector3(0, 0, 148) }
 
   return group
 }
