@@ -3,7 +3,7 @@ import { Observer, Equator, Horizon, Illumination, MoonPhase, Body } from 'astro
 import { OBJECTS, BODIES } from '@/data/celestial.js'
 import { CONSTELLATIONS } from '@/data/constellations.js'
 import { createAltAz } from './coordinates.js'
-import { buildStarShell, buildIntroStarField } from './stars.js'
+import { createStarShell, createIntroStarField } from './stars.js'
 import { createConstellations } from './constellations.js'
 import { createMarkers } from './markers.js'
 
@@ -52,7 +52,7 @@ function calculateVisibleBodies(date, observer, phase) {
 
 export function createCelestialSphere({ date, latitude, longitude, height, pixelRatio, aspect }) {
   const group = new THREE.Group()
-  const introStars = buildIntroStarField(pixelRatio, aspect)
+  const introStars = createIntroStarField(pixelRatio, aspect)
   group.add(introStars.points)
 
   const observer = new Observer(latitude, longitude, height)
@@ -75,7 +75,7 @@ export function createCelestialSphere({ date, latitude, longitude, height, pixel
     }
     if (disposed) return []
 
-    starShell = buildStarShell(catalog, toAltAz, pixelRatio)
+    starShell = createStarShell(catalog, toAltAz, pixelRatio)
     group.add(starShell.points)
 
     const elongation = MoonPhase(date)

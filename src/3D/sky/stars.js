@@ -154,7 +154,7 @@ function createStarPoints(attributes, uniforms, vertexShader, fragmentShader) {
   }
 }
 
-export function buildIntroStarField(pixelRatio, aspect) {
+export function createIntroStarField(pixelRatio, aspect) {
   const positions = new Float32Array(INTRO_STARS.count * 3)
   const colors = new Float32Array(INTRO_STARS.count * 3)
   const sizes = new Float32Array(INTRO_STARS.count)
@@ -223,7 +223,7 @@ export function buildIntroStarField(pixelRatio, aspect) {
   return { points, setIntroProgress, dispose }
 }
 
-export function buildStarShell(catalog, toAltAz, pixelRatio) {
+export function createStarShell(catalog, toAltAz, pixelRatio) {
   const count = catalog.length
   const positions = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)

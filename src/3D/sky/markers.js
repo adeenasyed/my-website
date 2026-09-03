@@ -7,11 +7,10 @@ const CENTER = TEXTURE_SIZE / 2
 const TAU = Math.PI * 2
 const MARKER_RADIUS = STAR_RADIUS * 0.99
 const PICK_RADIUS = 3400
-const DEEP_SKY_SCALE = { minAngle: 0.023, maxAngle: 3.17, minSize: 8300, maxSize: 12000 }
 
 const TYPE_STYLES = {
   planet: { texture: planetTexture, size: 5300 },
-  star: { texture: starTexture, size: 5600 },
+  star: { texture: starTexture, size: 5488 },
 }
 
 const MARKER_STYLES = {
@@ -40,18 +39,18 @@ const MARKER_STYLES = {
   Sirius: { tint: '#D6E3FF' },
   Spica: { tint: '#AAC4FF' },
   Vega: { tint: '#D6E3FF' },
-  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), tint: '#FFE1B8' },
-  Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), tint: '#C4DEFF' },
-  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), tint: '#FFF0CF' },
-  'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), tint: '#D4E7FF' },
-  'Dumbbell Nebula': { texture: dumbbellTexture, tint: '#FF9ECB', scale: 1.04 },
-  'Orion Nebula': { texture: orionTexture, tint: '#FF9ECB' },
-  'Ring Nebula': { texture: ringTexture, tint: '#FF9ECB', scale: 0.94 },
-  'Crab Nebula': { texture: crabTexture, tint: '#FFB27D' },
-  'Andromeda Galaxy': { texture: andromedaTexture, tint: '#CBBCFF', scale: 0.95 },
-  'Bode’s Galaxy': { texture: bodesTexture, tint: '#F6E7D4', scale: 0.88 },
-  'Triangulum Galaxy': { texture: triangulumTexture, tint: '#C4D6FF', scale: 0.78 },
-  'Whirlpool Galaxy': { texture: whirlpoolTexture, tint: '#CBBCFF', scale: 0.98 },
+  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), tint: '#FFE1B8', size: 11760 },
+  Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), tint: '#C4DEFF', size: 11356 },
+  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), tint: '#FFF0CF', size: 11247 },
+  'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), tint: '#D4E7FF', size: 10911 },
+  'Dumbbell Nebula': { texture: dumbbellTexture, tint: '#FF9ECB', size: 9803 },
+  'Orion Nebula': { texture: orionTexture, tint: '#FF9ECB', size: 10967 },
+  'Ring Nebula': { texture: ringTexture, tint: '#FF9ECB', size: 7646 },
+  'Crab Nebula': { texture: crabTexture, tint: '#FFB27D', size: 9216 },
+  'Andromeda Galaxy': { texture: andromedaTexture, tint: '#CBBCFF', size: 11172 },
+  'Bode’s Galaxy': { texture: bodesTexture, tint: '#F6E7D4', size: 9084 },
+  'Triangulum Galaxy': { texture: triangulumTexture, tint: '#C4D6FF', size: 8605 },
+  'Whirlpool Galaxy': { texture: whirlpoolTexture, tint: '#CBBCFF', size: 9495 },
 }
 
 const MARKER_ANIMATIONS = {
@@ -860,21 +859,9 @@ function resolveStyle(data) {
     magnitudeScale = THREE.MathUtils.clamp(1.08 - data.magnitude * 0.055, 0.84, 1.2)
   }
 
-  let size
-  if (data.sizeDeg == null) {
-    size = style.size * magnitudeScale
-  } else {
-    const t = Math.log(data.sizeDeg / DEEP_SKY_SCALE.minAngle)
-      / Math.log(DEEP_SKY_SCALE.maxAngle / DEEP_SKY_SCALE.minAngle)
-    size = THREE.MathUtils.lerp(
-      DEEP_SKY_SCALE.minSize,
-      DEEP_SKY_SCALE.maxSize,
-      THREE.MathUtils.clamp(t, 0, 1),
-    ) * (style.scale ?? 1)
-  }
-
-  const blending = ['sun', 'moon', 'planet'].includes(data.type) ? THREE.NormalBlending : THREE.AdditiveBlending
-  return { ...style, size, blending }
+  const isBody = ['sun', 'moon', 'planet'].includes(data.type)
+  const blending = isBody ? THREE.NormalBlending : THREE.AdditiveBlending
+  return { ...style, size: style.size * magnitudeScale, blending }
 }
 
 export function createMarkers(items) {
