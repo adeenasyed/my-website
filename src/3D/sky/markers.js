@@ -39,7 +39,7 @@ const MARKER_STYLES = {
   Sirius: { tint: '#D6E3FF' },
   Spica: { tint: '#AAC4FF' },
   Vega: { tint: '#D6E3FF' },
-  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), tint: '#FFE1B8', size: 11760 },
+  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), tint: '#FFE1B8', size: 11500 },
   Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), tint: '#C4DEFF', size: 11356 },
   'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), tint: '#FFF0CF', size: 11247 },
   'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), tint: '#D4E7FF', size: 10911 },
@@ -47,10 +47,10 @@ const MARKER_STYLES = {
   'Orion Nebula': { texture: orionTexture, tint: '#FF9ECB', size: 10967 },
   'Ring Nebula': { texture: ringTexture, tint: '#FF9ECB', size: 7646 },
   'Crab Nebula': { texture: crabTexture, tint: '#FFB27D', size: 9216 },
-  'Andromeda Galaxy': { texture: andromedaTexture, tint: '#CBBCFF', size: 11172 },
-  'Bode’s Galaxy': { texture: bodesTexture, tint: '#F6E7D4', size: 9084 },
-  'Triangulum Galaxy': { texture: triangulumTexture, tint: '#C4D6FF', size: 8605 },
-  'Whirlpool Galaxy': { texture: whirlpoolTexture, tint: '#CBBCFF', size: 9495 },
+  'Andromeda Galaxy': { texture: andromedaTexture, tint: '#CBBCFF', size: 10613 },
+  'Bode’s Galaxy': { texture: bodesTexture, tint: '#F6E7D4', size: 8630 },
+  'Triangulum Galaxy': { texture: triangulumTexture, tint: '#C4D6FF', size: 8175 },
+  'Whirlpool Galaxy': { texture: whirlpoolTexture, tint: '#CBBCFF', size: 9020 },
 }
 
 const MARKER_ANIMATIONS = {
