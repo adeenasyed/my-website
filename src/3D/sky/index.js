@@ -96,7 +96,7 @@ export function createCelestialSphere({ date, latitude, longitude, height, pixel
           type: object.type,
           catalog: object.catalog,
           magnitude: object.magnitude,
-          sizeDeg: object.sizeDeg,
+          colorIndex: object.colorIndex,
           distance: { value: object.distance, unit: 'ly' },
           ...getDirectionDegrees(alt, az),
         },

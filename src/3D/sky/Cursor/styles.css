@@ -3,13 +3,14 @@
   position: fixed;
   left: 0;
   top: 0;
-  width: 14.8vh;
-  height: 14.8vh;
+  width: 1em;
+  height: 1em;
   z-index: 4;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.16s ease;
   will-change: transform, opacity;
+  font-size: 14.8vh;
 }
 
 .sky-cursor-plus {
@@ -17,7 +18,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(15px, 1.3vw, 22px);
+  font-size: 0.13508em;
   line-height: 1;
 }
 
@@ -60,30 +61,30 @@
 
 .sky-cursor--hover::before,
 .sky-cursor--hover::after {
-  top: 14.0625%;
+  top: 10.9375%;
   width: 17.1875%;
-  height: 71.875%;
+  height: 78.125%;
 }
 
 .sky-cursor--hover::before {
-  left: 7.8125%;
+  left: 4.6875%;
 }
 
 .sky-cursor--hover::after {
-  right: 7.8125%;
+  right: 4.6875%;
 }
 
 .sky-cursor--frozen::before,
 .sky-cursor--frozen::after {
-  top: calc(50% - 31px);
-  width: 15px;
-  height: 62px;
+  top: 28.09%;
+  width: 10.6%;
+  height: 43.82%;
 }
 
 .sky-cursor--frozen::before {
-  left: calc(50% - 36.5px);
+  left: 24.5844%;
 }
 
 .sky-cursor--frozen::after {
-  right: calc(50% - 36.5px);
+  right: 24.5844%;
 }

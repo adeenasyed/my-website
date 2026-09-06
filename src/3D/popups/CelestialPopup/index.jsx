@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './styles.css'
 
 const DIRECTIONS = [
@@ -57,7 +58,10 @@ function formatPhase(phase) {
   return `${phaseName(phase)}, ${Math.round(phase.illuminated * 100)}% lit`
 }
 
-export default function CelestialPopup({ obj, placement, onClose }) {
+export default function CelestialPopup({ obj, placement, onClose, onPointerInput }) {
+  const [helper, setHelper] = useState(null)
+  const [touch, setTouch] = useState(false)
+
   const rows = [
     obj.magnitude != null && ['Magnitude', String(obj.magnitude), MAGNITUDE_INFO],
     obj.distance && ['Distance', formatQuantity(obj.distance.value, obj.distance.unit), CONVERSIONS[obj.distance.unit]],
@@ -66,21 +70,45 @@ export default function CelestialPopup({ obj, placement, onClose }) {
   ].filter(Boolean)
 
   return (
-    <div className='popup-overlay celestial-popup-overlay' onClick={onClose}>
+    <div
+      className='popup-overlay celestial-popup-overlay'
+      onPointerDownCapture={(e) => onPointerInput(e.pointerType, e.clientX, e.clientY)}
+      onClick={onClose}
+    >
       <div
-        className={`popup celestial-popup popup-static ${placement.className}`}
+        className={`popup celestial-popup ${placement.className}${touch ? ' celestial-popup--touch' : ''}`}
         style={placement.style}
+        onPointerDown={(e) => {
+          if (e.pointerType !== 'mouse') setTouch(true)
+        }}
+        onPointerMove={(e) => {
+          if (e.pointerType === 'mouse') setTouch(false)
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <span className='celestial-popup-flash' aria-hidden='true' />
-        <button type='button' aria-label='Close celestial details' onClick={onClose} className='popup-close'>×</button>
+        <span className='celestial-popup-flash' />
+        <button type='button' onClick={onClose} className='popup-close'>×</button>
         <header className='celestial-head'>
           <h2 className='celestial-name'>{formatTitle(obj)}</h2>
         </header>
         <dl className='celestial-fields'>
           {rows.map(([label, value, explainer]) => (
-            <div className='celestial-field' key={label}>
-              <dt>{explainer ? <span className='celestial-term'>{label}</span> : label}</dt>
+            <div className={`celestial-field${helper === label ? ' celestial-field--expanded' : ''}`} key={label}>
+              <dt>
+                {explainer ? (
+                  <span
+                    className='celestial-term'
+                    onPointerUp={(e) => {
+                      if (e.pointerType === 'mouse') return
+                      e.stopPropagation()
+                      setHelper((current) => current === label ? null : label)
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {label}
+                  </span>
+                ) : label}
+              </dt>
               <dd>
                 {value}
                 {explainer && <span className='celestial-explainer'>{explainer}</span>}

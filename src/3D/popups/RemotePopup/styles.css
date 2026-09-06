@@ -1,35 +1,33 @@
 .remote-anchor {
   position: fixed;
-  bottom: clamp(22px, 2.177vw, 56px);
-  right: clamp(22px, 2.177vw, 56px);
+  bottom: 2em;
+  right: 2em;
   z-index: 30;
+  font-size: var(--sky-ui-base);
 }
 
 .remote-popup {
-  --remote-space: clamp(6px, 0.55vw, 14px);
-  --remote-text: clamp(10px, 0.84vw, 22px);
-
-  width: clamp(139px, 11.85vw, 303px);
-  padding: clamp(17px, 1.633vw, 42px);
-  border-radius: clamp(8px, 0.816vw, 21px);
-  gap: calc(var(--remote-space) * 2);
+  width: 10.887em;
+  padding: 1.5em;
+  border-radius: 0.75em;
+  gap: 1.01em;
 }
 
 .remote-section {
   display: flex;
   flex-direction: column;
-  gap: var(--remote-space);
+  gap: 0.505em;
 }
 
 .remote-section--divided {
-  padding-top: calc(var(--remote-space) * 2);
+  padding-top: 1.01em;
   border-top: 1px solid var(--accent-border);
 }
 
 .remote-popup .popup-close {
-  top: clamp(7px, 0.680vw, 17px);
-  right: clamp(10px, 0.952vw, 24px);
-  font-size: clamp(14px, 1.361vw, 35px);
+  top: 0.5em;
+  right: 0.7em;
+  font-size: 1.25em;
 }
 
 .remote-source-switch {
@@ -40,21 +38,17 @@
 .remote-source-option {
   display: flex;
   align-items: center;
-  gap: var(--remote-space);
+  gap: 0.655em;
   padding: 0;
   border: 0;
   background: none;
   color: var(--accent);
   font-family: inherit;
-  font-size: var(--remote-text);
+  font-size: 0.772em;
   letter-spacing: 0.05em;
   line-height: 1.55;
   cursor: pointer;
   transition: color 0.15s ease;
-}
-
-.remote-source-option:focus-visible {
-  outline: none;
 }
 
 .remote-source-box {
@@ -68,18 +62,20 @@
 }
 
 .remote-popup .popup-label {
-  font-size: clamp(10px, 0.816vw, 21px);
+  font-size: 0.75em;
 }
 
 .color-swatch-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: clamp(4px, 0.33vw, 8px);
+  gap: 0.303em;
 }
 
 .color-swatch {
   aspect-ratio: 1;
-  border-radius: clamp(4px, 0.408vw, 8px);
+  border-radius: 0.375em;
   border: none;
+  box-shadow: 0 0 0.375em var(--swatch-shadow);
+  font: inherit;
   cursor: pointer;
 }

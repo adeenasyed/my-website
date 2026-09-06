@@ -10,7 +10,7 @@ export default function RemotePopup({ ledColor, tvZoom, tvSource, onClose, onEsc
         <button onClick={tvZoom ? onEscape : onClose} className='popup-close'>×</button>
         <div className='remote-section'>
           <div className='popup-label'>SOURCE</div>
-          <div className='remote-source-switch' role='group' aria-label='Source'>
+          <div className='remote-source-switch' role='group'>
             {SOURCES.map((source) => {
               const chosen = tvSource === source
               return (
@@ -37,7 +37,7 @@ export default function RemotePopup({ ledColor, tvZoom, tvSource, onClose, onEsc
                   key={color}
                   onClick={() => setLEDColor(color)}
                   className='color-swatch'
-                  style={{ background: color, boxShadow: `0 0 6px ${color}88` }}
+                  style={{ background: color, '--swatch-shadow': `${color}88` }}
                 />
               ))}
             </div>

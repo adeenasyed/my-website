@@ -1,60 +1,49 @@
 import * as THREE from 'three'
 import { altAzToScene } from './coordinates.js'
-import { STAR_RADIUS, COLOR_SATURATION } from './stars.js'
+import {
+  STAR_RADIUS,
+  COLOR_SATURATION,
+  starBrightness,
+  starColor,
+} from './stars.js'
 
 const TEXTURE_SIZE = 256
 const CENTER = TEXTURE_SIZE / 2
 const TAU = Math.PI * 2
 const MARKER_RADIUS = STAR_RADIUS * 0.99
-const PICK_RADIUS = 3400
+const PICK_RADIUS = 3000
 
 const TYPE_STYLES = {
-  planet: { texture: planetTexture, size: 5300 },
-  star: { texture: starTexture, size: 5488 },
+  planet: { texture: planetTexture },
+  star: { texture: starTexture },
 }
 
 const MARKER_STYLES = {
-  Sun: { texture: sunTexture, tint: '#FFDF8F', size: 9800 },
-  Moon: { texture: ({ phase }) => moonTexture(phase), tint: '#D9D6CF', size: 8700 },
-  Mercury: { tint: '#B9B0A4' },
-  Venus: { tint: '#F5E6B8' },
-  Mars: { texture: marsTexture, tint: '#E2795B' },
-  Jupiter: { texture: jupiterTexture, tint: '#E8D3A8' },
-  Saturn: { texture: saturnTexture, tint: '#E6D59A' },
-  Uranus: { tint: '#A8E1E8' },
-  Neptune: { tint: '#6F8DFF' },
-  Aldebaran: { tint: '#FFC98F' },
-  Altair: { tint: '#D6E3FF' },
-  Antares: { tint: '#FF946B' },
-  Arcturus: { tint: '#FFC98F' },
-  Betelgeuse: { tint: '#FF946B' },
-  Capella: { tint: '#FFF0BD' },
-  Castor: { tint: '#D6E3FF' },
-  Deneb: { tint: '#D6E3FF' },
-  Polaris: { tint: '#FFF4DF' },
-  Pollux: { tint: '#FFC98F' },
-  Procyon: { tint: '#FFF4DF' },
-  Regulus: { tint: '#AAC4FF' },
-  Rigel: { tint: '#AAC4FF' },
-  Sirius: { tint: '#D6E3FF' },
-  Spica: { tint: '#AAC4FF' },
-  Vega: { tint: '#D6E3FF' },
-  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), tint: '#FFE1B8', size: 11500 },
-  Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), tint: '#C4DEFF', size: 11356 },
-  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), tint: '#FFF0CF', size: 11247 },
-  'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), tint: '#D4E7FF', size: 10911 },
-  'Dumbbell Nebula': { texture: dumbbellTexture, tint: '#FF9ECB', size: 9803 },
-  'Orion Nebula': { texture: orionTexture, tint: '#FF9ECB', size: 10967 },
-  'Ring Nebula': { texture: ringTexture, tint: '#FF9ECB', size: 7646 },
-  'Crab Nebula': { texture: crabTexture, tint: '#FFB27D', size: 9216 },
-  'Andromeda Galaxy': { texture: andromedaTexture, tint: '#CBBCFF', size: 10613 },
-  'Bode’s Galaxy': { texture: bodesTexture, tint: '#F6E7D4', size: 8630 },
-  'Triangulum Galaxy': { texture: triangulumTexture, tint: '#C4D6FF', size: 8175 },
-  'Whirlpool Galaxy': { texture: whirlpoolTexture, tint: '#CBBCFF', size: 9020 },
+  Sun: { texture: sunTexture, color: '#FFDF8F', size: 9800 },
+  Moon: { texture: ({ phase }) => moonTexture(phase), color: '#D9D6CF', size: 8700 },
+  Mercury: { color: '#B9B0A4', size: 5050 },
+  Venus: { color: '#F5E6B8', size: 7600 },
+  Mars: { texture: marsTexture, color: '#E2795B', size: 5950 },
+  Jupiter: { texture: jupiterTexture, color: '#E8D3A8', size: 6350 },
+  Saturn: { texture: saturnTexture, color: '#E6D59A', size: 6300 },
+  Uranus: { color: '#A8E1E8', size: 3900 },
+  Neptune: { color: '#6F8DFF', size: 3800 },
+  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), color: '#FFE1B8', size: 12250 },
+  Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), color: '#C4DEFF', size: 11550 },
+  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), color: '#FFF0CF', size: 10100 },
+  'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), color: '#D4E7FF', size: 10750 },
+  'Dumbbell Nebula': { texture: dumbbellTexture, color: '#FF9ECB', size: 11100 },
+  'Orion Nebula': { texture: orionTexture, color: '#FF9ECB', size: 14350 },
+  'Ring Nebula': { texture: ringTexture, color: '#FF9ECB', size: 5650 },
+  'Crab Nebula': { texture: crabTexture, color: '#FFB27D', size: 6900 },
+  'Andromeda Galaxy': { texture: andromedaTexture, color: '#CBBCFF', size: 12350 },
+  'Bode’s Galaxy': { texture: bodesTexture, color: '#F6E7D4', size: 7850 },
+  'Triangulum Galaxy': { texture: triangulumTexture, color: '#C4D6FF', size: 7650 },
+  'Whirlpool Galaxy': { texture: whirlpoolTexture, color: '#CBBCFF', size: 8100 },
 }
 
 const MARKER_ANIMATIONS = {
-  star: { opacityAmp: 0.3, scaleAmp: 0.13, speed: [1.2, 3.4] },
+  star: { opacityAmp: 0.3, scaleAmp: 0.15, speed: [1.0, 2.0] },
   cluster: { opacityAmp: 0, scaleAmp: 0.08, speed: [0.8, 1.35] },
 }
 
@@ -852,16 +841,26 @@ function whirlpoolTexture() {
 function resolveStyle(data) {
   const style = { ...TYPE_STYLES[data.type], ...MARKER_STYLES[data.name] }
 
-  let magnitudeScale = 1
-  if (data.type === 'planet') {
-    magnitudeScale = THREE.MathUtils.clamp(1.04 - data.magnitude * 0.035, 0.82, 1.2)
-  } else if (data.type === 'star') {
-    magnitudeScale = THREE.MathUtils.clamp(1.08 - data.magnitude * 0.055, 0.84, 1.2)
+  if (data.type === 'star') {
+    const dimness = THREE.MathUtils.smoothstep(data.magnitude, -2, 8)
+    style.size = 6000 * THREE.MathUtils.lerp(1.15, 0.85, dimness)
+  }
+
+  if (style.color) {
+    const hsl = {}
+    style.color = new THREE.Color(style.color)
+    style.color.getHSL(hsl)
+    style.color.setHSL(hsl.h, Math.min(1, hsl.s * COLOR_SATURATION), hsl.l)
+  } else {
+    const brightness = starBrightness(data.magnitude)
+    const [r, g, b] = starColor(data.colorIndex)
+    style.color = new THREE.Color().setRGB(r * brightness, g * brightness, b * brightness)
   }
 
   const isBody = ['sun', 'moon', 'planet'].includes(data.type)
   const blending = isBody ? THREE.NormalBlending : THREE.AdditiveBlending
-  return { ...style, size: style.size * magnitudeScale, blending }
+
+  return { ...style, blending }
 }
 
 export function createMarkers(items) {
@@ -870,8 +869,7 @@ export function createMarkers(items) {
   const animations = []
   const markerMaterials = []
   const position = new THREE.Vector3()
-  const colorHsl = {}
-  const pickGeometry = new THREE.SphereGeometry(PICK_RADIUS, 8, 6)
+  const pickGeometry = new THREE.SphereGeometry(1, 8, 6)
   const pickMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
   const textures = new Map()
   const random = seededRandom(42)
@@ -879,21 +877,21 @@ export function createMarkers(items) {
   for (const { alt, az, data } of items) {
     const style = resolveStyle(data)
 
+    altAzToScene(alt, az, MARKER_RADIUS, position)
+
+    const pickSphere = new THREE.Mesh(pickGeometry, pickMaterial)
+    pickSphere.position.copy(position)
+    pickSphere.scale.setScalar(Math.max(PICK_RADIUS, style.size * 0.42))
+
     let texture = textures.get(style.texture)
     if (!texture) {
       texture = style.texture(data)
       textures.set(style.texture, texture)
     }
 
-    altAzToScene(alt, az, MARKER_RADIUS, position)
-
-    const tint = new THREE.Color(style.tint)
-    tint.getHSL(colorHsl)
-    tint.setHSL(colorHsl.h, Math.min(1, colorHsl.s * COLOR_SATURATION), colorHsl.l)
-
     const material = new THREE.SpriteMaterial({
       map: texture,
-      color: tint,
+      color: style.color,
       transparent: true,
       depthWrite: false,
       blending: style.blending,
@@ -904,9 +902,6 @@ export function createMarkers(items) {
     marker.position.copy(position)
     marker.scale.set(style.size, style.size, 1)
     marker.renderOrder = 1
-
-    const pickSphere = new THREE.Mesh(pickGeometry, pickMaterial)
-    pickSphere.position.copy(position)
 
     group.add(marker, pickSphere)
     interactables.push({ meshes: [pickSphere], data })

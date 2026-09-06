@@ -18,6 +18,7 @@ export const OBJECTS = [
     decDeg: 16.509,
     magnitude: 0.87,
     distance: 66.6,
+    colorIndex: 1.54,
   },
   {
     name: 'Altair',
@@ -26,6 +27,7 @@ export const OBJECTS = [
     decDeg: 8.868,
     magnitude: 0.76,
     distance: 16.7,
+    colorIndex: 0.22,
   },
   {
     name: 'Antares',
@@ -34,6 +36,7 @@ export const OBJECTS = [
     decDeg: -26.432,
     magnitude: 1.06,
     distance: 553.7,
+    colorIndex: 1.87,
   },
   {
     name: 'Arcturus',
@@ -42,6 +45,7 @@ export const OBJECTS = [
     decDeg: 19.182,
     magnitude: -0.05,
     distance: 36.7,
+    colorIndex: 1.24,
   },
   {
     name: 'Betelgeuse',
@@ -50,6 +54,7 @@ export const OBJECTS = [
     decDeg: 7.407,
     magnitude: 0.45,
     distance: 497.9,
+    colorIndex: 1.5,
   },
   {
     name: 'Capella',
@@ -58,6 +63,7 @@ export const OBJECTS = [
     decDeg: 45.998,
     magnitude: 0.08,
     distance: 42.8,
+    colorIndex: 0.8,
   },
   {
     name: 'Castor',
@@ -66,6 +72,7 @@ export const OBJECTS = [
     decDeg: 31.888,
     magnitude: 1.58,
     distance: 50.9,
+    colorIndex: 0.03,
   },
   {
     name: 'Deneb',
@@ -74,6 +81,7 @@ export const OBJECTS = [
     decDeg: 45.28,
     magnitude: 1.25,
     distance: 1411.9,
+    colorIndex: 0.09,
   },
   {
     name: 'Polaris',
@@ -82,6 +90,7 @@ export const OBJECTS = [
     decDeg: 89.264,
     magnitude: 1.97,
     distance: 432.6,
+    colorIndex: 0.64,
   },
   {
     name: 'Pollux',
@@ -90,6 +99,7 @@ export const OBJECTS = [
     decDeg: 28.026,
     magnitude: 1.16,
     distance: 33.8,
+    colorIndex: 0.99,
   },
   {
     name: 'Procyon',
@@ -98,6 +108,7 @@ export const OBJECTS = [
     decDeg: 5.225,
     magnitude: 0.4,
     distance: 11.5,
+    colorIndex: 0.43,
   },
   {
     name: 'Regulus',
@@ -106,6 +117,7 @@ export const OBJECTS = [
     decDeg: 11.967,
     magnitude: 1.36,
     distance: 79.3,
+    colorIndex: -0.09,
   },
   {
     name: 'Rigel',
@@ -114,6 +126,7 @@ export const OBJECTS = [
     decDeg: -8.202,
     magnitude: 0.18,
     distance: 862.8,
+    colorIndex: -0.03,
   },
   {
     name: 'Sirius',
@@ -122,6 +135,7 @@ export const OBJECTS = [
     decDeg: -16.716,
     magnitude: -1.44,
     distance: 8.6,
+    colorIndex: 0.01,
   },
   {
     name: 'Spica',
@@ -130,6 +144,7 @@ export const OBJECTS = [
     decDeg: -11.161,
     magnitude: 0.98,
     distance: 249.7,
+    colorIndex: -0.23,
   },
   {
     name: 'Vega',
@@ -138,6 +153,7 @@ export const OBJECTS = [
     decDeg: 38.784,
     magnitude: 0.03,
     distance: 25,
+    colorIndex: 0,
   },
   {
     name: 'Beehive Cluster',

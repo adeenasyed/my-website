@@ -1,12 +1,13 @@
 .sky-compass {
   position: fixed;
-  right: clamp(12px, 1.4vw, 24px);
-  bottom: clamp(12px, 1.4vw, 24px);
+  right: 1.28625em;
+  bottom: 1.28625em;
   z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0.125em;
+  font-size: var(--sky-ui-base);
   color: #00CCFF;
   opacity: 0;
   pointer-events: none;
@@ -19,18 +20,18 @@
 
 .sky-compass-ball {
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 4.5em;
+  height: 4.5em;
   flex: none;
 }
 
 .sky-compass-ball text {
   font-family: inherit;
-  font-size: 9px;
+  font-size: 0.5625em;
 }
 
 .sky-compass-readout {
-  font-size: clamp(9px, 0.73vw, 12px);
+  font-size: 0.67069em;
   letter-spacing: 0.14em;
   line-height: 1.25;
   text-align: center;

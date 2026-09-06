@@ -47,7 +47,7 @@ function bvToRGB(bv) {
   return last[1]
 }
 
-function starColor(bv) {
+export function starColor(bv) {
   const [r, g, b] = bvToRGB(bv)
   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
   const peak = Math.max(r, g, b)
@@ -57,6 +57,11 @@ function starColor(bv) {
   const boosted = Math.max(...saturated)
   return saturated.map((c) => c * (peak / boosted))
 }
+
+export function starBrightness(magnitude) {
+  return THREE.MathUtils.clamp(1.12 - 0.13 * magnitude, 0.32, 1.05)
+}
+
 
 const CATALOG_VERTEX_SHADER = `
   attribute float size;
@@ -239,7 +244,7 @@ export function createStarShell(catalog, toAltAz, pixelRatio) {
     positions[i * 3 + 1] = position.y
     positions[i * 3 + 2] = position.z
     const [r, g, b] = starColor(colorIndex)
-    const brightness = THREE.MathUtils.clamp(1.12 - 0.13 * magnitude, 0.32, 1.05)
+    const brightness = starBrightness(magnitude)
     colors[i * 3] = r * brightness
     colors[i * 3 + 1] = g * brightness
     colors[i * 3 + 2] = b * brightness
