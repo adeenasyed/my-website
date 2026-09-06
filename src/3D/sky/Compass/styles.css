@@ -1,0 +1,40 @@
+.sky-compass {
+  position: fixed;
+  right: 1.28625em;
+  bottom: 1.28625em;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125em;
+  font-size: var(--sky-ui-base);
+  color: #00CCFF;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+
+.sky-compass--on {
+  opacity: 1;
+}
+
+.sky-compass-ball {
+  display: block;
+  width: 4.5em;
+  height: 4.5em;
+  flex: none;
+}
+
+.sky-compass-ball text {
+  font-family: inherit;
+  font-size: 0.5625em;
+}
+
+.sky-compass-readout {
+  font-size: 0.67069em;
+  letter-spacing: 0.14em;
+  line-height: 1.25;
+  text-align: center;
+  min-width: calc(9 * (1ch + 0.14em));
+  white-space: nowrap;
+}

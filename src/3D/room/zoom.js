@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT } from './constants.js'
+import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT } from '../constants.js'
 
 const ZOOM_DURATION = 0.5
 
@@ -7,7 +7,7 @@ function easeInOut(t) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
-export function createZoomController(camera, controls, renderer, interactions, onEscape) {
+export function createZoomController(camera, controls, renderer, interactions, onZoomChange, onEscape) {
   const originalPosition = new THREE.Vector3(...DEFAULT_CAMERA_POSITION)
   const originalLookAt = new THREE.Vector3(...DEFAULT_CAMERA_LOOK_AT)
   const currentLookAt = originalLookAt.clone()
@@ -37,6 +37,7 @@ export function createZoomController(camera, controls, renderer, interactions, o
     return (onComplete) => {
       controls.enabled = false
       interactions.setEnabled(false)
+      onZoomChange(true)
       startAnimation(toPosition, toLook, () => {
         escapeTarget = target
         currentOnScroll = onScroll
@@ -66,6 +67,7 @@ export function createZoomController(camera, controls, renderer, interactions, o
       controls.enabled = true
       if (controls._sphericalDelta) controls._sphericalDelta.set(0, 0, 0)
       interactions.setEnabled(true)
+      onZoomChange(false)
     })
   }
 

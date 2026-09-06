@@ -1,55 +1,81 @@
 .remote-anchor {
   position: fixed;
-  bottom: clamp(22px, 2.177vw, 56px);
-  right: clamp(22px, 2.177vw, 56px);
+  bottom: 2em;
+  right: 2em;
   z-index: 30;
+  font-size: var(--sky-ui-base);
 }
 
 .remote-popup {
-  padding: clamp(17px, 1.633vw, 42px);
-  border-radius: clamp(8px, 0.816vw, 21px);
-  gap: 10px;
+  width: 10.887em;
+  padding: 1.5em;
+  border-radius: 0.75em;
+  gap: 1.01em;
 }
 
-.remote-popup .popup-close {
-  top: clamp(7px, 0.680vw, 17px);
-  right: clamp(10px, 0.952vw, 24px);
-  font-size: clamp(14px, 1.361vw, 35px);
+.remote-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.505em;
 }
 
-.remote-popup .popup-button {
-  font-size: clamp(11px, 0.884vw, 23px);
-  padding: clamp(6px, 0.544vw, 14px) clamp(8px, 0.816vw, 21px);
-}
-
-.remote-popup .popup-label {
-  font-size: clamp(10px, 0.816vw, 21px);
-}
-
-.remote-popup-select-label {
-  margin-bottom: 4px;
-}
-
-.remote-popup-leds-label {
-  margin-bottom: 8px;
-}
-
-.remote-led-section {
-  margin-top: 4px;
-  padding-top: 12px;
+.remote-section--divided {
+  padding-top: 1.01em;
   border-top: 1px solid var(--accent-border);
 }
 
-.color-swatch-row {
+.remote-popup .popup-close {
+  top: 0.5em;
+  right: 0.7em;
+  font-size: 1.25em;
+}
+
+.remote-source-switch {
   display: flex;
-  flex-wrap: wrap;
-  gap: clamp(4px, 0.408vw, 10px);
+  flex-direction: column;
+}
+
+.remote-source-option {
+  display: flex;
+  align-items: center;
+  gap: 0.655em;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.772em;
+  letter-spacing: 0.05em;
+  line-height: 1.55;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.remote-source-box {
+  color: var(--accent);
+  letter-spacing: 0;
+  transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+
+.remote-source-option[aria-pressed='true'] .remote-source-box {
+  text-shadow: 0 0 8px var(--accent-shadow);
+}
+
+.remote-popup .popup-label {
+  font-size: 0.75em;
+}
+
+.color-swatch-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.303em;
 }
 
 .color-swatch {
-  width: clamp(15px, 1.497vw, 38px);
-  height: clamp(15px, 1.497vw, 38px);
-  border-radius: 50%;
+  aspect-ratio: 1;
+  border-radius: 0.375em;
   border: none;
+  box-shadow: 0 0 0.375em var(--swatch-shadow);
+  font: inherit;
   cursor: pointer;
 }

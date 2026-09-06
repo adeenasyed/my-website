@@ -9,11 +9,6 @@ const limiters = {
     limiter: Ratelimit.slidingWindow(20, '1 m'),
     prefix: 'rl:listening-activity',
   }),
-  'album-of-month': new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '1 m'),
-    prefix: 'rl:album-of-month',
-  }),
 }
 
 function getIP(request) {

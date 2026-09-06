@@ -1,0 +1,90 @@
+.sky-cursor {
+  color: #00CCFF;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1em;
+  height: 1em;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+  will-change: transform, opacity;
+  font-size: 14.8vh;
+}
+
+.sky-cursor-plus {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.13508em;
+  line-height: 1;
+}
+
+.sky-cursor--frozen .sky-cursor-plus,
+.sky-cursor--pressed .sky-cursor-plus {
+  display: none;
+}
+
+.sky-cursor > svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke-width: 1px;
+}
+
+.sky-cursor--hover > svg,
+.sky-cursor--frozen > svg {
+  display: none;
+}
+
+.sky-cursor--hover::before,
+.sky-cursor--hover::after,
+.sky-cursor--frozen::before,
+.sky-cursor--frozen::after {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  border-block: 1px solid currentColor;
+}
+
+.sky-cursor--hover::before,
+.sky-cursor--frozen::before {
+  border-left: 1px solid currentColor;
+}
+
+.sky-cursor--hover::after,
+.sky-cursor--frozen::after {
+  border-right: 1px solid currentColor;
+}
+
+.sky-cursor--hover::before,
+.sky-cursor--hover::after {
+  top: 10.9375%;
+  width: 17.1875%;
+  height: 78.125%;
+}
+
+.sky-cursor--hover::before {
+  left: 4.6875%;
+}
+
+.sky-cursor--hover::after {
+  right: 4.6875%;
+}
+
+.sky-cursor--frozen::before,
+.sky-cursor--frozen::after {
+  top: 28.09%;
+  width: 10.6%;
+  height: 43.82%;
+}
+
+.sky-cursor--frozen::before {
+  left: 24.5844%;
+}
+
+.sky-cursor--frozen::after {
+  right: 24.5844%;
+}

@@ -1,0 +1,3 @@
+export const TORONTO_LATITUDE = 43.6532
+export const TORONTO_LONGITUDE = -79.3832
+export const TORONTO_HEIGHT = 76

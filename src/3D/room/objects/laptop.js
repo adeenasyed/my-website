@@ -44,13 +44,13 @@ const DRAW_HEIGHT = 580
 const SCALE = CANVAS_WIDTH / DRAW_WIDTH
 const PADDING = 48
 const TIMELINE_X = 20
-const DOT_RADIUS = 3
+const SQUARE_SIZE = 6
 const START_Y = 95
 const COMPANY_Y_OFFSET = 28
 const DESCRIPTION_Y_OFFSET = 65
 const BULLET_X = 64
-const ROW = 125
-const CONTENT_HEIGHT = START_Y + EXPERIENCE.length * ROW
+const ROW_HEIGHT = 125
+const CONTENT_HEIGHT = START_Y + EXPERIENCE.length * ROW_HEIGHT
 const MAX_SCROLL = Math.max(0, CONTENT_HEIGHT - DRAW_HEIGHT)
 const FULL_HEIGHT = Math.max(CONTENT_HEIGHT, DRAW_HEIGHT)
 const VISIBLE_FRACTION = DRAW_HEIGHT / FULL_HEIGHT
@@ -115,7 +115,7 @@ function buildScreen(worldBox, maxAnisotropy) {
     context.textBaseline = 'top'
     context.fillText('EXPERIENCE', TIMELINE_X, 28)
 
-    const railEnd = START_Y + (EXPERIENCE.length - 1) * ROW + 10
+    const railEnd = START_Y + (EXPERIENCE.length - 1) * ROW_HEIGHT + 10
     context.strokeStyle = `${CYAN}33`
     context.lineWidth = 2
     context.beginPath()
@@ -124,14 +124,12 @@ function buildScreen(worldBox, maxAnisotropy) {
     context.stroke()
 
     for (const [i, e] of EXPERIENCE.entries()) {
-      const y = START_Y + i * ROW
+      const y = START_Y + i * ROW_HEIGHT
 
       context.shadowBlur = 10
       context.shadowColor = CYAN
       context.fillStyle = CYAN
-      context.beginPath()
-      context.arc(TIMELINE_X, y + 10, DOT_RADIUS, 0, Math.PI * 2)
-      context.fill()
+      context.fillRect(TIMELINE_X - SQUARE_SIZE / 2, y + 10 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE)
       context.shadowBlur = 0
 
       context.fillStyle = WHITE
@@ -144,7 +142,6 @@ function buildScreen(worldBox, maxAnisotropy) {
       context.fillText(e.role, DRAW_WIDTH - PADDING, y)
 
       context.font = COMPANY_FONT
-      context.textAlign = 'right'
       context.fillText(e.company, DRAW_WIDTH - PADDING, y + COMPANY_Y_OFFSET)
 
       if (e.description) {

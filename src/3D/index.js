@@ -1,46 +1,103 @@
+import * as THREE from 'three'
 import { setupControls } from './controls.js'
-import { buildStructure } from './structure.js'
-import { loadObjects } from './objects/index.js'
+import { createRoom } from './room/index.js'
 import { createInteractionManager } from './interactions.js'
-import { createZoomController } from './zoom.js'
+import { createZoomController } from './room/zoom.js'
 import { createIntro } from './intro.js'
-import { loadingManager } from './objects/helpers.js'
 
-export async function buildRoom({ scene, camera, renderer, stars, setProgress, onEscape, ...objectCallbacks }) {
-  let maxProgress = 0
-  loadingManager.onProgress = (_, loaded, total) => {
-    const next = (loaded / total) * 0.9
-    if (next <= maxProgress) return
-    maxProgress = next
-    setProgress(next)
-  }
-
+export async function createWorld({
+  scene,
+  camera,
+  renderer,
+  sky,
+  onProgress,
+  onIntroComplete,
+  onCelestialClick,
+  onPointerDirectionChange,
+  onZoomChange,
+  onEscape,
+  ...objectCallbacks
+}) {
   const controls = setupControls(camera, renderer)
 
-  const maxAnisotropy = renderer.capabilities.getMaxAnisotropy()
-  const structure = buildStructure(maxAnisotropy)
-  const { objects, animated, interactables } = await loadObjects(maxAnisotropy)
-
-  for (const [key, cb] of Object.entries(objectCallbacks)) {
-    if (interactables[key]) interactables[key].onClick = cb
+  let maxProgress = 0
+  function onRoomProgress(progress) {
+    const next = progress * 0.9
+    if (next <= maxProgress) return
+    maxProgress = next
+    onProgress(next)
   }
 
-  scene.add(structure, ...objects)
-
+  const room = await createRoom({
+    maxAnisotropy: renderer.capabilities.getMaxAnisotropy(),
+    onProgress: onRoomProgress,
+    ...objectCallbacks,
+  })
+  scene.add(room.group)
   await renderer.compileAsync(scene, camera)
-  setProgress(1)
+  onProgress(1)
 
   const interactions = createInteractionManager(camera, renderer)
-  const zoomController = createZoomController(camera, controls, renderer, interactions, onEscape)
-  for (const obj of Object.values(interactables)) {
+
+  const zoomController = createZoomController(
+    camera,
+    controls,
+    renderer,
+    interactions,
+    onZoomChange,
+    onEscape,
+  )
+
+  for (const obj of Object.values(room.interactables)) {
     const zoom = obj.zoom
       ? zoomController.add(obj.zoom.target, obj.zoom.offset, obj.zoom)
       : null
     interactions.add(obj.meshes, obj.hoverColor, zoom ? () => zoom(obj.onClick) : obj.onClick)
   }
+
+  const skyInteractions = (await sky.ready).map(({ meshes, data }) => interactions.add(
+    meshes,
+    undefined,
+    (screenPoint, pointer) => {
+      controls.enabled = false
+      if (controls._sphericalDelta) controls._sphericalDelta.set(0, 0, 0)
+      onCelestialClick(
+        data,
+        screenPoint,
+        () => interactions.projectToScreen(meshes[0]),
+        pointer,
+      )
+    },
+    { anchor: meshes[0] },
+  ))
+  interactions.setEnabled(false, skyInteractions)
+
   interactions.addBlockers(scene)
 
-  const intro = createIntro(camera, controls, interactions)
+  const intro = createIntro(camera, controls, interactions, onIntroComplete)
+
+  const pointerDirection = new THREE.Vector3()
+  let lastDirectionKey = ''
+
+  function updatePointerDirection() {
+    if (room.group.visible) {
+      if (lastDirectionKey === '') return
+      lastDirectionKey = ''
+      onPointerDirectionChange(null)
+      return
+    }
+    const ndc = interactions.pointerNdc
+    pointerDirection.set(ndc.x, ndc.y, 0.5).unproject(camera).sub(camera.position).normalize()
+    const readout = {
+      hovered: interactions.isHoveringAnchor(),
+      azDeg: Math.atan2(pointerDirection.x, -pointerDirection.z) * THREE.MathUtils.RAD2DEG,
+      altDeg: Math.asin(THREE.MathUtils.clamp(pointerDirection.y, -1, 1)) * THREE.MathUtils.RAD2DEG,
+    }
+    const key = `${readout.hovered}|${Math.round(readout.azDeg)}|${Math.round(readout.altDeg)}`
+    if (key === lastDirectionKey) return
+    lastDirectionKey = key
+    onPointerDirectionChange(readout)
+  }
 
   let lastTime = 0
   let lastRender = 0
@@ -58,34 +115,47 @@ export async function buildRoom({ scene, camera, renderer, stars, setProgress, o
     const delta = Math.min((time - lastTime) / 1000, 0.1)
     lastTime = time
 
-    intro.update(delta)
-    if (intro.isFinished()) stars.rotation.y += delta * (Math.PI * 2 / 3600)
-    for (const a of animated) a.update(delta)
+    const introProgress = intro.update(delta)
+    if (introProgress !== null) sky.setIntroProgress(introProgress)
+    sky.update(delta)
+    room.update(delta)
     zoomController.update(delta)
     if (controls.enabled) controls.update()
     interactions.update()
+    updatePointerDirection()
 
     renderer.render(scene, camera)
   }
 
   function startIntro() {
     animate()
-    intro.start()
+  }
+
+  function setRoomVisible(visible) {
+    room.setVisible(visible)
+    interactions.setEnabled(!visible, skyInteractions)
+  }
+
+  function enableCameraControls() {
+    controls.enabled = true
   }
 
   function dispose() {
     disposed = true
     cancelAnimationFrame(animationFrameId)
-    interactables.tv.dispose()
+    room.dispose()
     zoomController.dispose()
   }
 
   return {
-    setLEDColor: structure.setLEDColor,
-    setTVMode: interactables.tv.setMode,
+    setLEDColor: room.setLEDColor,
+    setTVSource: room.setTVSource,
     setInteractionsEnabled: interactions.setEnabled,
+    setNativeCursorHidden: interactions.setNativeCursorHidden,
     resetCamera: zoomController.resetCamera,
     startIntro,
+    setRoomVisible,
+    enableCameraControls,
     dispose,
   }
 }

@@ -2,16 +2,18 @@ import { loadPacman } from './pacman.js'
 import { loadRug } from './rug.js'
 import { loadLaptop } from './laptop.js'
 import { loadRemote } from './remote.js'
-import { loadLightSign } from './lightSign.js'
 import { loadCatLightSign } from './catLightSign.js'
 import { loadHeartLightSign } from './heartLightSign.js'
 import { loadGraduationZone } from './graduationZone/index.js'
 import { loadShelfZone } from './shelfZone/index.js'
 import { loadLoungeZone } from './loungeZone/index.js'
 import { loadTableZone } from './tableZone/index.js'
+import { loadingManager } from './helpers.js'
 import { FONT_FAMILY } from '@/theme.js'
 
-export async function loadObjects(maxAnisotropy) {
+export async function loadObjects(maxAnisotropy, onProgress) {
+  loadingManager.onProgress = (_, loaded, total) => onProgress(loaded / total)
+
   await Promise.all([
     document.fonts.load(`1em ${FONT_FAMILY}`),
     document.fonts.load(`italic 1em ${FONT_FAMILY}`),
@@ -23,7 +25,6 @@ export async function loadObjects(maxAnisotropy) {
     rug,
     laptop,
     remote,
-    lightSign,
     catLightSign,
     heartLightSign,
     graduationZone,
@@ -35,7 +36,6 @@ export async function loadObjects(maxAnisotropy) {
     loadRug(maxAnisotropy),
     loadLaptop(maxAnisotropy),
     loadRemote(),
-    loadLightSign(),
     loadCatLightSign(),
     loadHeartLightSign(),
     loadGraduationZone(maxAnisotropy),
@@ -50,7 +50,6 @@ export async function loadObjects(maxAnisotropy) {
       rug,
       laptop,
       remote,
-      lightSign,
       catLightSign,
       heartLightSign,
       ...graduationZone.objects,
@@ -65,7 +64,6 @@ export async function loadObjects(maxAnisotropy) {
     interactables: {
       laptop,
       remote,
-      lightSign,
       ...graduationZone.interactables,
       ...shelfZone.interactables,
       ...loungeZone.interactables,
