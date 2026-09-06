@@ -30,7 +30,7 @@ const MARKER_STYLES = {
   Neptune: { color: '#6F8DFF', size: 3800 },
   Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), color: '#FFE1B8', size: 12250 },
   Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), color: '#C4DEFF', size: 11550 },
-  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), color: '#FFF0CF', size: 10100 },
+  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), color: '#FFF0CF', size: 10600 },
   'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), color: '#D4E7FF', size: 10750 },
   'Dumbbell Nebula': { texture: dumbbellTexture, color: '#FF9ECB', size: 11100 },
   'Orion Nebula': { texture: orionTexture, color: '#FF9ECB', size: 11600 },
