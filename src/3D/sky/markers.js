@@ -65,9 +65,13 @@ function createCanvas(draw) {
   return canvas
 }
 
-function createTexture(draw) {
+function createTexture(draw, crisp = false) {
   const texture = new THREE.CanvasTexture(createCanvas(draw))
   texture.colorSpace = THREE.SRGBColorSpace
+  if (crisp) {
+    texture.generateMipmaps = false
+    texture.minFilter = THREE.LinearFilter
+  }
   return texture
 }
 
@@ -115,31 +119,34 @@ function disc(context, x, y, radius, { centerOpacity = 1, edgeOpacity, lightOffs
   context.fill()
 }
 
-function soften(context, radius, draw) {
+function soften(context, radius, draw, color = '#FFFFFF') {
   context.save()
-  context.filter = `blur(${radius}px)`
+  if ('filter' in context) context.filter = `blur(${radius}px)`
+  else {
+    context.shadowBlur = radius * 2
+    context.shadowColor = color
+  }
   draw()
   context.restore()
 }
 
 function mottle(context, x, y, radius, alpha, { seed, count, min, max, dark }) {
   const random = seededRandom(seed)
-  context.save()
-  context.filter = 'blur(6px)'
-  for (let i = 0; i < count; i++) {
-    const angle = random() * TAU
-    const distance = Math.sqrt(random()) * radius * 0.92
-    const size = radius * (min + random() * (max - min))
-    const strength = alpha * (0.4 + random() * 0.6)
-    context.fillStyle = dark ? `rgba(0,0,0,${strength})` : `rgba(255,255,255,${strength})`
-    context.beginPath()
-    context.ellipse(
-      x + Math.cos(angle) * distance, y + Math.sin(angle) * distance,
-      size, size * (0.6 + random() * 0.6), random() * TAU, 0, TAU,
-    )
-    context.fill()
-  }
-  context.restore()
+  soften(context, 6, () => {
+    for (let i = 0; i < count; i++) {
+      const angle = random() * TAU
+      const distance = Math.sqrt(random()) * radius * 0.92
+      const size = radius * (min + random() * (max - min))
+      const strength = alpha * (0.4 + random() * 0.6)
+      context.fillStyle = dark ? `rgba(0,0,0,${strength})` : `rgba(255,255,255,${strength})`
+      context.beginPath()
+      context.ellipse(
+        x + Math.cos(angle) * distance, y + Math.sin(angle) * distance,
+        size, size * (0.6 + random() * 0.6), random() * TAU, 0, TAU,
+      )
+      context.fill()
+    }
+  }, dark ? '#000000' : '#FFFFFF')
 }
 
 function clip(context, x, y, radius, draw) {
@@ -224,7 +231,7 @@ function moonTexture({ illuminated, waxing }) {
             context.fill()
           }
         }
-      })
+      }, '#100F14')
 
       soften(context, 2.5, () => {
         context.fillStyle = '#FFFFFF47'
@@ -296,7 +303,7 @@ function marsTexture() {
         context.beginPath()
         context.ellipse(CENTER - 12, CENTER + 10, 17, 7, 0.25, 0, TAU)
         context.fill()
-      })
+      }, '#1E0A06')
       soften(context, 2.5, () => {
         context.fillStyle = '#FFFFFF80'
         context.beginPath()
@@ -329,13 +336,13 @@ function jupiterTexture() {
           context.fillStyle = band
           context.fillRect(CENTER - radius, CENTER + offset, radius * 2, height)
         }
-      })
+      }, '#18100A')
       soften(context, 3, () => {
         context.fillStyle = '#300C064D'
         context.beginPath()
         context.ellipse(CENTER + 15, CENTER + 16, 11, 6, 0, 0, TAU)
         context.fill()
-      })
+      }, '#300C06')
       soften(context, 7, () => {
         context.fillStyle = '#140E0C3D'
         for (const dy of [-radius, radius]) {
@@ -343,7 +350,7 @@ function jupiterTexture() {
           context.ellipse(CENTER, CENTER + dy, radius, 11, 0, 0, TAU)
           context.fill()
         }
-      })
+      }, '#140E0C')
     })
   })
 }
@@ -356,14 +363,15 @@ function saturnTexture() {
     context.save()
     context.translate(CENTER, CENTER)
     context.rotate(tilt)
-    context.filter = 'blur(1.1px)'
-    for (const [rx, ry, alpha, width] of [[52, 15, 0.09, 4], [64, 18.5, 0.46, 7], [77, 22.3, 0.24, 5]]) {
-      context.strokeStyle = `rgba(255,255,255,${alpha})`
-      context.lineWidth = width
-      context.beginPath()
-      context.ellipse(0, 0, rx, ry, 0, from, to)
-      context.stroke()
-    }
+    soften(context, 1.1, () => {
+      for (const [rx, ry, alpha, width] of [[52, 15, 0.09, 4], [64, 18.5, 0.46, 7], [77, 22.3, 0.24, 5]]) {
+        context.strokeStyle = `rgba(255,255,255,${alpha})`
+        context.lineWidth = width
+        context.beginPath()
+        context.ellipse(0, 0, rx, ry, 0, from, to)
+        context.stroke()
+      }
+    })
     context.restore()
   }
 
@@ -380,7 +388,7 @@ function saturnTexture() {
         context.fillRect(CENTER - radius, CENTER - 5, radius * 2, 7)
         context.fillStyle = '#1A120A29'
         context.fillRect(CENTER - radius, CENTER + 9, radius * 2, 6)
-      })
+      }, '#1A120A')
       soften(context, 2, () => {
         context.save()
         context.translate(CENTER, CENTER)
@@ -388,7 +396,7 @@ function saturnTexture() {
         context.fillStyle = '#0000004D'
         context.fillRect(-radius - 4, 1.5, radius * 2 + 8, 3.5)
         context.restore()
-      })
+      }, '#000000')
     })
     ringArc(context, 0, Math.PI)
     soften(context, 5, () => {
@@ -410,19 +418,20 @@ function starTexture() {
     context.save()
     context.translate(CENTER, CENTER)
     context.rotate(rotation)
-    context.filter = 'blur(1.4px)'
-    const taper = context.createLinearGradient(0, 0, length, 0)
-    taper.addColorStop(0, `rgba(255,255,255,${alpha})`)
-    taper.addColorStop(0.14, `rgba(255,255,255,${alpha * 0.8})`)
-    taper.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.28})`)
-    taper.addColorStop(1, '#FFFFFF00')
-    context.fillStyle = taper
-    context.beginPath()
-    context.moveTo(0, -width)
-    context.quadraticCurveTo(length * 0.3, -width * 0.28, length, 0)
-    context.quadraticCurveTo(length * 0.3, width * 0.28, 0, width)
-    context.closePath()
-    context.fill()
+    soften(context, 1.4, () => {
+      const taper = context.createLinearGradient(0, 0, length, 0)
+      taper.addColorStop(0, `rgba(255,255,255,${alpha})`)
+      taper.addColorStop(0.14, `rgba(255,255,255,${alpha * 0.8})`)
+      taper.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.28})`)
+      taper.addColorStop(1, '#FFFFFF00')
+      context.fillStyle = taper
+      context.beginPath()
+      context.moveTo(0, -width)
+      context.quadraticCurveTo(length * 0.3, -width * 0.28, length, 0)
+      context.quadraticCurveTo(length * 0.3, width * 0.28, 0, width)
+      context.closePath()
+      context.fill()
+    })
     context.restore()
   }
 
@@ -655,7 +664,7 @@ function crabTexture() {
     })
     context.restore()
     embeddedStar(context, CENTER + 5, CENTER - 3, 0.3)
-  })
+  }, true)
 }
 
 function spiralArm(context, turns, inner, outer, offset) {
@@ -744,7 +753,7 @@ function andromedaTexture() {
     })
     context.restore()
     glow(context, CENTER, CENTER, 24, 0.78, 2.0)
-  })
+  }, true)
 }
 
 function bodesTexture() {
@@ -764,7 +773,7 @@ function bodesTexture() {
     cloud(context, CENTER, CENTER, 58, 33, tilt, 0.24, 2.5)
     cloud(context, CENTER, CENTER, 32, 21, tilt, 0.44)
     glow(context, CENTER, CENTER, 12, 0.9, 1.9)
-  })
+  }, true)
 }
 
 function triangulumTexture() {
@@ -808,7 +817,7 @@ function triangulumTexture() {
     context.restore()
     cloud(context, CENTER, CENTER, 36, 29, 0.35, 0.22, 2.4)
     cloud(context, CENTER, CENTER, 17, 14, 0.35, 0.3)
-  })
+  }, true)
 }
 
 function whirlpoolTexture() {
@@ -827,7 +836,7 @@ function whirlpoolTexture() {
     context.restore()
     glow(context, CENTER, CENTER, 36, 0.42, 2.2)
     glow(context, CENTER, CENTER, 13, 0.72, 2.0)
-  })
+  }, true)
 }
 
 function resolveStyle(data) {
