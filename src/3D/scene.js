@@ -3,10 +3,12 @@ import {
   INTRO_CAMERA_POSITION,
   DEFAULT_CAMERA_LOOK_AT,
   CAMERA_FOV,
+} from './constants.js'
+import {
   TORONTO_LATITUDE,
   TORONTO_LONGITUDE,
   TORONTO_HEIGHT,
-} from './constants.js'
+} from './sky/constants.js'
 import { createCelestialSphere } from './sky/index.js'
 
 const BG_COLOR = new THREE.Color('#050309')
@@ -27,7 +29,7 @@ export function createScene() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.5
 
-  const celestial = createCelestialSphere({
+  const sky = createCelestialSphere({
     date: new Date(),
     latitude: TORONTO_LATITUDE,
     longitude: TORONTO_LONGITUDE,
@@ -35,7 +37,7 @@ export function createScene() {
     pixelRatio: renderer.getPixelRatio(),
     aspect: camera.aspect,
   })
-  scene.add(celestial.group)
+  scene.add(sky.group)
 
   document.body.appendChild(renderer.domElement)
   renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault())
@@ -54,13 +56,6 @@ export function createScene() {
   const resizeObserver = new ResizeObserver(onResize)
   resizeObserver.observe(canvas)
 
-  function dispose() {
-    resizeObserver.disconnect()
-    celestial.dispose()
-    renderer.domElement.remove()
-    renderer.dispose()
-  }
-
   let animationId
   let loopCancelled = false
 
@@ -76,5 +71,12 @@ export function createScene() {
     cancelAnimationFrame(animationId)
   }
 
-  return { scene, camera, renderer, celestial, cancelLandingLoop, dispose }
+  function dispose() {
+    resizeObserver.disconnect()
+    sky.dispose()
+    renderer.domElement.remove()
+    renderer.dispose()
+  }
+
+  return { scene, camera, renderer, sky, onResize, cancelLandingLoop, dispose }
 }

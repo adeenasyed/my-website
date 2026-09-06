@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT } from './constants.js'
+import { DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_LOOK_AT } from '../constants.js'
 
 const ZOOM_DURATION = 0.5
 

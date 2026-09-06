@@ -8,9 +8,12 @@ import { loadGraduationZone } from './graduationZone/index.js'
 import { loadShelfZone } from './shelfZone/index.js'
 import { loadLoungeZone } from './loungeZone/index.js'
 import { loadTableZone } from './tableZone/index.js'
+import { loadingManager } from './helpers.js'
 import { FONT_FAMILY } from '@/theme.js'
 
-export async function loadObjects(maxAnisotropy) {
+export async function loadObjects(maxAnisotropy, onProgress) {
+  loadingManager.onProgress = (_, loaded, total) => onProgress(loaded / total)
+
   await Promise.all([
     document.fonts.load(`1em ${FONT_FAMILY}`),
     document.fonts.load(`italic 1em ${FONT_FAMILY}`),
