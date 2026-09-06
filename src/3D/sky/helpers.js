@@ -7,7 +7,7 @@ import {
   Horizon,
 } from 'astronomy-engine'
 
-const DEG = Math.PI / 180
+const DEG_TO_RAD = Math.PI / 180
 
 export function createAltAz(date, observer) {
   const rotation = Rotation_EQJ_EQD(date)
@@ -17,7 +17,7 @@ export function createAltAz(date, observer) {
     const eqd = RotateVector(rotation, eqj)
     const equator = EquatorFromVector(eqd)
     const horizon = Horizon(date, observer, equator.ra, equator.dec, 'normal')
-    return { alt: horizon.altitude * DEG, az: horizon.azimuth * DEG }
+    return { alt: horizon.altitude * DEG_TO_RAD, az: horizon.azimuth * DEG_TO_RAD }
   }
 }
 

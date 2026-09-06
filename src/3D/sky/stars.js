@@ -1,12 +1,12 @@
 import * as THREE from 'three'
-import { altAzToScene } from './coordinates.js'
+import { altAzToScene } from './helpers.js'
 import {
   CAMERA_FOV,
   DEFAULT_CAMERA_POSITION,
   INTRO_CAMERA_POSITION,
 } from '../constants.js'
 
-export const STAR_RADIUS = 130000
+export const STAR_SHELL_RADIUS = 130000
 export const COLOR_SATURATION = 1.2
 const STAR_SIZE_SCALE = 1.15
 
@@ -239,7 +239,7 @@ export function createStarShell(catalog, toAltAz, pixelRatio) {
   for (let i = 0; i < count; i++) {
     const [raDeg, decDeg, magnitude, colorIndex] = catalog[i]
     const { alt, az } = toAltAz(raDeg, decDeg)
-    altAzToScene(alt, az, STAR_RADIUS, position)
+    altAzToScene(alt, az, STAR_SHELL_RADIUS, position)
     positions[i * 3] = position.x
     positions[i * 3 + 1] = position.y
     positions[i * 3 + 2] = position.z

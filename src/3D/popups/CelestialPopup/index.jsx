@@ -58,9 +58,25 @@ function formatPhase(phase) {
   return `${phaseName(phase)}, ${Math.round(phase.illuminated * 100)}% lit`
 }
 
-export default function CelestialPopup({ obj, placement, onClose, onPointerInput }) {
-  const [helper, setHelper] = useState(null)
+function getPlacement(anchor) {
+  const x = anchor.x * window.innerWidth
+  const y = anchor.y * window.innerHeight
+  const opensRight = x <= window.innerWidth / 2
+  const opensDown = y <= window.innerHeight / 2
+
+  return {
+    className: `celestial-popup--from-${opensDown ? 'top' : 'bottom'}-${opensRight ? 'left' : 'right'}`,
+    style: {
+      [opensRight ? 'left' : 'right']: `calc(${opensRight ? x : window.innerWidth - x}px + 4.5em)`,
+      [opensDown ? 'top' : 'bottom']: `calc(${opensDown ? y : window.innerHeight - y}px + 4.5em)`,
+    },
+  }
+}
+
+export default function CelestialPopup({ obj, anchor, onClose, onPointerInput }) {
+  const [expandedField, setExpandedField] = useState(null)
   const [touch, setTouch] = useState(false)
+  const placement = getPlacement(anchor)
 
   const rows = [
     obj.magnitude != null && ['Magnitude', String(obj.magnitude), MAGNITUDE_INFO],
@@ -93,7 +109,7 @@ export default function CelestialPopup({ obj, placement, onClose, onPointerInput
         </header>
         <dl className='celestial-fields'>
           {rows.map(([label, value, explainer]) => (
-            <div className={`celestial-field${helper === label ? ' celestial-field--expanded' : ''}`} key={label}>
+            <div className={`celestial-field${expandedField === label ? ' celestial-field--expanded' : ''}`} key={label}>
               <dt>
                 {explainer ? (
                   <span
@@ -101,7 +117,7 @@ export default function CelestialPopup({ obj, placement, onClose, onPointerInput
                     onPointerUp={(e) => {
                       if (e.pointerType === 'mouse') return
                       e.stopPropagation()
-                      setHelper((current) => current === label ? null : label)
+                      setExpandedField((current) => current === label ? null : label)
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >

@@ -2,12 +2,12 @@ import * as THREE from 'three'
 import { Observer, Equator, Horizon, Illumination, MoonPhase, Body } from 'astronomy-engine'
 import { OBJECTS, BODIES } from '@/data/celestial.js'
 import { CONSTELLATIONS } from '@/data/constellations.js'
-import { createAltAz } from './coordinates.js'
+import { createAltAz } from './helpers.js'
 import { createStarShell, createIntroStarField } from './stars.js'
 import { createConstellations } from './constellations.js'
 import { createMarkers } from './markers.js'
 
-const DEG = Math.PI / 180
+const DEG_TO_RAD = Math.PI / 180
 const KM_PER_AU = 149597870.7
 
 function getDirectionDegrees(alt, az) {
@@ -30,8 +30,8 @@ function calculateVisibleBodies(date, observer, phase) {
     const distance = metadata.type === 'moon'
       ? { value: equator.dist * KM_PER_AU, unit: 'km' }
       : { value: equator.dist, unit: 'au' }
-    const alt = horizon.altitude * DEG
-    const az = horizon.azimuth * DEG
+    const alt = horizon.altitude * DEG_TO_RAD
+    const az = horizon.azimuth * DEG_TO_RAD
 
     bodies.push({
       alt,
@@ -80,7 +80,7 @@ export function createCelestialSphere({ date, latitude, longitude, height, pixel
 
     const elongation = MoonPhase(date)
     const phase = {
-      illuminated: (1 - Math.cos(elongation * DEG)) / 2,
+      illuminated: (1 - Math.cos(elongation * DEG_TO_RAD)) / 2,
       waxing: elongation < 180,
     }
 

@@ -5,15 +5,15 @@ import { createInteractionManager } from './interactions.js'
 import { createZoomController } from './room/zoom.js'
 import { createIntro } from './intro.js'
 
-export async function createExperience({
+export async function createWorld({
   scene,
   camera,
   renderer,
   sky,
-  setProgress,
+  onProgress,
   onIntroComplete,
   onCelestialClick,
-  onPointerDirection,
+  onPointerDirectionChange,
   onZoomChange,
   onEscape,
   ...objectCallbacks
@@ -25,7 +25,7 @@ export async function createExperience({
     const next = progress * 0.9
     if (next <= maxProgress) return
     maxProgress = next
-    setProgress(next)
+    onProgress(next)
   }
 
   const room = await createRoom({
@@ -35,7 +35,7 @@ export async function createExperience({
   })
   scene.add(room.group)
   await renderer.compileAsync(scene, camera)
-  setProgress(1)
+  onProgress(1)
 
   const interactions = createInteractionManager(camera, renderer)
 
@@ -83,7 +83,7 @@ export async function createExperience({
     if (room.group.visible) {
       if (lastDirectionKey === '') return
       lastDirectionKey = ''
-      onPointerDirection(null)
+      onPointerDirectionChange(null)
       return
     }
     const ndc = interactions.pointerNdc
@@ -96,7 +96,7 @@ export async function createExperience({
     const key = `${readout.hovered}|${Math.round(readout.azDeg)}|${Math.round(readout.altDeg)}`
     if (key === lastDirectionKey) return
     lastDirectionKey = key
-    onPointerDirection(readout)
+    onPointerDirectionChange(readout)
   }
 
   let lastTime = 0

@@ -49,8 +49,8 @@ const START_Y = 95
 const COMPANY_Y_OFFSET = 28
 const DESCRIPTION_Y_OFFSET = 65
 const BULLET_X = 64
-const ROW = 125
-const CONTENT_HEIGHT = START_Y + EXPERIENCE.length * ROW
+const ROW_HEIGHT = 125
+const CONTENT_HEIGHT = START_Y + EXPERIENCE.length * ROW_HEIGHT
 const MAX_SCROLL = Math.max(0, CONTENT_HEIGHT - DRAW_HEIGHT)
 const FULL_HEIGHT = Math.max(CONTENT_HEIGHT, DRAW_HEIGHT)
 const VISIBLE_FRACTION = DRAW_HEIGHT / FULL_HEIGHT
@@ -115,7 +115,7 @@ function buildScreen(worldBox, maxAnisotropy) {
     context.textBaseline = 'top'
     context.fillText('EXPERIENCE', TIMELINE_X, 28)
 
-    const railEnd = START_Y + (EXPERIENCE.length - 1) * ROW + 10
+    const railEnd = START_Y + (EXPERIENCE.length - 1) * ROW_HEIGHT + 10
     context.strokeStyle = `${CYAN}33`
     context.lineWidth = 2
     context.beginPath()
@@ -124,7 +124,7 @@ function buildScreen(worldBox, maxAnisotropy) {
     context.stroke()
 
     for (const [i, e] of EXPERIENCE.entries()) {
-      const y = START_Y + i * ROW
+      const y = START_Y + i * ROW_HEIGHT
 
       context.shadowBlur = 10
       context.shadowColor = CYAN

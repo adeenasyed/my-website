@@ -78,5 +78,5 @@ export function createScene() {
     renderer.dispose()
   }
 
-  return { scene, camera, renderer, sky, onResize, cancelLandingLoop, dispose }
+  return { scene, camera, renderer, sky, cancelLandingLoop, dispose }
 }

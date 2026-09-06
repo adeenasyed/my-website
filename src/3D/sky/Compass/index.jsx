@@ -1,10 +1,10 @@
 import { useImperativeHandle, useState } from 'react'
 import './styles.css'
 
-const DEG = Math.PI / 180
+const DEG_TO_RAD = Math.PI / 180
 const BALL_RADIUS = 30
 const BALL_CENTER = 36
-const ARC_STEP = 4
+const ARC_STEP_DEG = 4
 const FACE_MARKS = [
   ...['N', 'E', 'S', 'W'].map((label, index) => ({ label, azimuth: index * 90, altitude: 0 })),
   { label: '·', azimuth: 0, altitude: 90 },
@@ -14,14 +14,14 @@ const GRID_LINES = [
     const azimuth = index * 30
     return {
       key: `m${azimuth}`,
-      points: Array.from({ length: 46 }, (_, point) => [azimuth, -90 + point * ARC_STEP]),
+      points: Array.from({ length: 46 }, (_, point) => [azimuth, -90 + point * ARC_STEP_DEG]),
       baseOpacity: 0.05,
       depthOpacity: 0.15,
     }
   }),
   ...[-60, -30, 0, 30, 60].map((altitude) => ({
     key: `p${altitude}`,
-    points: Array.from({ length: 91 }, (_, point) => [point * ARC_STEP, altitude]),
+    points: Array.from({ length: 91 }, (_, point) => [point * ARC_STEP_DEG, altitude]),
     baseOpacity: altitude === 0 ? 0.22 : 0.07,
     depthOpacity: altitude === 0 ? 0.32 : 0.12,
   })),
@@ -38,19 +38,19 @@ function formatAzimuth(azimuth) {
 }
 
 function projectDirection(azimuth, altitude, cameraAzimuth, cameraAltitude) {
-  const azimuthRadians = azimuth * DEG
-  const altitudeRadians = altitude * DEG
+  const azimuthRadians = azimuth * DEG_TO_RAD
+  const altitudeRadians = altitude * DEG_TO_RAD
   const x = Math.sin(azimuthRadians) * Math.cos(altitudeRadians)
   const y = Math.sin(altitudeRadians)
   const z = Math.cos(azimuthRadians) * Math.cos(altitudeRadians)
 
-  const azimuthCosine = Math.cos(cameraAzimuth * DEG)
-  const azimuthSine = Math.sin(cameraAzimuth * DEG)
+  const azimuthCosine = Math.cos(cameraAzimuth * DEG_TO_RAD)
+  const azimuthSine = Math.sin(cameraAzimuth * DEG_TO_RAD)
   const rotatedX = x * azimuthCosine - z * azimuthSine
   const rotatedZ = x * azimuthSine + z * azimuthCosine
 
-  const altitudeCosine = Math.cos(cameraAltitude * DEG)
-  const altitudeSine = Math.sin(cameraAltitude * DEG)
+  const altitudeCosine = Math.cos(cameraAltitude * DEG_TO_RAD)
+  const altitudeSine = Math.sin(cameraAltitude * DEG_TO_RAD)
   const rotatedY = y * altitudeCosine - rotatedZ * altitudeSine
   const depth = y * altitudeSine + rotatedZ * altitudeCosine
 

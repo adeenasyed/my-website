@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { altAzToScene } from './coordinates.js'
+import { altAzToScene } from './helpers.js'
 import {
-  STAR_RADIUS,
+  STAR_SHELL_RADIUS,
   COLOR_SATURATION,
   starBrightness,
   starColor,
@@ -10,8 +10,8 @@ import {
 const TEXTURE_SIZE = 256
 const CENTER = TEXTURE_SIZE / 2
 const TAU = Math.PI * 2
-const MARKER_RADIUS = STAR_RADIUS * 0.99
-const PICK_RADIUS = 3000
+const MARKER_RADIUS = STAR_SHELL_RADIUS * 0.99
+const MIN_PICK_RADIUS = 3000
 
 const TYPE_STYLES = {
   planet: { texture: planetTexture },
@@ -20,7 +20,7 @@ const TYPE_STYLES = {
 
 const MARKER_STYLES = {
   Sun: { texture: sunTexture, color: '#FFDF8F', size: 9800 },
-  Moon: { texture: ({ phase }) => moonTexture(phase), color: '#D9D6CF', size: 8700 },
+  Moon: { texture: ({ phase }) => moonTexture(phase), color: '#D9D6CF', size: 9200 },
   Mercury: { color: '#B9B0A4', size: 5050 },
   Venus: { color: '#F5E6B8', size: 7600 },
   Mars: { texture: marsTexture, color: '#E2795B', size: 5950 },
@@ -33,7 +33,7 @@ const MARKER_STYLES = {
   'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), color: '#FFF0CF', size: 10100 },
   'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), color: '#D4E7FF', size: 10750 },
   'Dumbbell Nebula': { texture: dumbbellTexture, color: '#FF9ECB', size: 11100 },
-  'Orion Nebula': { texture: orionTexture, color: '#FF9ECB', size: 14350 },
+  'Orion Nebula': { texture: orionTexture, color: '#FF9ECB', size: 11600 },
   'Ring Nebula': { texture: ringTexture, color: '#FF9ECB', size: 5650 },
   'Crab Nebula': { texture: crabTexture, color: '#FFB27D', size: 6900 },
   'Andromeda Galaxy': { texture: andromedaTexture, color: '#CBBCFF', size: 12350 },
@@ -65,13 +65,9 @@ function createCanvas(draw) {
   return canvas
 }
 
-function createTexture(draw, crisp = false) {
+function createTexture(draw) {
   const texture = new THREE.CanvasTexture(createCanvas(draw))
   texture.colorSpace = THREE.SRGBColorSpace
-  if (crisp) {
-    texture.generateMipmaps = false
-    texture.minFilter = THREE.LinearFilter
-  }
   return texture
 }
 
@@ -105,13 +101,13 @@ function cloud(context, x, y, rx, ry, rotation, alpha, falloff = 2.2) {
   context.restore()
 }
 
-function disc(context, x, y, radius, { centerOpacity = 1, opacityMultiplier = 0.9, edgeOpacity, lightOffset }) {
+function disc(context, x, y, radius, { centerOpacity = 1, edgeOpacity, lightOffset }) {
   const gradient = context.createRadialGradient(
     x - radius * lightOffset, y - radius * lightOffset, radius * 0.04,
     x, y, radius,
   )
   gradient.addColorStop(0, `rgba(255,255,255,${centerOpacity})`)
-  gradient.addColorStop(0.72, `rgba(255,255,255,${centerOpacity * opacityMultiplier})`)
+  gradient.addColorStop(0.72, `rgba(255,255,255,${centerOpacity * 0.9})`)
   gradient.addColorStop(1, `rgba(255,255,255,${edgeOpacity})`)
   context.beginPath()
   context.arc(x, y, radius, 0, TAU)
@@ -172,7 +168,6 @@ function sunTexture() {
     glow(context, CENTER, CENTER, 88, 0.24, 2.0)
     glow(context, CENTER, CENTER, 70, 0.4, 2.2)
     disc(context, CENTER, CENTER, 57, {
-      middleOpacity: 0.97,
       edgeOpacity: 0.8,
       lightOffset: 0.05,
     })
@@ -189,7 +184,6 @@ function moonTexture({ illuminated, waxing }) {
   const direction = waxing ? 1 : -1
   const body = createCanvas((context) => {
     disc(context, CENTER, CENTER, radius, {
-      middleOpacity: 0.98,
       edgeOpacity: 0.88,
       lightOffset: -0.05 * direction,
     })
@@ -319,7 +313,6 @@ function jupiterTexture() {
     glow(context, CENTER, CENTER, 116, 0.15, 2.8)
     glow(context, CENTER, CENTER, 60, 0.16, 2.4)
     disc(context, CENTER, CENTER, radius, {
-      middleOpacity: 0.95,
       edgeOpacity: 0.6,
       lightOffset: 0.22,
     })
@@ -378,7 +371,6 @@ function saturnTexture() {
     glow(context, CENTER, CENTER, 114, 0.13, 2.8)
     ringArc(context, Math.PI, TAU)
     disc(context, CENTER, CENTER, radius, {
-      middleOpacity: 0.95,
       edgeOpacity: 0.58,
       lightOffset: 0.26,
     })
@@ -881,7 +873,7 @@ export function createMarkers(items) {
 
     const pickSphere = new THREE.Mesh(pickGeometry, pickMaterial)
     pickSphere.position.copy(position)
-    pickSphere.scale.setScalar(Math.max(PICK_RADIUS, style.size * 0.42))
+    pickSphere.scale.setScalar(Math.max(MIN_PICK_RADIUS, style.size * 0.42))
 
     let texture = textures.get(style.texture)
     if (!texture) {

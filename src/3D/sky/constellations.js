@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 import { FONT_FAMILY } from '@/theme.js'
-import { altAzToScene } from './coordinates.js'
-import { STAR_RADIUS } from './stars.js'
+import { altAzToScene } from './helpers.js'
+import { STAR_SHELL_RADIUS } from './stars.js'
 
-const LINE_RADIUS = STAR_RADIUS * 0.985
-const LABEL_RADIUS = STAR_RADIUS * 0.98
+const LINE_RADIUS = STAR_SHELL_RADIUS * 0.985
+const LABEL_RADIUS = STAR_SHELL_RADIUS * 0.98
 const LABEL_RISE = 3
 const MAX_ARC_STEP = THREE.MathUtils.degToRad(4)
 const MAX_LABEL_ALT = THREE.MathUtils.degToRad(89)
