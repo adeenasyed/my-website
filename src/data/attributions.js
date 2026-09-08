@@ -105,13 +105,6 @@ export const ATTRIBUTIONS = [
     via: 'Sketchfab',
   },
   {
-    name: 'Nintendo Switch',
-    nameUrl: 'https://sketchfab.com/3d-models/nintendo-switch-b8e8670918944c6398174e90c129b926',
-    author: 'Bjarne Stokhof',
-    authorUrl: 'https://sketchfab.com/stokhuis',
-    via: 'Sketchfab',
-  },
-  {
     name: 'Noodle Cup',
     nameUrl: 'https://sketchfab.com/3d-models/tau-noodle-cup-74399ab3073d47d196621eecee0bfad3',
     author: 'Squishy',
@@ -151,6 +144,13 @@ export const ATTRIBUTIONS = [
     nameUrl: 'https://sketchfab.com/3d-models/tv-stand-55612f6c24dd4b189993ef80f00791c9',
     author: 'LightSwitch',
     authorUrl: 'https://sketchfab.com/edwardlewis450',
+    via: 'Sketchfab',
+  },
+  {
+    name: 'Video Game Console',
+    nameUrl: 'https://sketchfab.com/3d-models/retro-gaming-console-81d2ff2e002143e4916e5e175610bdfc',
+    author: 'Lamborarri',
+    authorUrl: 'https://sketchfab.com/Lamborarri',
     via: 'Sketchfab',
   },
 ]

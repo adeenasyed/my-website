@@ -7,7 +7,7 @@ export function loadBonsai(tvStandBox) {
     position: (box) => ({
       x: (tvStandBox.min.x + tvStandBox.max.x) / 2 - (box.min.x + box.max.x) / 2,
       y: tvStandBox.max.y - box.min.y - 5,
-      z: (tvStandBox.min.z + tvStandBox.max.z) / 2 + 112.5,
+      z: (tvStandBox.min.z + tvStandBox.max.z) / 2 + 105,
     }),
   })
 }

@@ -1,7 +1,7 @@
 import { loadObject } from '../helpers.js'
 
-export function loadSwitch(tvStandBox) {
-  return loadObject('/objects/switch.glb', {
+export function loadGameConsole(tvStandBox) {
+  return loadObject('/objects/console.glb', {
     size: 85,
     rotation: { y: -Math.PI / 2 },
     position: (box) => ({
@@ -9,5 +9,9 @@ export function loadSwitch(tvStandBox) {
       y: tvStandBox.max.y - box.min.y,
       z: (tvStandBox.min.z + tvStandBox.max.z) / 2 - (box.min.z + box.max.z) / 2,
     }),
+    editMesh: (mesh) => {
+      mesh.material.emissive.copy(mesh.material.color)
+      mesh.material.emissiveIntensity = 0.7
+    },
   })
 }
