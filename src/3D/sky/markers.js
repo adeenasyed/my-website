@@ -13,33 +13,42 @@ const TAU = Math.PI * 2
 const MARKER_RADIUS = STAR_SHELL_RADIUS * 0.99
 const MIN_PICK_RADIUS = 3000
 
+const BODY_SIZE_RANGE = {
+  minDiameterArcsec: 2,
+  maxDiameterArcsec: 2000,
+  minSize: 4000,
+  maxSize: 10000,
+}
+
+const CLUSTER_SIZE_RANGE = {
+  minDiameterArcsec: 1 * 3600,
+  maxDiameterArcsec: 5.5 * 3600,
+  minSize: 10000,
+  maxSize: 12250,
+}
+
+const GALAXY_SIZE = 10000
+
 const TYPE_STYLES = {
   planet: { texture: planetTexture },
   star: { texture: starTexture },
 }
 
 const MARKER_STYLES = {
-  Sun: { texture: sunTexture, color: '#FFDF8F', size: 9800 },
-  Moon: { texture: ({ phase }) => moonTexture(phase), color: '#D9D6CF', size: 9200 },
-  Mercury: { color: '#B9B0A4', size: 5050 },
-  Venus: { color: '#F5E6B8', size: 7600 },
-  Mars: { texture: marsTexture, color: '#E2795B', size: 5950 },
-  Jupiter: { texture: jupiterTexture, color: '#E8D3A8', size: 6350 },
-  Saturn: { texture: saturnTexture, color: '#E6D59A', size: 6300 },
-  Uranus: { color: '#A8E1E8', size: 3900 },
-  Neptune: { color: '#6F8DFF', size: 3800 },
-  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), color: '#FFE1B8', size: 12250 },
-  Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), color: '#C4DEFF', size: 11550 },
-  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), color: '#FFF0CF', size: 10600 },
-  'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), color: '#D4E7FF', size: 10750 },
-  'Dumbbell Nebula': { texture: dumbbellTexture, color: '#FF9ECB', size: 11100 },
-  'Orion Nebula': { texture: orionTexture, color: '#FF9ECB', size: 11600 },
-  'Ring Nebula': { texture: ringTexture, color: '#FF9ECB', size: 5650 },
-  'Crab Nebula': { texture: crabTexture, color: '#FFB27D', size: 6900 },
-  'Andromeda Galaxy': { texture: andromedaTexture, color: '#CBBCFF', size: 12350 },
-  'Bode’s Galaxy': { texture: bodesTexture, color: '#F6E7D4', size: 7850 },
-  'Triangulum Galaxy': { texture: triangulumTexture, color: '#C4D6FF', size: 7650 },
-  'Whirlpool Galaxy': { texture: whirlpoolTexture, color: '#CBBCFF', size: 8100 },
+  Sun: { texture: sunTexture, color: '#FFDF8F' },
+  Moon: { texture: ({ phase }) => moonTexture(phase), color: '#D9D6CF' },
+  Mercury: { color: '#B9B0A4' },
+  Venus: { color: '#F5E6B8' },
+  Mars: { texture: marsTexture, color: '#E2795B' },
+  Jupiter: { texture: jupiterTexture, color: '#E8D3A8' },
+  Saturn: { texture: saturnTexture, color: '#E6D59A' },
+  Uranus: { color: '#A8E1E8' },
+  Neptune: { color: '#6F8DFF' },
+  Hyades: { texture: () => clusterTexture(CLUSTERS.hyades), color: '#FFE1B8' },
+  Pleiades: { texture: () => clusterTexture(CLUSTERS.pleiades), color: '#C4DEFF' },
+  'Beehive Cluster': { texture: () => clusterTexture(CLUSTERS.beehive), color: '#FFF0CF' },
+  'Double Cluster': { texture: () => clusterTexture(CLUSTERS.double), color: '#D4E7FF' },
+  'Andromeda Galaxy': { texture: andromedaTexture, color: '#CBBCFF' },
 }
 
 const MARKER_ANIMATIONS = {
@@ -488,250 +497,6 @@ function clusterTexture({ seed, count, reach, concentration, centers, haze = fal
   }, true)
 }
 
-function embeddedStar(context, x, y, brightness) {
-  glow(context, x, y, 13, brightness * 0.34, 2.4)
-  disc(context, x, y, 2.6, {
-    centerOpacity: brightness,
-    edgeOpacity: brightness * 0.7,
-    lightOffset: 0,
-  })
-}
-
-function dumbbellTexture() {
-  return createTexture((context) => {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(0.42)
-    cloud(context, 0, 0, 74, 54, 0, 0.165)
-    cloud(context, -27, 0, 36, 34, 0, 0.295)
-    cloud(context, 27, 0, 36, 34, 0, 0.295)
-    soften(context, 7, () => {
-      context.globalCompositeOperation = 'destination-out'
-      context.fillStyle = '#00000057'
-      for (const dy of [-1, 1]) {
-        context.beginPath()
-        context.ellipse(0, dy * 40, 16, 22, 0, 0, TAU)
-        context.fill()
-      }
-    })
-    context.restore()
-    embeddedStar(context, CENTER, CENTER, 0.4)
-  })
-}
-
-function orionTexture() {
-  const random = seededRandom(61)
-  return createTexture((context) => {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(-0.5)
-    cloud(context, -4, -6, 68, 44, -0.3, 0.33)
-    cloud(context, 28, 15, 50, 31, 0.55, 0.27)
-    cloud(context, -34, 20, 44, 27, 0.95, 0.21)
-    cloud(context, -2, -2, 36, 29, 0, 0.42)
-    glow(context, -2, -2, 18, 0.53, 2.0)
-    soften(context, 6, () => {
-      context.globalCompositeOperation = 'destination-out'
-      context.fillStyle = '#00000080'
-      context.beginPath()
-      context.ellipse(19, -19, 27, 12, 0.65, 0, TAU)
-      context.fill()
-    })
-    context.restore()
-    for (const [dx, dy, brightness] of [[-3, -2, 1], [4, -5, 0.7], [2, 5, 0.6], [-9, 3, 0.5]]) {
-      embeddedStar(context, CENTER + dx, CENTER + dy, brightness)
-    }
-    for (let i = 0; i < 7; i++) {
-      const angle = random() * TAU
-      const distance = 26 + random() * 46
-      embeddedStar(
-        context,
-        CENTER + Math.cos(angle) * distance,
-        CENTER + Math.sin(angle) * distance * 0.8,
-        0.18 + random() * 0.16,
-      )
-    }
-  })
-}
-
-function ringTexture() {
-  const random = seededRandom(88)
-  return createTexture((context) => {
-    glow(context, CENTER, CENTER, 116, 0.094, 2.6)
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(-0.25)
-    context.scale(1, 0.8)
-    const shell = context.createRadialGradient(0, 0, 12, 0, 0, 96)
-    shell.addColorStop(0, '#FFFFFF0F')
-    shell.addColorStop(0.32, '#FFFFFF1B')
-    shell.addColorStop(0.52, '#FFFFFF3F')
-    shell.addColorStop(0.66, '#FFFFFF48')
-    shell.addColorStop(0.82, '#FFFFFF1E')
-    shell.addColorStop(1, '#FFFFFF00')
-    soften(context, 7, () => {
-      context.fillStyle = shell
-      context.fillRect(-98, -98, 196, 196)
-    })
-    soften(context, 9, () => {
-      context.globalCompositeOperation = 'destination-out'
-      context.fillStyle = '#00000047'
-      for (const dx of [-1, 1]) {
-        context.beginPath()
-        context.ellipse(dx * 62, 0, 22, 34, 0, 0, TAU)
-        context.fill()
-      }
-    })
-    soften(context, 5, () => {
-      for (let i = 0; i < 10; i++) {
-        const angle = random() * TAU
-        const reach = 52 + random() * 16
-        context.fillStyle = `rgba(255,255,255,${0.047 + random() * 0.059})`
-        context.beginPath()
-        context.arc(Math.cos(angle) * reach, Math.sin(angle) * reach, 8 + random() * 7, 0, TAU)
-        context.fill()
-      }
-    })
-    context.restore()
-    embeddedStar(context, CENTER, CENTER, 0.34)
-  })
-}
-
-function crabTexture() {
-  const random = seededRandom(23)
-
-  function point(angle, scale) {
-    const c = Math.abs(Math.cos(angle)) / 96
-    const s = Math.abs(Math.sin(angle)) / 50
-    const radius = THREE.MathUtils.lerp(1 / Math.hypot(c, s), 1 / (c + s), 0.55) * scale
-    return [Math.cos(angle) * radius, Math.sin(angle) * radius]
-  }
-
-  return createTexture((context) => {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(-0.34)
-
-    soften(context, 10, () => {
-      context.fillStyle = '#FFFFFF1F'
-      context.beginPath()
-      for (let i = 0; i < 20; i++) {
-        const [x, y] = point((i / 20) * TAU, 0.88 + random() * 0.22)
-        if (i === 0) context.moveTo(x, y)
-        else context.lineTo(x, y)
-      }
-      context.closePath()
-      context.fill()
-    })
-
-    cloud(context, 6, -3, 56, 36, -0.15, 0.085, 1.9)
-
-    mottle(context, 0, 0, 80, 0.065, { seed: 31, count: 20, min: 0.16, max: 0.4, dark: true })
-    mottle(context, 0, 0, 66, 0.05, { seed: 47, count: 14, min: 0.14, max: 0.34, dark: false })
-
-    soften(context, 7, () => {
-      context.globalCompositeOperation = 'destination-out'
-      context.fillStyle = '#0000004D'
-      for (const [x, y, rx, ry, rotation] of [
-        [-46, -10, 26, 15, 0.35],
-        [26, 15, 29, 16, -0.2],
-        [10, -27, 20, 11, 0.7],
-        [-18, 25, 18, 10, -0.5],
-      ]) {
-        context.beginPath()
-        context.ellipse(x, y, rx, ry, rotation, 0, TAU)
-        context.fill()
-      }
-    })
-
-    soften(context, 3.5, () => {
-      for (let i = 0; i < 12; i++) {
-        const from = random() * TAU
-        const to = from + Math.PI * (0.5 + random())
-        const [x0, y0] = point(from, 0.6 + random() * 0.32)
-        const [x1, y1] = point(to, 0.6 + random() * 0.32)
-        context.beginPath()
-        context.moveTo(x0, y0)
-        context.quadraticCurveTo(
-          (x0 + x1) * 0.5 + (random() - 0.5) * 44,
-          (y0 + y1) * 0.5 + (random() - 0.5) * 30,
-          x1, y1,
-        )
-        context.strokeStyle = `rgba(255,255,255,${0.1 + random() * 0.12})`
-        context.lineWidth = 1.6 + random() * 1.4
-        context.stroke()
-      }
-    })
-    context.restore()
-    embeddedStar(context, CENTER + 5, CENTER - 3, 0.3)
-  }, true)
-}
-
-function spiralArm(context, turns, inner, outer, offset) {
-  context.beginPath()
-  for (let i = 0; i <= 60; i++) {
-    const t = i / 60
-    const angle = offset + t * turns
-    const reach = inner + t * (outer - inner)
-    const x = Math.cos(angle) * reach
-    const y = Math.sin(angle) * reach
-    if (i) context.lineTo(x, y)
-    else context.moveTo(x, y)
-  }
-}
-
-function spiralArms(context, {
-  arms, turns, inner, outer, seed,
-  haze, hazeWidth, ridge, ridgeWidth,
-  knots, knotAlpha, knotSize, dust, spur = null,
-}) {
-  const random = seededRandom(seed)
-  const spacing = TAU / arms
-  soften(context, 10, () => {
-    context.strokeStyle = `rgba(255,255,255,${haze})`
-    context.lineWidth = hazeWidth
-    for (let arm = 0; arm < arms; arm++) {
-      spiralArm(context, turns, inner, outer, arm * spacing)
-      context.stroke()
-    }
-  })
-  soften(context, 3, () => {
-    context.strokeStyle = `rgba(255,255,255,${ridge})`
-    context.lineWidth = ridgeWidth
-    for (let arm = 0; arm < arms; arm++) {
-      spiralArm(context, turns, inner + 2, outer - 4, arm * spacing + 0.06)
-      context.stroke()
-    }
-    if (spur) {
-      const [spurTurns, spurInner, spurOuter, spurOffset, spurAlpha] = spur
-      spiralArm(context, spurTurns, spurInner, spurOuter, spurOffset)
-      context.strokeStyle = `rgba(255,255,255,${spurAlpha})`
-      context.lineWidth = 6
-      context.stroke()
-    }
-  })
-  soften(context, 2, () => {
-    for (let i = 0; i < knots; i++) {
-      const t = 0.22 + random() * 0.78
-      const angle = (i % arms) * spacing + t * turns + (random() - 0.5) * 0.16
-      const reach = (inner + t * (outer - inner)) * (1 + (random() - 0.5) * 0.1)
-      context.fillStyle = `rgba(255,255,255,${knotAlpha * (0.4 + random() * 0.9)})`
-      context.beginPath()
-      context.arc(Math.cos(angle) * reach, Math.sin(angle) * reach, 2 + random() * knotSize, 0, TAU)
-      context.fill()
-    }
-  })
-  soften(context, 4, () => {
-    context.globalCompositeOperation = 'destination-out'
-    context.strokeStyle = `rgba(0,0,0,${dust})`
-    context.lineWidth = 6
-    for (let arm = 0; arm < arms; arm++) {
-      spiralArm(context, turns * 0.96, inner - 1, outer - 12, arm * spacing - 0.17)
-      context.stroke()
-    }
-  })
-}
-
 function andromedaTexture() {
   const tilt = -0.38
   return createTexture((context) => {
@@ -756,93 +521,30 @@ function andromedaTexture() {
   }, true)
 }
 
-function bodesTexture() {
-  const tilt = -0.95
-  return createTexture((context) => {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(tilt)
-    context.scale(1, 0.5)
-    glow(context, 0, 0, 120, 0.26, 2.2)
-    spiralArms(context, {
-      arms: 2, turns: 3.7, inner: 30, outer: 112, seed: 81,
-      haze: 0.125, hazeWidth: 21, ridge: 0.105, ridgeWidth: 5.5,
-      knots: 14, knotAlpha: 0.085, knotSize: 2.2, dust: 0.26,
-    })
-    context.restore()
-    cloud(context, CENTER, CENTER, 58, 33, tilt, 0.24, 2.5)
-    cloud(context, CENTER, CENTER, 32, 21, tilt, 0.44)
-    glow(context, CENTER, CENTER, 12, 0.9, 1.9)
-  }, true)
-}
-
-function triangulumTexture() {
-  const random = seededRandom(33)
-  const turns = 2.35
-  return createTexture((context) => {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(0.35)
-    context.scale(1, 0.78)
-    glow(context, 0, 0, 124, 0.22, 2.0)
-    glow(context, 0, 0, 76, 0.17, 2.2)
-    spiralArms(context, {
-      arms: 3, turns, inner: 18, outer: 104, seed: 33,
-      haze: 0.12, hazeWidth: 42, ridge: 0.09, ridgeWidth: 11,
-      knots: 22, knotAlpha: 0.085, knotSize: 2.4, dust: 0.05,
-    })
-    soften(context, 3, () => {
-      context.lineWidth = 5.5
-      for (const [branchTurns, inner, outer, offset, alpha] of [
-        [0.9, 42, 94, 1.05, 0.075],
-        [0.75, 50, 98, 3.3, 0.065],
-        [0.6, 36, 72, 5.25, 0.055],
-      ]) {
-        context.strokeStyle = `rgba(255,255,255,${alpha})`
-        spiralArm(context, branchTurns, inner, outer, offset)
-        context.stroke()
-      }
-    })
-    soften(context, 2, () => {
-      for (let i = 0; i < 4; i++) {
-        const t = 0.45 + random() * 0.45
-        const angle = i * (TAU / 3) + t * turns + (random() - 0.5) * 0.3
-        const reach = 18 + t * 86
-        const x = Math.cos(angle) * reach
-        const y = Math.sin(angle) * reach
-        glow(context, x, y, 12 + random() * 5, 0.11 + random() * 0.07, 2.2)
-        glow(context, x, y, 4 + random() * 1.8, 0.22 + random() * 0.1, 1.9)
-      }
-    })
-    context.restore()
-    cloud(context, CENTER, CENTER, 36, 29, 0.35, 0.22, 2.4)
-    cloud(context, CENTER, CENTER, 17, 14, 0.35, 0.3)
-  }, true)
-}
-
-function whirlpoolTexture() {
-  return createTexture((context) => {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(-0.42)
-    context.scale(1, 0.56)
-    glow(context, 0, 0, 118, 0.32, 2.2)
-    spiralArms(context, {
-      arms: 2, turns: 2.5, inner: 16, outer: 104, seed: 31,
-      haze: 0.16, hazeWidth: 30, ridge: 0.15, ridgeWidth: 8,
-      knots: 24, knotAlpha: 0.14, knotSize: 3.5, dust: 0.24,
-      spur: [1.4, 32, 76, 2.4, 0.08],
-    })
-    context.restore()
-    glow(context, CENTER, CENTER, 36, 0.42, 2.2)
-    glow(context, CENTER, CENTER, 13, 0.72, 2.0)
-  }, true)
+function calculateSize(angularSizeArcsec, range) {
+  const { minDiameterArcsec, maxDiameterArcsec, minSize, maxSize } = range
+  const diameter = THREE.MathUtils.clamp(
+    angularSizeArcsec,
+    minDiameterArcsec,
+    maxDiameterArcsec,
+  )
+  const minLog = Math.log(minDiameterArcsec)
+  const maxLog = Math.log(maxDiameterArcsec)
+  const normalizedDiameter = (Math.log(diameter) - minLog) / (maxLog - minLog)
+  return THREE.MathUtils.lerp(minSize, maxSize, normalizedDiameter)
 }
 
 function resolveStyle(data) {
   const style = { ...TYPE_STYLES[data.type], ...MARKER_STYLES[data.name] }
+  const isBody = ['sun', 'moon', 'planet'].includes(data.type)
 
-  if (data.type === 'star') {
+  if (isBody) {
+    style.size = calculateSize(data.angularSizeArcsec, BODY_SIZE_RANGE)
+  } else if (data.type === 'cluster') {
+    style.size = calculateSize(data.angularSizeArcsec, CLUSTER_SIZE_RANGE)
+  } else if (data.type === 'galaxy') {
+    style.size = GALAXY_SIZE
+  } else if (data.type === 'star') {
     const dimness = THREE.MathUtils.smoothstep(data.magnitude, -2, 8)
     style.size = 6000 * THREE.MathUtils.lerp(1.15, 0.85, dimness)
   }
@@ -858,7 +560,6 @@ function resolveStyle(data) {
     style.color = new THREE.Color().setRGB(r * brightness, g * brightness, b * brightness)
   }
 
-  const isBody = ['sun', 'moon', 'planet'].includes(data.type)
   const blending = isBody ? THREE.NormalBlending : THREE.AdditiveBlending
 
   return { ...style, blending }

@@ -8,6 +8,7 @@ import { createConstellations } from './constellations.js'
 import { createMarkers } from './markers.js'
 
 const DEG_TO_RAD = Math.PI / 180
+const RAD_TO_ARCSEC = 180 / Math.PI * 3600
 const KM_PER_AU = 149597870.7
 
 function getDirectionDegrees(alt, az) {
@@ -27,9 +28,11 @@ function calculateVisibleBodies(date, observer, phase) {
     if (horizon.altitude <= 0) continue
 
     const magnitude = metadata.magnitude ?? Illumination(body, date).mag
+    const distanceKm = equator.dist * KM_PER_AU
     const distance = metadata.type === 'moon'
-      ? { value: equator.dist * KM_PER_AU, unit: 'km' }
+      ? { value: distanceKm, unit: 'km' }
       : { value: equator.dist, unit: 'au' }
+    const angularSizeArcsec = 2 * Math.atan(metadata.diameterKm / (2 * distanceKm)) * RAD_TO_ARCSEC
     const alt = horizon.altitude * DEG_TO_RAD
     const az = horizon.azimuth * DEG_TO_RAD
 
@@ -41,6 +44,7 @@ function calculateVisibleBodies(date, observer, phase) {
         type: metadata.type,
         magnitude: Math.round(magnitude * 100) / 100,
         distance,
+        angularSizeArcsec,
         phase: metadata.type === 'moon' ? phase : undefined,
         ...getDirectionDegrees(alt, az),
       },
@@ -88,18 +92,22 @@ export function createCelestialSphere({ date, latitude, longitude, height, pixel
     for (const object of OBJECTS) {
       const { alt, az } = toAltAz(object.raDeg, object.decDeg)
       if (alt <= 0) continue
+
+      const data = {
+        name: object.name,
+        type: object.type,
+        catalog: object.catalog,
+        magnitude: object.magnitude,
+        colorIndex: object.colorIndex,
+        distance: { value: object.distanceLy, unit: 'ly' },
+        ...getDirectionDegrees(alt, az),
+      }
+      if (object.angularSizeDeg !== undefined) data.angularSizeArcsec = object.angularSizeDeg * 3600
+
       items.push({
         alt,
         az,
-        data: {
-          name: object.name,
-          type: object.type,
-          catalog: object.catalog,
-          magnitude: object.magnitude,
-          colorIndex: object.colorIndex,
-          distance: { value: object.distance, unit: 'ly' },
-          ...getDirectionDegrees(alt, az),
-        },
+        data,
       })
     }
     items.push(...calculateVisibleBodies(date, observer, phase))
