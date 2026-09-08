@@ -10,7 +10,7 @@
   pointer-events: none;
   transition: opacity 0.16s ease;
   will-change: transform, opacity;
-  font-size: 14.8vh;
+  font-size: 13.8vh;
 }
 
 .sky-cursor-plus {

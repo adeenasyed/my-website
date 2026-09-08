@@ -1,7 +1,7 @@
 import './styles.css'
 import { LED_COLORS } from '@/theme.js'
 
-const SOURCES = ['spotify', 'nintendo']
+const SOURCES = ['spotify', 'nes']
 
 export default function RemotePopup({ ledColor, tvZoom, tvSource, onClose, onEscape, setTVSource, setLEDColor }) {
   return (

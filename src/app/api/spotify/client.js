@@ -49,3 +49,11 @@ export async function spotifyFetch(endpoint) {
   }
   return res.json()
 }
+
+export function getTrack(track) {
+  return {
+    albumImage: track.album.images[0].url,
+    track: track.name,
+    artist: track.artists.map((artist) => artist.name).join(', '),
+  }
+}

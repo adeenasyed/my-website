@@ -1,11 +1,18 @@
 export function createSpotifyConnection(onChange) {
   let listeningActivity = null
 
-  async function pollListeningActivity() {
+  async function pollSpotify() {
     try {
-      const res = await fetch('/api/spotify/listening-activity')
-      const data = await res.json()
-      if (!data?.track) return
+      let res = await fetch('/api/spotify/now-playing')
+      let data = await res.json()
+      if (!data?.track && !listeningActivity) {
+        res = await fetch('/api/spotify/last-played')
+        data = await res.json()
+      }
+      if (!data?.track) {
+        if (!listeningActivity) return
+        data = { ...listeningActivity, playing: false }
+      }
 
       const changed = !listeningActivity ||
         listeningActivity.track !== data.track ||
@@ -18,8 +25,8 @@ export function createSpotifyConnection(onChange) {
     } catch { }
   }
 
-  pollListeningActivity()
-  const intervalId = setInterval(pollListeningActivity, 30000)
+  pollSpotify()
+  const intervalId = setInterval(pollSpotify, 30000)
 
   return { dispose: () => clearInterval(intervalId) }
 }
