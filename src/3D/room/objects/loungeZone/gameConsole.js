@@ -1,7 +1,7 @@
 import { loadObject } from '../helpers.js'
 
 export function loadGameConsole(tvStandBox) {
-  return loadObject('/objects/console.glb', {
+  return loadObject('/objects/game-console.glb', {
     size: 85,
     rotation: { y: -Math.PI / 2 },
     position: (box) => ({
