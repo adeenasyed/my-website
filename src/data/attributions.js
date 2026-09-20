@@ -1,11 +1,4 @@
 export const ATTRIBUTIONS = [
-  // {
-  //   name: 'Air Max 95s',
-  //   nameUrl: 'https://cults3d.com/en/3d-model/fashion/nike-air-max-95-og-neon',
-  //   author: 'Zertux',
-  //   authorUrl: 'https://cults3d.com/en/users/Zertux/3d-models',
-  //   via: 'Cults 3D',
-  // },
   {
     name: 'Basketball Net',
     nameUrl: 'https://sketchfab.com/3d-models/basketball-net-a845be1db4c141be92ceadebfb5b38f0',
@@ -21,31 +14,10 @@ export const ATTRIBUTIONS = [
     via: 'Poly Pizza',
   },
   {
-    name: 'Bonsai Tree',
-    nameUrl: 'https://sketchfab.com/3d-models/bonsai-affd4e8893954ff58623224b6c5b5684',
-    author: 'local.yany',
-    authorUrl: 'https://sketchfab.com/local.yany',
-    via: 'Sketchfab',
-  },
-  {
-    name: 'Book',
-    nameUrl: 'https://poly.pizza/m/29AEseoy9pN',
-    author: 'Norbert Kurucz',
-    authorUrl: 'https://poly.pizza/u/Norbert%20Kurucz',
-    via: 'Poly Pizza',
-  },
-  {
     name: 'Coffee Table',
     nameUrl: 'https://sketchfab.com/3d-models/noguchi-coffee-table-8f8a3dbd45534152b5771c36cc4742d9',
     author: 'Deborah Kumagai',
     authorUrl: 'https://sketchfab.com/3dmaedchen',
-    via: 'Sketchfab',
-  },
-  {
-    name: 'Cookie Jar',
-    nameUrl: 'https://sketchfab.com/3d-models/cookies-in-the-jar-372cc5bca9e54c579d8399a18e686b24',
-    author: 'sheana',
-    authorUrl: 'https://sketchfab.com/sheana',
     via: 'Sketchfab',
   },
   {
