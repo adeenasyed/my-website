@@ -41,7 +41,7 @@ export async function loadObjects(maxAnisotropy, onProgress) {
     loadGraduationZone(maxAnisotropy),
     loadShelfZone(maxAnisotropy),
     loadLoungeZone(maxAnisotropy),
-    loadTableZone(),
+    loadTableZone(maxAnisotropy),
   ])
 
   return {
@@ -59,6 +59,7 @@ export async function loadObjects(maxAnisotropy, onProgress) {
     ],
     animated: [
       ...graduationZone.animated,
+      ...loungeZone.animated,
       ...tableZone.animated,
     ],
     interactables: {
@@ -67,6 +68,7 @@ export async function loadObjects(maxAnisotropy, onProgress) {
       ...graduationZone.interactables,
       ...shelfZone.interactables,
       ...loungeZone.interactables,
+      ...tableZone.interactables,
     },
   }
 }

@@ -5,7 +5,7 @@ import { EXPERIENCE } from '@/data/experience.js'
 
 export async function loadLaptop(maxAnisotropy) {
   const object = await loadObject('/objects/laptop.glb', {
-    size: 85,
+    size: 80,
     rotation: { y: -Math.PI / 45 },
     position: (box) => ({
       x: -222,

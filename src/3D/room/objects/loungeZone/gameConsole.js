@@ -2,7 +2,7 @@ import { loadObject } from '../helpers.js'
 
 export function loadGameConsole(tvStandBox) {
   return loadObject('/objects/game-console.glb', {
-    size: 85,
+    size: 90,
     rotation: { y: -Math.PI / 2 },
     position: (box) => ({
       x: (tvStandBox.min.x + tvStandBox.max.x) / 2 - (box.min.x + box.max.x) / 2,

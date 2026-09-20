@@ -2,25 +2,22 @@ import * as THREE from 'three'
 import { loadObject } from '../helpers.js'
 import { WHITE } from '@/theme.js'
 
-const NOODLES_X = -75
-const NOODLES_Z = 100
-
-export async function loadNoodles(tableMaxY) {
+export async function loadNoodles(tvStandBox) {
   const object = await loadObject('/objects/noodles.glb', {
     size: 55,
     position: (box) => ({
-      x: NOODLES_X,
-      y: tableMaxY - box.min.y,
-      z: NOODLES_Z,
+      x: (tvStandBox.min.x + tvStandBox.max.x) / 2 - (box.min.x + box.max.x) / 2 - 35,
+      y: tvStandBox.max.y - box.min.y,
+      z: (tvStandBox.min.z + tvStandBox.max.z) / 2 + 105,
     }),
   })
 
   const box = new THREE.Box3().setFromObject(object)
   const steam = createSteam()
   steam.position.set(
-    NOODLES_X,
-    object.position.y + box.max.y - box.min.y - 25,
-    NOODLES_Z,
+    (box.min.x + box.max.x) / 2,
+    box.max.y - 25,
+    (box.min.z + box.max.z) / 2,
   )
 
   const noodles = new THREE.Group()
