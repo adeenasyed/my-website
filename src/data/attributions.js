@@ -1,12 +1,5 @@
 export const ATTRIBUTIONS = [
   {
-    name: 'Basketball Net',
-    nameUrl: 'https://sketchfab.com/3d-models/basketball-net-a845be1db4c141be92ceadebfb5b38f0',
-    author: '1-3D.com',
-    authorUrl: 'https://sketchfab.com/1-3D.com',
-    via: 'Sketchfab',
-  },
-  {
     name: 'Bean Bag Chair',
     nameUrl: 'https://poly.pizza/m/1MFMOaz3zqe',
     author: 'CMHT Oculus',
@@ -22,10 +15,10 @@ export const ATTRIBUTIONS = [
   },
   {
     name: 'Corner Shelf',
-    nameUrl: 'https://sketchfab.com/3d-models/corner-wall-shelf-c5e0ad84a2d44c9b9cc3bef27cd77bcd',
-    author: 'kakou3991',
-    authorUrl: 'https://sketchfab.com/kakou3991',
-    via: 'Sketchfab',
+    nameUrl: 'https://poly.pizza/m/fnZQBInt_EQ',
+    author: 'CMHT Oculus',
+    authorUrl: 'https://poly.pizza/u/CMHT%20Oculus',
+    via: 'Poly Pizza',
   },
   {
     name: 'Couch',
@@ -33,13 +26,6 @@ export const ATTRIBUTIONS = [
     author: 'Quaternius',
     authorUrl: 'https://poly.pizza/u/Quaternius',
     via: 'Poly Pizza',
-  },
-  {
-    name: 'GitHub Button',
-    nameUrl: 'https://sketchfab.com/3d-models/3d-github-logo-441d03d1076b44f483df551e02d970fe',
-    author: 'pengedarseni',
-    authorUrl: 'https://sketchfab.com/pengedarseni',
-    via: 'Sketchfab',
   },
   {
     name: 'Jordan 4s',
@@ -67,13 +53,6 @@ export const ATTRIBUTIONS = [
     nameUrl: 'https://sketchfab.com/3d-models/neon-sign-letters-and-elements-a5330a94391945a493a87b07d118fe02',
     author: 'oparaskos',
     authorUrl: 'https://sketchfab.com/oparaskos',
-    via: 'Sketchfab',
-  },
-  {
-    name: 'Neon Lucky Cat Light Sign',
-    nameUrl: 'https://sketchfab.com/3d-models/neon-signs-307e887d740649f88fbc77b061f3a742',
-    author: 'Shalmon',
-    authorUrl: 'https://sketchfab.com/nashalanandas',
     via: 'Sketchfab',
   },
   {

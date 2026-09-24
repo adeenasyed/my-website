@@ -1,8 +1,7 @@
 import { loadPacman } from './pacman.js'
 import { loadRug } from './rug.js'
-import { loadLaptop } from './laptop.js'
 import { loadRemote } from './remote.js'
-import { loadCatLightSign } from './catLightSign.js'
+import { loadLightSign } from './lightSign.js'
 import { loadHeartLightSign } from './heartLightSign.js'
 import { loadGraduationZone } from './graduationZone/index.js'
 import { loadShelfZone } from './shelfZone/index.js'
@@ -23,9 +22,8 @@ export async function loadObjects(maxAnisotropy, onProgress) {
   const [
     pacman,
     rug,
-    laptop,
     remote,
-    catLightSign,
+    lightSign,
     heartLightSign,
     graduationZone,
     shelfZone,
@@ -34,9 +32,8 @@ export async function loadObjects(maxAnisotropy, onProgress) {
   ] = await Promise.all([
     loadPacman(),
     loadRug(maxAnisotropy),
-    loadLaptop(maxAnisotropy),
     loadRemote(),
-    loadCatLightSign(),
+    loadLightSign(),
     loadHeartLightSign(),
     loadGraduationZone(maxAnisotropy),
     loadShelfZone(maxAnisotropy),
@@ -48,9 +45,8 @@ export async function loadObjects(maxAnisotropy, onProgress) {
     objects: [
       pacman,
       rug,
-      laptop,
       remote,
-      catLightSign,
+      lightSign,
       heartLightSign,
       ...graduationZone.objects,
       ...shelfZone.objects,
@@ -63,8 +59,8 @@ export async function loadObjects(maxAnisotropy, onProgress) {
       ...tableZone.animated,
     ],
     interactables: {
-      laptop,
       remote,
+      lightSign,
       ...graduationZone.interactables,
       ...shelfZone.interactables,
       ...loungeZone.interactables,

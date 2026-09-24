@@ -2,13 +2,13 @@ import * as THREE from 'three'
 import { loadObject } from '../helpers.js'
 import { WHITE } from '@/theme.js'
 
-export async function loadNoodles(tvStandBox) {
+export async function loadNoodles(tableBox) {
   const object = await loadObject('/objects/noodles.glb', {
     size: 55,
     position: (box) => ({
-      x: (tvStandBox.min.x + tvStandBox.max.x) / 2 - (box.min.x + box.max.x) / 2 - 35,
-      y: tvStandBox.max.y - box.min.y,
-      z: (tvStandBox.min.z + tvStandBox.max.z) / 2 + 105,
+      x: -90,
+      y: tableBox.max.y - box.min.y,
+      z: 115,
     }),
   })
 
