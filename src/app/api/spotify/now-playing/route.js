@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { spotifyFetch, getTrack } from '../client.js'
-import { rateLimit } from '../redis.js'
+import { rateLimit } from '../../redis.js'
 
 export async function GET(request) {
   if (!await rateLimit('listening-activity', request)) {
