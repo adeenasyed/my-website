@@ -24,6 +24,7 @@ export async function createRoom({
 
   function dispose() {
     interactables.tv.dispose()
+    interactables.visitorBook.dispose()
   }
 
   return {

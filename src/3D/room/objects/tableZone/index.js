@@ -1,20 +1,20 @@
 import * as THREE from 'three'
 import { loadTable } from './table.js'
-import { loadBook } from './book.js'
+import { loadLaptop } from './laptop.js'
 import { loadNoodles } from './noodles.js'
 
-export async function loadTableZone() {
+export async function loadTableZone(maxAnisotropy) {
   const table = await loadTable()
   const box = new THREE.Box3().setFromObject(table)
-  const maxY = box.max.y
 
-  const [book, noodles] = await Promise.all([
-    loadBook(maxY),
-    loadNoodles(maxY),
+  const [laptop, noodles] = await Promise.all([
+    loadLaptop(box, maxAnisotropy),
+    loadNoodles(box),
   ])
 
   return {
-    objects: [table, book, noodles],
+    objects: [table, laptop, noodles],
     animated: [noodles],
+    interactables: { laptop },
   }
 }

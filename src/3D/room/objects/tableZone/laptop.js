@@ -1,16 +1,17 @@
 import * as THREE from 'three'
-import { loadObject, getMeshes } from './helpers.js'
+import { loadObject, getMeshes } from '../helpers.js'
 import { FONT_FAMILY, BLACK, WHITE, GRAY, CYAN } from '@/theme.js'
 import { EXPERIENCE } from '@/data/experience.js'
 
-export async function loadLaptop(maxAnisotropy) {
+const ROTATION_Y = -Math.PI / 2
+
+export async function loadLaptop(tableBox, maxAnisotropy) {
   const object = await loadObject('/objects/laptop.glb', {
     size: 85,
-    rotation: { y: -Math.PI / 45 },
     position: (box) => ({
-      x: -222,
-      y: 72 - box.min.y,
-      z: 10,
+      x: 0,
+      y: tableBox.max.y - box.min.y,
+      z: 0,
     }),
     editMesh: (mesh) => {
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
@@ -26,12 +27,14 @@ export async function loadLaptop(maxAnisotropy) {
   const { screen, scroll } = buildScreen(worldBox, maxAnisotropy)
 
   const laptop = new THREE.Group()
+  laptop.position.set(-68, 0, 44)
+  laptop.rotation.y = ROTATION_Y
   laptop.add(object, screen)
   laptop.meshes = getMeshes(object, [screen])
   laptop.hoverColor = '#666666'
   laptop.zoom = {
     target: screen,
-    offset: new THREE.Vector3(Math.sin(-Math.PI / 45) * 75, 0, Math.cos(-Math.PI / 45) * 75),
+    offset: new THREE.Vector3(Math.sin(ROTATION_Y) * 75, 0, Math.cos(ROTATION_Y) * 75),
     onScroll: scroll,
   }
 
@@ -93,14 +96,13 @@ function buildScreen(worldBox, maxAnisotropy) {
   const material = new THREE.MeshBasicMaterial({ map: texture })
   material.toneMapped = false
 
-  const screenWidth = worldSize.x * 0.93
+  const screenWidth = worldSize.x * 0.975
   const screenHeight = screenWidth * (DRAW_HEIGHT / DRAW_WIDTH)
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(screenWidth, screenHeight), material)
-  screen.rotation.y = -Math.PI / 45
   screen.position.set(
-    (worldBox.min.x + worldBox.max.x) / 2 + 2,
+    (worldBox.min.x + worldBox.max.x) / 2,
     worldBox.min.y + worldSize.y * 0.525,
-    worldBox.max.z - worldSize.z * 0.93,
+    worldBox.min.z + worldSize.z * 0.02,
   )
 
   function drawResume() {

@@ -9,6 +9,11 @@ const limiters = {
     limiter: Ratelimit.slidingWindow(20, '1 m'),
     prefix: 'rl:listening-activity',
   }),
+  'visitor-book': new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, '1 h'),
+    prefix: 'rl:visitor-book',
+  }),
 }
 
 function getIP(request) {

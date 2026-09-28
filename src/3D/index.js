@@ -43,16 +43,32 @@ export async function createWorld({
     camera,
     controls,
     renderer,
-    interactions,
     onZoomChange,
     onEscape,
   )
 
   for (const obj of Object.values(room.interactables)) {
     const zoom = obj.zoom
-      ? zoomController.add(obj.zoom.target, obj.zoom.offset, obj.zoom)
+      ? zoomController.add(obj.zoom)
       : null
     interactions.add(obj.meshes, obj.hoverColor, zoom ? () => zoom(obj.onClick) : obj.onClick)
+  }
+
+  const visitorBook = room.interactables.visitorBook
+  const visitorBookControls = {
+    ...visitorBook.controls,
+    setDrawingEnabled(enabled) {
+      interactions.setDrawingTarget(
+        enabled ? visitorBook.drawingSurface : null,
+        enabled ? visitorBook.controls : null,
+      )
+    },
+    getPositions() {
+      return {
+        toolbar: interactions.projectToScreen(visitorBook.controlAnchors.toolbar),
+        pageNavigation: interactions.projectToScreen(visitorBook.controlAnchors.pageNavigation),
+      }
+    },
   }
 
   const skyInteractions = (await sky.ready).map(({ meshes, data }) => interactions.add(
@@ -89,7 +105,7 @@ export async function createWorld({
     const ndc = interactions.pointerNdc
     pointerDirection.set(ndc.x, ndc.y, 0.5).unproject(camera).sub(camera.position).normalize()
     const readout = {
-      hovered: interactions.isHoveringAnchor(),
+      hovered: interactions.isHovering(),
       azDeg: Math.atan2(pointerDirection.x, -pointerDirection.z) * THREE.MathUtils.RAD2DEG,
       altDeg: Math.asin(THREE.MathUtils.clamp(pointerDirection.y, -1, 1)) * THREE.MathUtils.RAD2DEG,
     }
@@ -150,6 +166,7 @@ export async function createWorld({
   return {
     setLEDColor: room.setLEDColor,
     setTVSource: room.setTVSource,
+    visitorBookControls,
     setInteractionsEnabled: interactions.setEnabled,
     setNativeCursorHidden: interactions.setNativeCursorHidden,
     resetCamera: zoomController.resetCamera,

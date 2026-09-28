@@ -33,11 +33,31 @@ export function loadGLTF(url) {
   return new Promise((resolve, reject) => gltfLoader.load(url, (gltf) => resolve(gltf.scene), undefined, reject))
 }
 
-export async function loadObject(file, { size, rotation, position, editMesh }) {
+function getObjectBox(object, boundsFilter) {
+  if (!boundsFilter) return new THREE.Box3().setFromObject(object)
+
+  const box = new THREE.Box3()
+
+  object.traverse((child) => {
+    if (!child.isMesh || !boundsFilter(child)) return
+    if (!child.geometry.boundingBox) child.geometry.computeBoundingBox()
+    box.union(child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld))
+  })
+
+  return box
+}
+
+export async function loadObject(file, {
+  size,
+  rotation,
+  position,
+  editMesh,
+  boundsFilter,
+}) {
   const object = await loadGLTF(file)
 
   if (size !== undefined) {
-    const originalBox = new THREE.Box3().setFromObject(object)
+    const originalBox = getObjectBox(object, boundsFilter)
     const originalSize = originalBox.getSize(new THREE.Vector3())
     const scale = size / Math.max(originalSize.x, originalSize.y, originalSize.z)
     object.scale.setScalar(scale)
@@ -45,7 +65,7 @@ export async function loadObject(file, { size, rotation, position, editMesh }) {
 
   if (rotation) Object.assign(object.rotation, rotation)
 
-  const box = new THREE.Box3().setFromObject(object)
+  const box = getObjectBox(object, boundsFilter)
   const { x, y, z } = position(box)
   object.position.set(x, y, z)
 

@@ -36,8 +36,8 @@ function buildFloor(maxAnisotropy) {
     return texture
   }
 
-  const floorTexture = applySettings(loader.load('/floor_diffuse.png'))
-  const normalTexture = applySettings(loader.load('/floor_normal.png'))
+  const floorTexture = applySettings(loader.load('/images/floor_diffuse.png'))
+  const normalTexture = applySettings(loader.load('/images/floor_normal.png'))
 
   const floorMaterial = new THREE.MeshStandardMaterial({
     map: floorTexture,

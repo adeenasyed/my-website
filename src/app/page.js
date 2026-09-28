@@ -1,14 +1,15 @@
 'use client'
-import '@/3D/popups/styles.css'
+import '@/3D/styles.css'
 import { useEffect, useRef, useState } from 'react'
 import { createScene } from '@/3D/scene.js'
 import { PURPLE } from '@/theme.js'
-import ContactPopup from '@/3D/popups/ContactPopup'
-import AttributionsPopup from '@/3D/popups/AttributionsPopup'
-import RemotePopup from '@/3D/popups/RemotePopup'
-import CelestialPopup from '@/3D/popups/CelestialPopup'
-import Cursor from '@/3D/sky/Cursor'
-import Compass from '@/3D/sky/Compass'
+import ContactPopup from '@/3D/room/overlays/ContactPopup'
+import AttributionsPopup from '@/3D/room/overlays/AttributionsPopup'
+import RemotePopup from '@/3D/room/overlays/RemotePopup'
+import VisitorBookControls from '@/3D/room/overlays/VisitorBookControls'
+import CelestialPopup from '@/3D/sky/overlays/CelestialPopup'
+import Cursor from '@/3D/sky/overlays/Cursor'
+import Compass from '@/3D/sky/overlays/Compass'
 
 const VIEW_OPTIONS = [
   { label: 'ROOM VIEW', room: true },
@@ -71,6 +72,7 @@ export default function Landing() {
   const [mode, setMode] = useState(null)
   const [starting, setStarting] = useState(false)
   const [showRemote, setShowRemote] = useState(false)
+  const [showVisitorBook, setShowVisitorBook] = useState(false)
   const [ledColor, setLEDColor] = useState(PURPLE)
   const [tvSource, setTVSource] = useState('spotify')
   const [showContact, setShowContact] = useState(false)
@@ -174,8 +176,18 @@ export default function Landing() {
     syncInteractions()
   }
 
+  function openVisitorBook() {
+    setShowVisitorBook(true)
+  }
+
+  function closeVisitorBook() {
+    worldRef.current?.visitorBookControls.setOpen(false)
+    setShowVisitorBook(false)
+  }
+
   function handleEscape() {
     closeRemote()
+    closeVisitorBook()
     worldRef.current.resetCamera()
   }
 
@@ -324,6 +336,7 @@ export default function Landing() {
           lightSign: () => setShowContact(true),
           infoButton: () => setShowAttributions(true),
           remote: openRemote,
+          visitorBook: openVisitorBook,
           onIntroComplete: handleIntroComplete,
           onCelestialClick: openCelestial,
           onPointerDirectionChange: updateReadout,
@@ -385,11 +398,16 @@ export default function Landing() {
   }, [])
 
   useEffect(() => {
-    const active = mode === '3D' && supports3D(device) && mouseInput && !roomVisible && !activeCelestial
+    const active = mode === '3D'
+      && supports3D(device)
+      && mouseInput
+      && !roomVisible
+      && !activeCelestial
+      && !showVisitorBook
     cursorStateRef.current.active = active
-    worldRef.current?.setNativeCursorHidden(active)
+    if (!showVisitorBook) worldRef.current?.setNativeCursorHidden(active)
     drawCursor()
-  }, [mode, device, mouseInput, roomVisible, activeCelestial])
+  }, [mode, device, mouseInput, roomVisible, activeCelestial, showVisitorBook])
 
   useEffect(() => {
     if (showSkyOverlay) return
@@ -436,6 +454,13 @@ export default function Landing() {
           onEscape={handleEscape}
           setTVSource={updateTVSource}
           setLEDColor={updateLEDColor}
+        />
+      )}
+      {showVisitorBook && (
+        <VisitorBookControls
+          controls={worldRef.current.visitorBookControls}
+          initialPointer={mouseInputRef.current ? cursorStateRef.current : null}
+          setNativeCursorHidden={worldRef.current.setNativeCursorHidden}
         />
       )}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}

@@ -1,37 +1,9 @@
 export const ATTRIBUTIONS = [
-  // {
-  //   name: 'Air Max 95s',
-  //   nameUrl: 'https://cults3d.com/en/3d-model/fashion/nike-air-max-95-og-neon',
-  //   author: 'Zertux',
-  //   authorUrl: 'https://cults3d.com/en/users/Zertux/3d-models',
-  //   via: 'Cults 3D',
-  // },
-  {
-    name: 'Basketball Net',
-    nameUrl: 'https://sketchfab.com/3d-models/basketball-net-a845be1db4c141be92ceadebfb5b38f0',
-    author: '1-3D.com',
-    authorUrl: 'https://sketchfab.com/1-3D.com',
-    via: 'Sketchfab',
-  },
   {
     name: 'Bean Bag Chair',
     nameUrl: 'https://poly.pizza/m/1MFMOaz3zqe',
     author: 'CMHT Oculus',
     authorUrl: 'https://poly.pizza/u/CMHT%20Oculus',
-    via: 'Poly Pizza',
-  },
-  {
-    name: 'Bonsai Tree',
-    nameUrl: 'https://sketchfab.com/3d-models/bonsai-affd4e8893954ff58623224b6c5b5684',
-    author: 'local.yany',
-    authorUrl: 'https://sketchfab.com/local.yany',
-    via: 'Sketchfab',
-  },
-  {
-    name: 'Book',
-    nameUrl: 'https://poly.pizza/m/29AEseoy9pN',
-    author: 'Norbert Kurucz',
-    authorUrl: 'https://poly.pizza/u/Norbert%20Kurucz',
     via: 'Poly Pizza',
   },
   {
@@ -42,18 +14,11 @@ export const ATTRIBUTIONS = [
     via: 'Sketchfab',
   },
   {
-    name: 'Cookie Jar',
-    nameUrl: 'https://sketchfab.com/3d-models/cookies-in-the-jar-372cc5bca9e54c579d8399a18e686b24',
-    author: 'sheana',
-    authorUrl: 'https://sketchfab.com/sheana',
-    via: 'Sketchfab',
-  },
-  {
     name: 'Corner Shelf',
-    nameUrl: 'https://sketchfab.com/3d-models/corner-wall-shelf-c5e0ad84a2d44c9b9cc3bef27cd77bcd',
-    author: 'kakou3991',
-    authorUrl: 'https://sketchfab.com/kakou3991',
-    via: 'Sketchfab',
+    nameUrl: 'https://poly.pizza/m/fnZQBInt_EQ',
+    author: 'CMHT Oculus',
+    authorUrl: 'https://poly.pizza/u/CMHT%20Oculus',
+    via: 'Poly Pizza',
   },
   {
     name: 'Couch',
@@ -61,13 +26,6 @@ export const ATTRIBUTIONS = [
     author: 'Quaternius',
     authorUrl: 'https://poly.pizza/u/Quaternius',
     via: 'Poly Pizza',
-  },
-  {
-    name: 'GitHub Button',
-    nameUrl: 'https://sketchfab.com/3d-models/3d-github-logo-441d03d1076b44f483df551e02d970fe',
-    author: 'pengedarseni',
-    authorUrl: 'https://sketchfab.com/pengedarseni',
-    via: 'Sketchfab',
   },
   {
     name: 'Jordan 4s',
@@ -95,13 +53,6 @@ export const ATTRIBUTIONS = [
     nameUrl: 'https://sketchfab.com/3d-models/neon-sign-letters-and-elements-a5330a94391945a493a87b07d118fe02',
     author: 'oparaskos',
     authorUrl: 'https://sketchfab.com/oparaskos',
-    via: 'Sketchfab',
-  },
-  {
-    name: 'Neon Lucky Cat Light Sign',
-    nameUrl: 'https://sketchfab.com/3d-models/neon-signs-307e887d740649f88fbc77b061f3a742',
-    author: 'Shalmon',
-    authorUrl: 'https://sketchfab.com/nashalanandas',
     via: 'Sketchfab',
   },
   {

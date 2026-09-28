@@ -117,7 +117,7 @@ function createFrameTexture() {
 }
 
 export async function loadDegree(maxAnisotropy) {
-  const degree = await new Promise((resolve) => new THREE.TextureLoader().load('/degree.png', resolve))
+  const degree = await new Promise((resolve) => new THREE.TextureLoader().load('/images/degree.png', resolve))
   degree.colorSpace = THREE.SRGBColorSpace
   degree.anisotropy = maxAnisotropy
 
@@ -148,7 +148,7 @@ export async function loadDegree(maxAnisotropy) {
 
   const group = new THREE.Group()
   group.add(top, bottom, left, right, panel)
-  group.position.set(-68, ROOM_HEIGHT - 260, -ROOM_WIDTH / 2 + DEPTH / 2)
+  group.position.set(-7, ROOM_HEIGHT - 200, -ROOM_WIDTH / 2 + DEPTH / 2)
 
   const zoomTarget = new THREE.Mesh(
     new THREE.PlaneGeometry(FRAME_WIDTH, FRAME_HEIGHT),

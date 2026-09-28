@@ -3,8 +3,7 @@ import { loadCouch } from './couch.js'
 import { loadTVStand } from './tvStand.js'
 import { loadTV } from './tv.js'
 import { loadGameConsole } from './gameConsole.js'
-import { loadBonsai } from './bonsai.js'
-import { loadCookies } from './cookies.js'
+import { loadVisitorBook } from './visitorBook.js'
 
 export async function loadLoungeZone(maxAnisotropy) {
   const couch = await loadCouch()
@@ -18,14 +17,12 @@ export async function loadLoungeZone(maxAnisotropy) {
 
   const tvStandBox = new THREE.Box3().setFromObject(tvStand)
 
-  const [gameConsole, bonsai, cookies] = await Promise.all([
-    loadGameConsole(tvStandBox),
-    loadBonsai(tvStandBox),
-    loadCookies(tvStandBox),
-  ])
+  const gameConsole = await loadGameConsole(tvStandBox)
+  const visitorBook = loadVisitorBook(tvStandBox, maxAnisotropy)
 
   return {
-    objects: [couch, tv, tvStand, gameConsole, cookies, bonsai],
-    interactables: { tv },
+    objects: [couch, tv, tvStand, gameConsole, visitorBook],
+    animated: [visitorBook],
+    interactables: { tv, visitorBook },
   }
 }
