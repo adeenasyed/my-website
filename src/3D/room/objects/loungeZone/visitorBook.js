@@ -105,8 +105,8 @@ function drawStroke(context, stroke, mirrorX = false, compositeOperation = 'sour
   }
   context.save()
   context.globalCompositeOperation = compositeOperation
-  context.strokeStyle = stroke.color
-  context.lineWidth = stroke.width
+  context.strokeStyle = stroke.tool === 'pencil' ? BLACK : PAPER_COLOR
+  context.lineWidth = stroke.tool === 'pencil' ? PENCIL_WIDTH : ERASER_WIDTH
   context.lineCap = 'round'
   context.lineJoin = 'round'
   context.beginPath()
@@ -269,7 +269,7 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
   function hasVisibleDrawing() {
     inkMaskContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
     for (const stroke of strokes) {
-      const compositeOperation = stroke.color === PAPER_COLOR ? 'destination-out' : 'source-over'
+      const compositeOperation = stroke.tool === 'pencil' ? 'source-over' : 'destination-out'
       drawStroke(inkMaskContext, stroke, false, compositeOperation)
     }
     const pixels = inkMaskContext.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT).data
@@ -319,8 +319,7 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
   function beginStroke(uv) {
     const point = pointFromUv(uv)
     activeStroke = {
-      color: tool === 'eraser' ? PAPER_COLOR : BLACK,
-      width: tool === 'eraser' ? ERASER_WIDTH : PENCIL_WIDTH,
+      tool,
       points: [point],
     }
     drawOnRightPage(activeStroke)
@@ -332,8 +331,7 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
     if (Math.hypot(next[0] - previous[0], next[1] - previous[1]) < 0.002) return
     activeStroke.points.push(next)
     drawOnRightPage({
-      color: activeStroke.color,
-      width: activeStroke.width,
+      tool: activeStroke.tool,
       points: [previous, next],
     })
   }
