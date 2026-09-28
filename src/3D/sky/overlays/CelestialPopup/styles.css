@@ -148,18 +148,3 @@
     border-bottom-color: var(--celestial-line);
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .celestial-popup {
-    animation: none;
-  }
-
-  .celestial-popup-flash {
-    display: none;
-  }
-
-  .celestial-popup > :not(.celestial-popup-flash) {
-    opacity: 1;
-    animation: none;
-  }
-}

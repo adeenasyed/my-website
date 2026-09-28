@@ -185,18 +185,6 @@ button {
   animation: landing-glitch-blue 480ms steps(1, end) 1;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .landing-start-button--exiting {
-    animation: none;
-    opacity: 0;
-    transition: opacity 560ms ease-out;
-  }
-
-  .landing-start-ghost {
-    display: none;
-  }
-}
-
 .sky-overlay {
   --overlay-gap: 1.47em;
   position: fixed;

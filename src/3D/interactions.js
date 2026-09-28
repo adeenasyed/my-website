@@ -13,13 +13,18 @@ export function createInteractionManager(camera, renderer) {
 
   let enabled = false
   let nativeCursorHidden = false
-  let currentHovered = null
+  let hovered = null
   let fading = false
+  let drawingSurface = null
+  let drawingControls = null
+  let drawingPointerId = null
 
   function add(meshes, hoverColor = HOVER_COLOR, onClick, { anchor = null } = {}) {
     const hoverEmissive = new THREE.Color(hoverColor)
-    const originalEmissives = meshes.map((m) => m.material?.emissive?.clone() ?? new THREE.Color(0))
-    const obj = { meshes, hoverEmissive, originalEmissives, onClick, anchor, hovered: false, enabled: true }
+    const emissives = [...new Set(meshes.flatMap(({ material }) => material))]
+      .filter((material) => material?.emissive)
+      .map(({ emissive }) => ({ emissive, original: emissive.clone() }))
+    const obj = { hoverEmissive, emissives, onClick, anchor, enabled: true }
     interactables.push(obj)
     for (const m of meshes) {
       meshToInteractable.set(m, obj)
@@ -38,10 +43,8 @@ export function createInteractionManager(camera, renderer) {
     if (!fading) return
     let allArrived = true
     for (const obj of interactables) {
-      for (const [i, m] of obj.meshes.entries()) {
-        const emissive = m.material?.emissive
-        if (!emissive) continue
-        const target = obj.hovered ? obj.hoverEmissive : obj.originalEmissives[i]
+      for (const { emissive, original } of obj.emissives) {
+        const target = obj === hovered ? obj.hoverEmissive : original
         emissive.lerp(target, LERP_SPEED)
         if (Math.abs(emissive.r - target.r) + Math.abs(emissive.g - target.g) + Math.abs(emissive.b - target.b) > 0.004) {
           allArrived = false
@@ -53,34 +56,45 @@ export function createInteractionManager(camera, renderer) {
     if (allArrived) fading = false
   }
 
-  function updateNativeCursor(isHovering) {
-    renderer.domElement.style.cursor = nativeCursorHidden ? 'none' : isHovering ? 'pointer' : 'default'
+  function updateNativeCursor() {
+    renderer.domElement.style.cursor = nativeCursorHidden
+      ? 'none'
+      : drawingSurface
+        ? 'crosshair'
+        : hovered ? 'pointer' : 'default'
   }
 
-  function clearCurrentHover() {
-    currentHovered.hovered = false
-    currentHovered = null
+  function clearHovered() {
+    hovered = null
     fading = true
-    updateNativeCursor(false)
+    updateNativeCursor()
   }
 
   function setEnabled(nextEnabled, items) {
     if (items) {
       for (const item of items) item.enabled = nextEnabled
-      if (!nextEnabled && items.includes(currentHovered)) clearCurrentHover()
+      if (!nextEnabled && items.includes(hovered)) clearHovered()
     } else {
-      if (!nextEnabled && currentHovered) clearCurrentHover()
+      if (!nextEnabled && hovered) clearHovered()
       enabled = nextEnabled
     }
   }
 
   function setNativeCursorHidden(hidden) {
     nativeCursorHidden = hidden
-    updateNativeCursor(Boolean(currentHovered))
+    updateNativeCursor()
   }
 
-  function isHoveringAnchor() {
-    return Boolean(currentHovered?.anchor)
+  function setDrawingTarget(surface, controls) {
+    drawingSurface = surface
+    drawingControls = controls
+    drawingPointerId = null
+    if (hovered) clearHovered()
+    else updateNativeCursor()
+  }
+
+  function isHovering() {
+    return hovered !== null
   }
 
   function projectToScreen(anchor) {
@@ -100,7 +114,7 @@ export function createInteractionManager(camera, renderer) {
   }
 
   function pick() {
-    const hits = raycaster.intersectObjects(allMeshes, true)
+    const hits = raycaster.intersectObjects(allMeshes, false)
     for (const hit of hits) {
       let object = hit.object
       let interactable = null
@@ -118,36 +132,64 @@ export function createInteractionManager(camera, renderer) {
     return null
   }
 
-
-
   renderer.domElement.addEventListener('mousemove', (e) => {
-    if (!enabled) return
+    if (!enabled || drawingSurface) return
     setPointerFromEvent(e)
 
     const hit = pick()
-    if (hit !== currentHovered) {
-      if (currentHovered) currentHovered.hovered = false
-      if (hit) hit.hovered = true
+    if (hit !== hovered) {
+      hovered = hit
       fading = true
-      updateNativeCursor(Boolean(hit))
-      currentHovered = hit
+      updateNativeCursor()
     }
   })
 
+  function getDrawingUv(e) {
+    if (!drawingSurface) return null
+    setPointerFromEvent(e)
+    return raycaster.intersectObject(drawingSurface, false)[0]?.uv ?? null
+  }
+
+  function endDrawing(e) {
+    if (e.pointerId !== drawingPointerId) return
+    e.preventDefault()
+    drawingPointerId = null
+    drawingControls.endStroke()
+  }
+
   renderer.domElement.addEventListener('click', (e) => {
-    if (!enabled) return
+    if (!enabled || drawingSurface) return
     setPointerFromEvent(e)
 
     const hit = pick()
     if (!hit) return
-    hit.hovered = false
+    hovered = null
     fading = true
-    if (currentHovered === hit) {
-      currentHovered = null
-      updateNativeCursor(false)
-    }
+    updateNativeCursor()
     hit.onClick(projectToScreen(hit.anchor), { pointerType: e.pointerType, x: e.clientX, y: e.clientY })
   })
 
-  return { add, addBlockers, update, setEnabled, setNativeCursorHidden, isHoveringAnchor, projectToScreen, pointerNdc }
+  renderer.domElement.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || drawingPointerId !== null) return
+    const uv = getDrawingUv(e)
+    if (!uv) return
+    e.preventDefault()
+    drawingPointerId = e.pointerId
+    renderer.domElement.setPointerCapture(e.pointerId)
+    drawingControls.beginStroke(uv)
+  })
+
+  renderer.domElement.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== drawingPointerId) return
+    const uv = getDrawingUv(e)
+    if (!uv) return
+    e.preventDefault()
+    drawingControls.continueStroke(uv)
+  })
+
+  renderer.domElement.addEventListener('pointerup', endDrawing)
+
+  renderer.domElement.addEventListener('pointercancel', endDrawing)
+
+  return { add, addBlockers, update, setEnabled, setNativeCursorHidden, setDrawingTarget, isHovering, projectToScreen, pointerNdc }
 }
