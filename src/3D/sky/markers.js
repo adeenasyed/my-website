@@ -8,6 +8,7 @@ import {
 } from './stars.js'
 
 const TEXTURE_SIZE = 256
+const TEXTURE_PIXEL_RATIO = 2
 const CENTER = TEXTURE_SIZE / 2
 const TAU = Math.PI * 2
 const MARKER_RADIUS = STAR_SHELL_RADIUS * 0.99
@@ -67,20 +68,22 @@ function seededRandom(seed) {
 
 function createCanvas(draw) {
   const canvas = document.createElement('canvas')
-  canvas.width = canvas.height = TEXTURE_SIZE
+  canvas.width = canvas.height = TEXTURE_SIZE * TEXTURE_PIXEL_RATIO
   const context = canvas.getContext('2d')
+  context.scale(TEXTURE_PIXEL_RATIO, TEXTURE_PIXEL_RATIO)
   context.lineCap = 'round'
   draw(context)
   return canvas
 }
 
-function createTexture(draw, crisp = false) {
+function createTexture(draw) {
   const texture = new THREE.CanvasTexture(createCanvas(draw))
   texture.colorSpace = THREE.SRGBColorSpace
-  if (crisp) {
-    texture.generateMipmaps = false
-    texture.minFilter = THREE.LinearFilter
-  }
+  // These sprites are already softly shaded in canvas space. Letting WebGL
+  // generate another blurred mip level makes the small iPad rendering look
+  // muddy, especially around the Moon's edge and Saturn's rings.
+  texture.generateMipmaps = false
+  texture.minFilter = THREE.LinearFilter
   return texture
 }
 
@@ -130,10 +133,19 @@ function disc(context, x, y, radius, { centerOpacity = 1, edgeOpacity, lightOffs
 
 function soften(context, radius, draw, color = '#FFFFFF') {
   context.save()
-  if ('filter' in context) context.filter = `blur(${radius}px)`
-  else {
+  const blur = `blur(${radius}px)`
+  const supportsFilter = 'filter' in context
+  if (supportsFilter) context.filter = blur
+
+  if (!supportsFilter) {
+    // Older iPad Safari versions expose a different Canvas 2D feature set.
+    // Draw the shadow back at the intended position while moving the hard
+    // source shape off-canvas, so the fallback does not reveal both layers.
+    const offset = TEXTURE_SIZE * 4
     context.shadowBlur = radius * 2
     context.shadowColor = color
+    context.shadowOffsetX = offset
+    context.translate(-offset, 0)
   }
   draw()
   context.restore()
@@ -284,7 +296,7 @@ function moonTexture({ illuminated, waxing }) {
 
   return createTexture((context) => {
     glow(context, CENTER, CENTER, 124, 0.14 * illumination, 2.6)
-    context.drawImage(body, 0, 0)
+    context.drawImage(body, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
   })
 }
 
@@ -494,7 +506,7 @@ function clusterTexture({ seed, count, reach, concentration, centers, haze = fal
       const rank = (star.brightness - 0.28) / 0.72
       particle(context, star.x, star.y, 2.05 + rank * 4.6, 0.47 + rank * 0.46)
     }
-  }, true)
+  })
 }
 
 function andromedaTexture() {
@@ -518,7 +530,7 @@ function andromedaTexture() {
     })
     context.restore()
     glow(context, CENTER, CENTER, 24, 0.78, 2.0)
-  }, true)
+  })
 }
 
 function calculateSize(angularSizeArcsec, range) {
