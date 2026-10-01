@@ -144,15 +144,29 @@ export function createInteractionManager(camera, renderer) {
     }
   })
 
+  // Safari may treat rapid drawing strokes as a double-tap and suppress the second contact.
+  renderer.domElement.addEventListener('touchstart', (e) => {
+    if (drawingSurface) e.preventDefault()
+  }, { passive: false })
+
   function getDrawingUv(e) {
     if (!drawingSurface) return null
     setPointerFromEvent(e)
     return raycaster.intersectObject(drawingSurface, false)[0]?.uv ?? null
   }
 
+  function continueDrawing(e) {
+    const events = e.getCoalescedEvents?.()
+    for (const event of events?.length ? events : [e]) {
+      const uv = getDrawingUv(event)
+      if (uv) drawingControls.continueStroke(uv)
+    }
+  }
+
   function endDrawing(e) {
     if (e.pointerId !== drawingPointerId) return
     e.preventDefault()
+    if (e.type === 'pointerup') continueDrawing(e)
     drawingPointerId = null
     drawingControls.endStroke()
   }
@@ -181,10 +195,8 @@ export function createInteractionManager(camera, renderer) {
 
   renderer.domElement.addEventListener('pointermove', (e) => {
     if (e.pointerId !== drawingPointerId) return
-    const uv = getDrawingUv(e)
-    if (!uv) return
     e.preventDefault()
-    drawingControls.continueStroke(uv)
+    continueDrawing(e)
   })
 
   renderer.domElement.addEventListener('pointerup', endDrawing)

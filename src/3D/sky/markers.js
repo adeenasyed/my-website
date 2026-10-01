@@ -128,34 +128,45 @@ function disc(context, x, y, radius, { centerOpacity = 1, edgeOpacity, lightOffs
   context.fill()
 }
 
-function soften(context, radius, draw, color = '#FFFFFF') {
-  context.save()
-  if ('filter' in context) context.filter = `blur(${radius}px)`
-  else {
-    context.shadowBlur = radius * 2
-    context.shadowColor = color
+function soften(context, radius, draw, blending = 'source-over') {
+  if ('filter' in context) {
+    context.save()
+    context.filter = `blur(${radius}px)`
+    context.globalCompositeOperation = blending
+    draw(context)
+    context.restore()
+    return
   }
-  draw()
+
+  const layer = createCanvas(draw)
+  context.save()
+  context.globalCompositeOperation = blending
+  for (let y = -2; y <= 2; y++) {
+    for (let x = -2; x <= 2; x++) {
+      context.globalAlpha = ((3 - Math.abs(x)) * (3 - Math.abs(y))) / 81
+      context.drawImage(layer, x * radius / 2, y * radius / 2)
+    }
+  }
   context.restore()
 }
 
 function mottle(context, x, y, radius, alpha, { seed, count, min, max, dark }) {
   const random = seededRandom(seed)
-  soften(context, 6, () => {
+  soften(context, 6, (layer) => {
     for (let i = 0; i < count; i++) {
       const angle = random() * TAU
       const distance = Math.sqrt(random()) * radius * 0.92
       const size = radius * (min + random() * (max - min))
       const strength = alpha * (0.4 + random() * 0.6)
-      context.fillStyle = dark ? `rgba(0,0,0,${strength})` : `rgba(255,255,255,${strength})`
-      context.beginPath()
-      context.ellipse(
+      layer.fillStyle = dark ? `rgba(0,0,0,${strength})` : `rgba(255,255,255,${strength})`
+      layer.beginPath()
+      layer.ellipse(
         x + Math.cos(angle) * distance, y + Math.sin(angle) * distance,
         size, size * (0.6 + random() * 0.6), random() * TAU, 0, TAU,
       )
-      context.fill()
+      layer.fill()
     }
-  }, dark ? '#000000' : '#FFFFFF')
+  })
 }
 
 function clip(context, x, y, radius, draw) {
@@ -171,12 +182,12 @@ function sunTexture() {
   const random = seededRandom(9)
   return createTexture((context) => {
     glow(context, CENTER, CENTER, 128, 0.28, 1.6)
-    soften(context, 12, () => {
+    soften(context, 12, (layer) => {
       for (let i = 0; i < 9; i++) {
         const angle = random() * TAU
         const reach = 58 + random() * 46
         cloud(
-          context, CENTER + Math.cos(angle) * reach * 0.5, CENTER + Math.sin(angle) * reach * 0.5,
+          layer, CENTER + Math.cos(angle) * reach * 0.5, CENTER + Math.sin(angle) * reach * 0.5,
           reach * 0.62, reach * 0.34, angle, 0.085, 1.8,
         )
       }
@@ -205,22 +216,22 @@ function moonTexture({ illuminated, waxing }) {
     })
 
     clip(context, CENTER, CENTER, radius, () => {
-      soften(context, 9, () => {
-        context.strokeStyle = '#FFFFFF12'
-        context.lineWidth = 5
+      soften(context, 9, (layer) => {
+        layer.strokeStyle = '#FFFFFF12'
+        layer.lineWidth = 5
         for (let i = 0; i < 9; i++) {
           const angle = -Math.PI / 2 + (i - 4) * 0.38
-          context.beginPath()
-          context.moveTo(CENTER - 8, CENTER + 40)
-          context.lineTo(CENTER - 8 + Math.cos(angle) * 98, CENTER + 40 + Math.sin(angle) * 98)
-          context.stroke()
+          layer.beginPath()
+          layer.moveTo(CENTER - 8, CENTER + 40)
+          layer.lineTo(CENTER - 8 + Math.cos(angle) * 98, CENTER + 40 + Math.sin(angle) * 98)
+          layer.stroke()
         }
       })
 
       mottle(context, CENTER, CENTER, radius, 0.04, { seed: 5, count: 30, min: 0.14, max: 0.34, dark: false })
       mottle(context, CENTER, CENTER, radius, 0.055, { seed: 12, count: 34, min: 0.14, max: 0.34, dark: true })
 
-      soften(context, 5.5, () => {
+      soften(context, 5.5, (layer) => {
         for (const [dx, dy, rx, ry, rotation, weight] of [
           [-26, -33, 27, 23, -0.25, 1.00],
           [-44, 2, 20, 38, 0.18, 0.78],
@@ -232,22 +243,22 @@ function moonTexture({ illuminated, waxing }) {
           [-20, 28, 16, 11, 0.30, 0.62],
           [-38, 32, 10, 9, 0.00, 0.58],
         ]) {
-          context.fillStyle = `rgba(16,15,20,${0.1 * weight})`
+          layer.fillStyle = `rgba(16,15,20,${0.1 * weight})`
           for (let pass = 0; pass < 2; pass++) {
             const shrink = 1 - pass * 0.22
-            context.beginPath()
-            context.ellipse(CENTER + dx, CENTER + dy, rx * shrink, ry * shrink, rotation, 0, TAU)
-            context.fill()
+            layer.beginPath()
+            layer.ellipse(CENTER + dx, CENTER + dy, rx * shrink, ry * shrink, rotation, 0, TAU)
+            layer.fill()
           }
         }
-      }, '#100F14')
+      })
 
-      soften(context, 2.5, () => {
-        context.fillStyle = '#FFFFFF47'
+      soften(context, 2.5, (layer) => {
+        layer.fillStyle = '#FFFFFF47'
         for (const [dx, dy, r] of [[-8, 40, 4], [-17, -14, 3.2], [34, 45, 2.4], [52, 6, 2]]) {
-          context.beginPath()
-          context.arc(CENTER + dx, CENTER + dy, r, 0, TAU)
-          context.fill()
+          layer.beginPath()
+          layer.arc(CENTER + dx, CENTER + dy, r, 0, TAU)
+          layer.fill()
         }
       })
     })
@@ -303,21 +314,21 @@ function marsTexture() {
     glow(context, CENTER, CENTER, 48, 0.24, 2.4)
     disc(context, CENTER, CENTER, radius, { edgeOpacity: 0.55, lightOffset: 0.3 })
     clip(context, CENTER, CENTER, radius, () => {
-      soften(context, 5, () => {
-        context.fillStyle = '#1E0A0657'
-        context.beginPath()
-        context.ellipse(CENTER + 9, CENTER - 4, 15, 9, -0.5, 0, TAU)
-        context.fill()
-        context.fillStyle = '#1E0A0633'
-        context.beginPath()
-        context.ellipse(CENTER - 12, CENTER + 10, 17, 7, 0.25, 0, TAU)
-        context.fill()
-      }, '#1E0A06')
-      soften(context, 2.5, () => {
-        context.fillStyle = '#FFFFFF80'
-        context.beginPath()
-        context.ellipse(CENTER - 5, CENTER - radius + 5, 11, 5, 0, 0, TAU)
-        context.fill()
+      soften(context, 5, (layer) => {
+        layer.fillStyle = '#1E0A0657'
+        layer.beginPath()
+        layer.ellipse(CENTER + 9, CENTER - 4, 15, 9, -0.5, 0, TAU)
+        layer.fill()
+        layer.fillStyle = '#1E0A0633'
+        layer.beginPath()
+        layer.ellipse(CENTER - 12, CENTER + 10, 17, 7, 0.25, 0, TAU)
+        layer.fill()
+      })
+      soften(context, 2.5, (layer) => {
+        layer.fillStyle = '#FFFFFF80'
+        layer.beginPath()
+        layer.ellipse(CENTER - 5, CENTER - radius + 5, 11, 5, 0, 0, TAU)
+        layer.fill()
       })
     })
   })
@@ -333,33 +344,33 @@ function jupiterTexture() {
       lightOffset: 0.22,
     })
     clip(context, CENTER, CENTER, radius, () => {
-      soften(context, 3.5, () => {
+      soften(context, 3.5, (layer) => {
         for (const [offset, height, alpha] of [
           [-40, 8, 0.26], [-27, 5, 0.14], [-14, 10, 0.32],
           [2, 6, 0.18], [11, 12, 0.34], [28, 6, 0.17], [37, 9, 0.24],
         ]) {
-          const band = context.createLinearGradient(0, CENTER + offset, 0, CENTER + offset + height)
+          const band = layer.createLinearGradient(0, CENTER + offset, 0, CENTER + offset + height)
           band.addColorStop(0, '#18100A00')
           band.addColorStop(0.5, `rgba(24,16,10,${alpha})`)
           band.addColorStop(1, '#18100A00')
-          context.fillStyle = band
-          context.fillRect(CENTER - radius, CENTER + offset, radius * 2, height)
+          layer.fillStyle = band
+          layer.fillRect(CENTER - radius, CENTER + offset, radius * 2, height)
         }
-      }, '#18100A')
-      soften(context, 3, () => {
-        context.fillStyle = '#300C064D'
-        context.beginPath()
-        context.ellipse(CENTER + 15, CENTER + 16, 11, 6, 0, 0, TAU)
-        context.fill()
-      }, '#300C06')
-      soften(context, 7, () => {
-        context.fillStyle = '#140E0C3D'
+      })
+      soften(context, 3, (layer) => {
+        layer.fillStyle = '#300C064D'
+        layer.beginPath()
+        layer.ellipse(CENTER + 15, CENTER + 16, 11, 6, 0, 0, TAU)
+        layer.fill()
+      })
+      soften(context, 7, (layer) => {
+        layer.fillStyle = '#140E0C3D'
         for (const dy of [-radius, radius]) {
-          context.beginPath()
-          context.ellipse(CENTER, CENTER + dy, radius, 11, 0, 0, TAU)
-          context.fill()
+          layer.beginPath()
+          layer.ellipse(CENTER, CENTER + dy, radius, 11, 0, 0, TAU)
+          layer.fill()
         }
-      }, '#140E0C')
+      })
     })
   })
 }
@@ -369,19 +380,17 @@ function saturnTexture() {
   const tilt = -0.3
 
   function ringArc(context, from, to) {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(tilt)
-    soften(context, 1.1, () => {
+    soften(context, 1.1, (layer) => {
+      layer.translate(CENTER, CENTER)
+      layer.rotate(tilt)
       for (const [rx, ry, alpha, width] of [[52, 15, 0.09, 4], [64, 18.5, 0.46, 7], [77, 22.3, 0.24, 5]]) {
-        context.strokeStyle = `rgba(255,255,255,${alpha})`
-        context.lineWidth = width
-        context.beginPath()
-        context.ellipse(0, 0, rx, ry, 0, from, to)
-        context.stroke()
+        layer.strokeStyle = `rgba(255,255,255,${alpha})`
+        layer.lineWidth = width
+        layer.beginPath()
+        layer.ellipse(0, 0, rx, ry, 0, from, to)
+        layer.stroke()
       }
     })
-    context.restore()
   }
 
   return createTexture((context) => {
@@ -392,56 +401,49 @@ function saturnTexture() {
       lightOffset: 0.26,
     })
     clip(context, CENTER, CENTER, radius, () => {
-      soften(context, 4, () => {
-        context.fillStyle = '#1A120A38'
-        context.fillRect(CENTER - radius, CENTER - 5, radius * 2, 7)
-        context.fillStyle = '#1A120A29'
-        context.fillRect(CENTER - radius, CENTER + 9, radius * 2, 6)
-      }, '#1A120A')
-      soften(context, 2, () => {
-        context.save()
-        context.translate(CENTER, CENTER)
-        context.rotate(tilt)
-        context.fillStyle = '#0000004D'
-        context.fillRect(-radius - 4, 1.5, radius * 2 + 8, 3.5)
-        context.restore()
-      }, '#000000')
+      soften(context, 4, (layer) => {
+        layer.fillStyle = '#1A120A38'
+        layer.fillRect(CENTER - radius, CENTER - 5, radius * 2, 7)
+        layer.fillStyle = '#1A120A29'
+        layer.fillRect(CENTER - radius, CENTER + 9, radius * 2, 6)
+      })
+      soften(context, 2, (layer) => {
+        layer.translate(CENTER, CENTER)
+        layer.rotate(tilt)
+        layer.fillStyle = '#0000004D'
+        layer.fillRect(-radius - 4, 1.5, radius * 2 + 8, 3.5)
+      })
     })
     ringArc(context, 0, Math.PI)
-    soften(context, 5, () => {
-      context.save()
-      context.translate(CENTER, CENTER)
-      context.rotate(tilt)
-      context.globalCompositeOperation = 'destination-out'
-      context.fillStyle = '#0000008C'
-      context.beginPath()
-      context.ellipse(18, 13, 22, 9, 0.3, 0, TAU)
-      context.fill()
-      context.restore()
-    })
+    soften(context, 5, (layer) => {
+      layer.translate(CENTER, CENTER)
+      layer.rotate(tilt)
+      layer.fillStyle = '#0000008C'
+      layer.beginPath()
+      layer.ellipse(18, 13, 22, 9, 0.3, 0, TAU)
+      layer.fill()
+    }, 'destination-out')
   })
 }
 
 function starTexture() {
   function ray(context, length, width, rotation, alpha) {
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(rotation)
-    soften(context, 1.4, () => {
-      const taper = context.createLinearGradient(0, 0, length, 0)
+    soften(context, 1.4, (layer) => {
+      layer.translate(CENTER, CENTER)
+      layer.rotate(rotation)
+      const taper = layer.createLinearGradient(0, 0, length, 0)
       taper.addColorStop(0, `rgba(255,255,255,${alpha})`)
       taper.addColorStop(0.14, `rgba(255,255,255,${alpha * 0.8})`)
       taper.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.28})`)
       taper.addColorStop(1, '#FFFFFF00')
-      context.fillStyle = taper
-      context.beginPath()
-      context.moveTo(0, -width)
-      context.quadraticCurveTo(length * 0.3, -width * 0.28, length, 0)
-      context.quadraticCurveTo(length * 0.3, width * 0.28, 0, width)
-      context.closePath()
-      context.fill()
+      layer.fillStyle = taper
+      layer.beginPath()
+      layer.moveTo(0, -width)
+      layer.quadraticCurveTo(length * 0.3, -width * 0.28, length, 0)
+      layer.quadraticCurveTo(length * 0.3, width * 0.28, 0, width)
+      layer.closePath()
+      layer.fill()
     })
-    context.restore()
   }
 
   return createTexture((context) => {
@@ -483,9 +485,9 @@ function clusterTexture({ seed, count, reach, concentration, centers, haze = fal
 
     if (haze) {
       const brightest = [...stars].sort((a, b) => b.brightness - a.brightness).slice(0, 5)
-      soften(context, 8, () => {
+      soften(context, 8, (layer) => {
         for (const star of brightest) {
-          cloud(context, star.x, star.y, 30, 12, -0.7, 0.105)
+          cloud(layer, star.x, star.y, 30, 12, -0.7, 0.105)
         }
       })
     }
@@ -503,20 +505,17 @@ function andromedaTexture() {
     cloud(context, CENTER, CENTER, 120, 27, tilt, 0.5, 2.0)
     cloud(context, CENTER, CENTER, 74, 30, tilt, 0.26)
     cloud(context, CENTER, CENTER, 40, 26, tilt, 0.36)
-    context.save()
-    context.translate(CENTER, CENTER)
-    context.rotate(tilt)
-    context.globalCompositeOperation = 'destination-out'
-    const lane = context.createLinearGradient(-114, 0, 114, 0)
-    lane.addColorStop(0, '#00000000')
-    lane.addColorStop(0.5, '#00000080')
-    lane.addColorStop(1, '#00000000')
-    soften(context, 3.5, () => {
-      context.fillStyle = lane
-      context.fillRect(-114, 5, 228, 4.5)
-      context.fillRect(-70, -9, 140, 3)
-    })
-    context.restore()
+    soften(context, 3.5, (layer) => {
+      layer.translate(CENTER, CENTER)
+      layer.rotate(tilt)
+      const lane = layer.createLinearGradient(-114, 0, 114, 0)
+      lane.addColorStop(0, '#00000000')
+      lane.addColorStop(0.5, '#00000080')
+      lane.addColorStop(1, '#00000000')
+      layer.fillStyle = lane
+      layer.fillRect(-114, 5, 228, 4.5)
+      layer.fillRect(-70, -9, 140, 3)
+    }, 'destination-out')
     glow(context, CENTER, CENTER, 24, 0.78, 2.0)
   }, true)
 }

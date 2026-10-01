@@ -20,9 +20,11 @@ function Icon({ name }) {
       viewBox='0 0 24 24'
       fill='none'
       stroke='currentColor'
-      strokeWidth='1.5'
+      strokeWidth='1.25'
+      strokeLinecap='butt'
+      strokeLinejoin='miter'
     >
-      <path d={ICON_PATHS[name]} vectorEffect='non-scaling-stroke' />
+      <path d={ICON_PATHS[name]} />
     </svg>
   )
 }
@@ -88,7 +90,7 @@ export default function VisitorBookControls({ controls, initialPointer, setNativ
       if (!cursor) return
       const overControls = event.target instanceof Element
         && event.target.closest('.visitor-book-toolbar, .visitor-book-page-navigation')
-      cursor.style.opacity = event.pointerType === 'touch' || overControls ? '0' : '1'
+      cursor.style.opacity = event.pointerType !== 'mouse' || overControls ? '0' : '1'
       cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-3px, -21px)`
     }
 

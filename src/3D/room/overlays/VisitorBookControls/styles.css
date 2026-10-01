@@ -3,6 +3,8 @@
   inset: 0;
   z-index: 25;
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .visitor-book-toolbar {
@@ -28,6 +30,8 @@
   background: transparent;
   color: #F0D080;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .visitor-book-toolbar button:not(:disabled):hover .visitor-book-tool-art,
@@ -50,6 +54,7 @@
 
 .visitor-book-toolbar .visitor-book-tool-art {
   transition: transform 0.14s ease;
+  shape-rendering: geometricPrecision;
 }
 
 .visitor-book-toolbar .visitor-book-trash {
@@ -89,6 +94,8 @@
   border: 0;
   background: transparent;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .visitor-book-page-navigation span {
