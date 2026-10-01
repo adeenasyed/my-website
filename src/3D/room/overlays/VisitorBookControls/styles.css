@@ -50,6 +50,7 @@
 
 .visitor-book-toolbar .visitor-book-tool-art {
   transition: transform 0.14s ease;
+  shape-rendering: geometricPrecision;
 }
 
 .visitor-book-toolbar .visitor-book-trash {
