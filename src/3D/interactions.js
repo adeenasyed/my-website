@@ -144,6 +144,11 @@ export function createInteractionManager(camera, renderer) {
     }
   })
 
+  // Safari may treat rapid drawing strokes as a double-tap and suppress the second contact.
+  renderer.domElement.addEventListener('touchstart', (e) => {
+    if (drawingSurface) e.preventDefault()
+  }, { passive: false })
+
   function getDrawingUv(e) {
     if (!drawingSurface) return null
     setPointerFromEvent(e)
@@ -158,16 +163,12 @@ export function createInteractionManager(camera, renderer) {
     }
   }
 
-  function finishDrawing() {
-    drawingPointerId = null
-    drawingControls.endStroke()
-  }
-
   function endDrawing(e) {
     if (e.pointerId !== drawingPointerId) return
     e.preventDefault()
     if (e.type === 'pointerup') continueDrawing(e)
-    finishDrawing()
+    drawingPointerId = null
+    drawingControls.endStroke()
   }
 
   renderer.domElement.addEventListener('click', (e) => {
@@ -183,11 +184,10 @@ export function createInteractionManager(camera, renderer) {
   })
 
   renderer.domElement.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0) return
+    if (e.button !== 0 || drawingPointerId !== null) return
     const uv = getDrawingUv(e)
     if (!uv) return
     e.preventDefault()
-    if (drawingPointerId !== null) finishDrawing()
     drawingPointerId = e.pointerId
     renderer.domElement.setPointerCapture(e.pointerId)
     drawingControls.beginStroke(uv)
@@ -202,8 +202,6 @@ export function createInteractionManager(camera, renderer) {
   renderer.domElement.addEventListener('pointerup', endDrawing)
 
   renderer.domElement.addEventListener('pointercancel', endDrawing)
-
-  renderer.domElement.addEventListener('lostpointercapture', endDrawing)
 
   return { add, addBlockers, update, setEnabled, setNativeCursorHidden, setDrawingTarget, isHovering, projectToScreen, pointerNdc }
 }
