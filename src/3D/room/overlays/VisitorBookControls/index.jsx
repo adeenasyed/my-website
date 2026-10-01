@@ -29,7 +29,7 @@ function Icon({ name }) {
   )
 }
 
-export default function VisitorBookControls({ controls, initialPointer, setNativeCursorHidden }) {
+export default function VisitorBookControls({ controls, initialPointer, onClose, setNativeCursorHidden }) {
   const [tool, setTool] = useState('pencil')
   const [hasDrawing, setHasDrawing] = useState(false)
   const [pageIndex, setPageIndex] = useState(0)
@@ -98,6 +98,12 @@ export default function VisitorBookControls({ controls, initialPointer, setNativ
       if (cursorRef.current) cursorRef.current.style.opacity = '0'
     }
 
+    function closeOutsideBook(event) {
+      const overControls = event.target instanceof Element
+        && event.target.closest('.visitor-book-toolbar, .visitor-book-page-navigation')
+      if (!overControls && !controls.containsPoint(event.clientX, event.clientY)) onClose()
+    }
+
     const pointer = initialPointerRef.current
     if (pointer) {
       positionCursor({
@@ -109,17 +115,19 @@ export default function VisitorBookControls({ controls, initialPointer, setNativ
     }
     positionControls()
     window.addEventListener('pointermove', positionCursor)
+    window.addEventListener('pointerdown', closeOutsideBook)
     document.addEventListener('mouseleave', hideCursor)
 
     return () => {
       cancelled = true
       cancelAnimationFrame(animationFrameId)
       window.removeEventListener('pointermove', positionCursor)
+      window.removeEventListener('pointerdown', closeOutsideBook)
       document.removeEventListener('mouseleave', hideCursor)
       controls.setDrawingEnabled(false)
       controls.setDrawingListener(null)
     }
-  }, [controls, showPage])
+  }, [controls, onClose, showPage])
 
   useEffect(() => {
     if (pageIndex !== 0) return

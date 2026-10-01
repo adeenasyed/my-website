@@ -113,6 +113,17 @@ export function createInteractionManager(camera, renderer) {
     raycaster.setFromCamera(pointerNdc, camera)
   }
 
+  function intersects(meshes, x, y) {
+    setPointerFromEvent({ clientX: x, clientY: y })
+    return raycaster.intersectObjects(meshes, false).some(({ object }) => {
+      while (object) {
+        if (!object.visible) return false
+        object = object.parent
+      }
+      return true
+    })
+  }
+
   function pick() {
     const hits = raycaster.intersectObjects(allMeshes, false)
     for (const hit of hits) {
@@ -203,5 +214,5 @@ export function createInteractionManager(camera, renderer) {
 
   renderer.domElement.addEventListener('pointercancel', endDrawing)
 
-  return { add, addBlockers, update, setEnabled, setNativeCursorHidden, setDrawingTarget, isHovering, projectToScreen, pointerNdc }
+  return { add, addBlockers, update, setEnabled, setNativeCursorHidden, setDrawingTarget, isHovering, intersects, projectToScreen, pointerNdc }
 }

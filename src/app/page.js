@@ -1,6 +1,6 @@
 'use client'
 import '@/3D/styles.css'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createScene } from '@/3D/scene.js'
 import { PURPLE } from '@/theme.js'
 import ContactPopup from '@/3D/room/overlays/ContactPopup'
@@ -180,10 +180,10 @@ export default function Landing() {
     setShowVisitorBook(true)
   }
 
-  function closeVisitorBook() {
+  const closeVisitorBook = useCallback(() => {
     worldRef.current?.visitorBookControls.setOpen(false)
     setShowVisitorBook(false)
-  }
+  }, [])
 
   function handleEscape() {
     closeRemote()
@@ -460,6 +460,7 @@ export default function Landing() {
         <VisitorBookControls
           controls={worldRef.current.visitorBookControls}
           initialPointer={mouseInputRef.current ? cursorStateRef.current : null}
+          onClose={closeVisitorBook}
           setNativeCursorHidden={worldRef.current.setNativeCursorHidden}
         />
       )}

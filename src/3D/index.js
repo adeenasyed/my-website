@@ -69,6 +69,9 @@ export async function createWorld({
         pageNavigation: interactions.projectToScreen(visitorBook.controlAnchors.pageNavigation),
       }
     },
+    containsPoint(x, y) {
+      return interactions.intersects(visitorBook.meshes, x, y)
+    },
   }
 
   const skyInteractions = (await sky.ready).map(({ meshes, data }) => interactions.add(
