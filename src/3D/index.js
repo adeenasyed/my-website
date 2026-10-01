@@ -92,14 +92,21 @@ export async function createWorld({
   interactions.setEnabled(false, skyInteractions)
 
   interactions.addBlockers(scene)
-
-  const intro = createIntro(camera, controls, interactions, onIntroComplete)
+  room.setVisible(false)
 
   const pointerDirection = new THREE.Vector3()
+  let activeView = 'landing'
+  let introComplete = false
   let lastDirectionKey = ''
 
+  const intro = createIntro(camera, controls, interactions, () => {
+    introComplete = true
+    controls.enabled = activeView !== 'landing'
+    onIntroComplete()
+  })
+
   function updatePointerDirection() {
-    if (room.group.visible) {
+    if (activeView !== 'sky') {
       if (lastDirectionKey === '') return
       lastDirectionKey = ''
       onPointerDirectionChange(null)
@@ -118,41 +125,27 @@ export async function createWorld({
     onPointerDirectionChange(readout)
   }
 
-  let lastTime = 0
-  let lastRender = 0
-  let animationFrameId = null
-  let disposed = false
+  let introStarted = false
 
-  function animate(time = 0) {
-    if (disposed) return
-
-    animationFrameId = requestAnimationFrame(animate)
-
-    if (time - lastRender < 1000 / 75) return
-    lastRender = time
-
-    const delta = Math.min((time - lastTime) / 1000, 0.1)
-    lastTime = time
-
-    const introProgress = intro.update(delta)
+  function update(delta) {
+    const introProgress = introStarted ? intro.update(delta) : null
     if (introProgress !== null) sky.setIntroProgress(introProgress)
-    sky.update(delta)
     room.update(delta)
     zoomController.update(delta)
     if (controls.enabled) controls.update()
     interactions.update()
     updatePointerDirection()
-
-    renderer.render(scene, camera)
   }
 
   function startIntro() {
-    animate()
+    introStarted = true
   }
 
-  function setRoomVisible(visible) {
-    room.setVisible(visible)
-    interactions.setEnabled(!visible, skyInteractions)
+  function setView(view) {
+    activeView = view
+    controls.enabled = view !== 'landing' && introComplete
+    room.setVisible(view === 'room')
+    interactions.setEnabled(view === 'sky', skyInteractions)
   }
 
   function enableCameraControls() {
@@ -160,8 +153,6 @@ export async function createWorld({
   }
 
   function dispose() {
-    disposed = true
-    cancelAnimationFrame(animationFrameId)
     room.dispose()
     zoomController.dispose()
   }
@@ -173,8 +164,9 @@ export async function createWorld({
     setInteractionsEnabled: interactions.setEnabled,
     setNativeCursorHidden: interactions.setNativeCursorHidden,
     resetCamera: zoomController.resetCamera,
+    update,
     startIntro,
-    setRoomVisible,
+    setView,
     enableCameraControls,
     dispose,
   }

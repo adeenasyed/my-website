@@ -56,27 +56,37 @@ export function createScene() {
   const resizeObserver = new ResizeObserver(onResize)
   resizeObserver.observe(canvas)
 
-  let animationId
-  let loopCancelled = false
+  let update = null
+  let lastTime = 0
+  let lastRender = 0
+  let animationFrameId = null
 
-  function landingLoop() {
-    if (loopCancelled) return
-    animationId = requestAnimationFrame(landingLoop)
+  function animate(time = 0) {
+    animationFrameId = requestAnimationFrame(animate)
+
+    if (time - lastRender < 1000 / 75) return
+    lastRender = time
+
+    const delta = Math.min((time - lastTime) / 1000, 0.1)
+    lastTime = time
+
+    sky.update(delta)
+    update?.(delta)
     renderer.render(scene, camera)
   }
-  landingLoop()
+  animate()
 
-  function cancelLandingLoop() {
-    loopCancelled = true
-    cancelAnimationFrame(animationId)
+  function setUpdate(nextUpdate) {
+    update = nextUpdate
   }
 
   function dispose() {
+    cancelAnimationFrame(animationFrameId)
     resizeObserver.disconnect()
     sky.dispose()
     renderer.domElement.remove()
     renderer.dispose()
   }
 
-  return { scene, camera, renderer, sky, cancelLandingLoop, dispose }
+  return { scene, camera, renderer, sky, setUpdate, dispose }
 }
