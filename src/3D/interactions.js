@@ -158,12 +158,16 @@ export function createInteractionManager(camera, renderer) {
     }
   }
 
+  function finishDrawing() {
+    drawingPointerId = null
+    drawingControls.endStroke()
+  }
+
   function endDrawing(e) {
     if (e.pointerId !== drawingPointerId) return
     e.preventDefault()
     if (e.type === 'pointerup') continueDrawing(e)
-    drawingPointerId = null
-    drawingControls.endStroke()
+    finishDrawing()
   }
 
   renderer.domElement.addEventListener('click', (e) => {
@@ -179,10 +183,11 @@ export function createInteractionManager(camera, renderer) {
   })
 
   renderer.domElement.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0 || drawingPointerId !== null) return
+    if (e.button !== 0) return
     const uv = getDrawingUv(e)
     if (!uv) return
     e.preventDefault()
+    if (drawingPointerId !== null) finishDrawing()
     drawingPointerId = e.pointerId
     renderer.domElement.setPointerCapture(e.pointerId)
     drawingControls.beginStroke(uv)
@@ -197,6 +202,8 @@ export function createInteractionManager(camera, renderer) {
   renderer.domElement.addEventListener('pointerup', endDrawing)
 
   renderer.domElement.addEventListener('pointercancel', endDrawing)
+
+  renderer.domElement.addEventListener('lostpointercapture', endDrawing)
 
   return { add, addBlockers, update, setEnabled, setNativeCursorHidden, setDrawingTarget, isHovering, projectToScreen, pointerNdc }
 }

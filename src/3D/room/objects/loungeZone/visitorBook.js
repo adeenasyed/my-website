@@ -17,7 +17,6 @@ const PAPER_COLOR = '#F7F0DF'
 const PENCIL_WIDTH = 5
 const ERASER_WIDTH = 18
 const LEFT_PAGE_SPINE_OVERLAP = 1.75
-const VISIBILITY_CHECK_TIMEOUT = 250
 
 function createCoverTexture(maxAnisotropy) {
   const canvas = document.createElement('canvas')
@@ -231,8 +230,6 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
   let pageIndex = 0
   let tool = 'pencil'
   let onDrawingChange = null
-  let hasDrawing = false
-  let visibilityCheckId = null
   let openStart = 0
   let openTarget = 0
   let openProgress = 0
@@ -282,32 +279,8 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
     return false
   }
 
-  function updateHasDrawing(nextHasDrawing) {
-    if (nextHasDrawing === hasDrawing) return
-    hasDrawing = nextHasDrawing
-    onDrawingChange?.(hasDrawing)
-  }
-
-  function cancelVisibilityCheck() {
-    if (visibilityCheckId === null) return
-    if ('requestIdleCallback' in window) window.cancelIdleCallback(visibilityCheckId)
-    else window.clearTimeout(visibilityCheckId)
-    visibilityCheckId = null
-  }
-
-  function scheduleVisibilityCheck() {
-    const run = () => {
-      visibilityCheckId = null
-      updateHasDrawing(hasVisibleDrawing())
-    }
-
-    // Keep the expensive ink canvas read out of pointerup so the next stroke
-    // can begin without waiting for it.
-    if ('requestIdleCallback' in window) {
-      visibilityCheckId = window.requestIdleCallback(run, { timeout: VISIBILITY_CHECK_TIMEOUT })
-    } else {
-      visibilityCheckId = window.setTimeout(run, VISIBILITY_CHECK_TIMEOUT)
-    }
+  function notifyDrawingChange() {
+    onDrawingChange?.(hasVisibleDrawing())
   }
 
   function setOpen(open) {
@@ -340,11 +313,10 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
 
   function setDrawingListener(listener) {
     onDrawingChange = listener
-    listener?.(hasDrawing)
+    listener?.(hasVisibleDrawing())
   }
 
   function beginStroke(uv) {
-    cancelVisibilityCheck()
     const point = pointFromUv(uv)
     activeStroke = {
       tool,
@@ -365,12 +337,10 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
   }
 
   function endStroke() {
-    const addsInk = activeStroke.tool === 'pencil'
     strokes.push(activeStroke)
     undoneStrokes = []
     activeStroke = null
-    if (addsInk) updateHasDrawing(true)
-    else if (hasDrawing) scheduleVisibilityCheck()
+    notifyDrawingChange()
   }
 
   function getStrokes() {
@@ -378,40 +348,34 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
   }
 
   function clear() {
-    cancelVisibilityCheck()
     strokes = []
     undoneStrokes = []
-    updateHasDrawing(false)
+    notifyDrawingChange()
     redraw()
   }
 
   function undo() {
     const stroke = strokes.pop()
     if (!stroke) return
-    cancelVisibilityCheck()
     undoneStrokes.push(stroke)
-    if (strokes.length) scheduleVisibilityCheck()
-    else updateHasDrawing(false)
+    notifyDrawingChange()
     redraw()
   }
 
   function redo() {
     const stroke = undoneStrokes.pop()
     if (!stroke) return
-    cancelVisibilityCheck()
     strokes.push(stroke)
-    if (stroke.tool === 'pencil') updateHasDrawing(true)
-    else if (hasDrawing) scheduleVisibilityCheck()
+    notifyDrawingChange()
     redraw()
   }
 
   function save(entry, maxEntries) {
-    cancelVisibilityCheck()
     entries.unshift(entry)
     entries.length = Math.min(entries.length, maxEntries)
     strokes = []
     undoneStrokes = []
-    updateHasDrawing(false)
+    notifyDrawingChange()
     redraw()
   }
 
@@ -427,7 +391,6 @@ export function loadVisitorBook(tvStandBox, maxAnisotropy) {
   }
 
   function dispose() {
-    cancelVisibilityCheck()
     const materials = new Set()
     visitorBook.traverse((child) => {
       if (!child.isMesh) return
