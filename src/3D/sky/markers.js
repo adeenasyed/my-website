@@ -8,7 +8,6 @@ import {
 } from './stars.js'
 
 const TEXTURE_SIZE = 256
-const TEXTURE_PIXEL_RATIO = 2
 const CENTER = TEXTURE_SIZE / 2
 const TAU = Math.PI * 2
 const MARKER_RADIUS = STAR_SHELL_RADIUS * 0.99
@@ -68,22 +67,20 @@ function seededRandom(seed) {
 
 function createCanvas(draw) {
   const canvas = document.createElement('canvas')
-  canvas.width = canvas.height = TEXTURE_SIZE * TEXTURE_PIXEL_RATIO
+  canvas.width = canvas.height = TEXTURE_SIZE
   const context = canvas.getContext('2d')
-  context.scale(TEXTURE_PIXEL_RATIO, TEXTURE_PIXEL_RATIO)
   context.lineCap = 'round'
   draw(context)
   return canvas
 }
 
-function createTexture(draw) {
+function createTexture(draw, crisp = false) {
   const texture = new THREE.CanvasTexture(createCanvas(draw))
   texture.colorSpace = THREE.SRGBColorSpace
-  // These sprites are already softly shaded in canvas space. Letting WebGL
-  // generate another blurred mip level makes the small iPad rendering look
-  // muddy, especially around the Moon's edge and Saturn's rings.
-  texture.generateMipmaps = false
-  texture.minFilter = THREE.LinearFilter
+  if (crisp) {
+    texture.generateMipmaps = false
+    texture.minFilter = THREE.LinearFilter
+  }
   return texture
 }
 
@@ -133,41 +130,50 @@ function disc(context, x, y, radius, { centerOpacity = 1, edgeOpacity, lightOffs
 
 function soften(context, radius, draw, color = '#FFFFFF') {
   context.save()
-  const blur = `blur(${radius}px)`
-  const supportsFilter = 'filter' in context
-  if (supportsFilter) context.filter = blur
-
-  if (!supportsFilter) {
-    // Older iPad Safari versions expose a different Canvas 2D feature set.
-    // Draw the shadow back at the intended position while moving the hard
-    // source shape off-canvas, so the fallback does not reveal both layers.
-    const offset = TEXTURE_SIZE * 4
+  if ('filter' in context) context.filter = `blur(${radius}px)`
+  else {
     context.shadowBlur = radius * 2
     context.shadowColor = color
-    context.shadowOffsetX = offset
-    context.translate(-offset, 0)
   }
   draw()
   context.restore()
 }
 
+function softenLayer(context, radius, draw) {
+  if ('filter' in context) {
+    soften(context, radius, () => draw(context))
+    return
+  }
+
+  // Older iPad Safari needs offset layer copies in place of canvas filters.
+  const layer = createCanvas(draw)
+  context.save()
+  for (let y = -2; y <= 2; y++) {
+    for (let x = -2; x <= 2; x++) {
+      context.globalAlpha = ((3 - Math.abs(x)) * (3 - Math.abs(y))) / 81
+      context.drawImage(layer, x * radius / 2, y * radius / 2)
+    }
+  }
+  context.restore()
+}
+
 function mottle(context, x, y, radius, alpha, { seed, count, min, max, dark }) {
   const random = seededRandom(seed)
-  soften(context, 6, () => {
+  softenLayer(context, 6, (layer) => {
     for (let i = 0; i < count; i++) {
       const angle = random() * TAU
       const distance = Math.sqrt(random()) * radius * 0.92
       const size = radius * (min + random() * (max - min))
       const strength = alpha * (0.4 + random() * 0.6)
-      context.fillStyle = dark ? `rgba(0,0,0,${strength})` : `rgba(255,255,255,${strength})`
-      context.beginPath()
-      context.ellipse(
+      layer.fillStyle = dark ? `rgba(0,0,0,${strength})` : `rgba(255,255,255,${strength})`
+      layer.beginPath()
+      layer.ellipse(
         x + Math.cos(angle) * distance, y + Math.sin(angle) * distance,
         size, size * (0.6 + random() * 0.6), random() * TAU, 0, TAU,
       )
-      context.fill()
+      layer.fill()
     }
-  }, dark ? '#000000' : '#FFFFFF')
+  })
 }
 
 function clip(context, x, y, radius, draw) {
@@ -217,22 +223,22 @@ function moonTexture({ illuminated, waxing }) {
     })
 
     clip(context, CENTER, CENTER, radius, () => {
-      soften(context, 9, () => {
-        context.strokeStyle = '#FFFFFF12'
-        context.lineWidth = 5
+      softenLayer(context, 9, (layer) => {
+        layer.strokeStyle = '#FFFFFF12'
+        layer.lineWidth = 5
         for (let i = 0; i < 9; i++) {
           const angle = -Math.PI / 2 + (i - 4) * 0.38
-          context.beginPath()
-          context.moveTo(CENTER - 8, CENTER + 40)
-          context.lineTo(CENTER - 8 + Math.cos(angle) * 98, CENTER + 40 + Math.sin(angle) * 98)
-          context.stroke()
+          layer.beginPath()
+          layer.moveTo(CENTER - 8, CENTER + 40)
+          layer.lineTo(CENTER - 8 + Math.cos(angle) * 98, CENTER + 40 + Math.sin(angle) * 98)
+          layer.stroke()
         }
       })
 
       mottle(context, CENTER, CENTER, radius, 0.04, { seed: 5, count: 30, min: 0.14, max: 0.34, dark: false })
       mottle(context, CENTER, CENTER, radius, 0.055, { seed: 12, count: 34, min: 0.14, max: 0.34, dark: true })
 
-      soften(context, 5.5, () => {
+      softenLayer(context, 5.5, (layer) => {
         for (const [dx, dy, rx, ry, rotation, weight] of [
           [-26, -33, 27, 23, -0.25, 1.00],
           [-44, 2, 20, 38, 0.18, 0.78],
@@ -244,22 +250,22 @@ function moonTexture({ illuminated, waxing }) {
           [-20, 28, 16, 11, 0.30, 0.62],
           [-38, 32, 10, 9, 0.00, 0.58],
         ]) {
-          context.fillStyle = `rgba(16,15,20,${0.1 * weight})`
+          layer.fillStyle = `rgba(16,15,20,${0.1 * weight})`
           for (let pass = 0; pass < 2; pass++) {
             const shrink = 1 - pass * 0.22
-            context.beginPath()
-            context.ellipse(CENTER + dx, CENTER + dy, rx * shrink, ry * shrink, rotation, 0, TAU)
-            context.fill()
+            layer.beginPath()
+            layer.ellipse(CENTER + dx, CENTER + dy, rx * shrink, ry * shrink, rotation, 0, TAU)
+            layer.fill()
           }
         }
-      }, '#100F14')
+      })
 
-      soften(context, 2.5, () => {
-        context.fillStyle = '#FFFFFF47'
+      softenLayer(context, 2.5, (layer) => {
+        layer.fillStyle = '#FFFFFF47'
         for (const [dx, dy, r] of [[-8, 40, 4], [-17, -14, 3.2], [34, 45, 2.4], [52, 6, 2]]) {
-          context.beginPath()
-          context.arc(CENTER + dx, CENTER + dy, r, 0, TAU)
-          context.fill()
+          layer.beginPath()
+          layer.arc(CENTER + dx, CENTER + dy, r, 0, TAU)
+          layer.fill()
         }
       })
     })
@@ -296,7 +302,7 @@ function moonTexture({ illuminated, waxing }) {
 
   return createTexture((context) => {
     glow(context, CENTER, CENTER, 124, 0.14 * illumination, 2.6)
-    context.drawImage(body, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
+    context.drawImage(body, 0, 0)
   })
 }
 
@@ -506,7 +512,7 @@ function clusterTexture({ seed, count, reach, concentration, centers, haze = fal
       const rank = (star.brightness - 0.28) / 0.72
       particle(context, star.x, star.y, 2.05 + rank * 4.6, 0.47 + rank * 0.46)
     }
-  })
+  }, true)
 }
 
 function andromedaTexture() {
@@ -530,7 +536,7 @@ function andromedaTexture() {
     })
     context.restore()
     glow(context, CENTER, CENTER, 24, 0.78, 2.0)
-  })
+  }, true)
 }
 
 function calculateSize(angularSizeArcsec, range) {
