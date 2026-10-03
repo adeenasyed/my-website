@@ -3,7 +3,6 @@ import '@/3D/styles.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createScene } from '@/3D/scene.js'
 import { PURPLE } from '@/theme.js'
-import ContactPopup from '@/3D/room/overlays/ContactPopup'
 import AttributionsPopup from '@/3D/room/overlays/AttributionsPopup'
 import RemotePopup from '@/3D/room/overlays/RemotePopup'
 import VisitorBookControls from '@/3D/room/overlays/VisitorBookControls'
@@ -11,7 +10,7 @@ import CelestialPopup from '@/3D/sky/overlays/CelestialPopup'
 import Cursor from '@/3D/sky/overlays/Cursor'
 import Compass from '@/3D/sky/overlays/Compass'
 import LandingView from './LandingView'
-import SiteChrome from './SiteChrome'
+import Navbar from './Navbar'
 
 function getDevice(width) {
   if (width < 768) return 'mobile'
@@ -53,17 +52,18 @@ export default function Landing() {
   const [showVisitorBook, setShowVisitorBook] = useState(false)
   const [ledColor, setLEDColor] = useState(PURPLE)
   const [tvSource, setTVSource] = useState('spotify')
-  const [showContact, setShowContact] = useState(false)
   const [showAttributions, setShowAttributions] = useState(false)
   const [activeCelestial, setActiveCelestial] = useState(null)
   const [mouseInput, setMouseInput] = useState(false)
-  const [device, setDevice] = useState('desktop')
-  const [loading, setLoading] = useState(0)
+  const [device, setDevice] = useState(null)
+  const [worldReady, setWorldReady] = useState(false)
+  const [introComplete, setIntroComplete] = useState(false)
   const [roomZoomed, setRoomZoomed] = useState(false)
   const [showConstellations, setShowConstellations] = useState(true)
   const [clock, setClock] = useState({ date: '', time: '' })
 
-  const showSiteChrome = loading === null && supports3D(device) && !roomZoomed
+  const canEnter = supports3D(device)
+  const showNavbar = worldReady && introComplete && !roomZoomed
 
   function drawCursor() {
     const el = cursorRef.current
@@ -107,10 +107,9 @@ export default function Landing() {
     drawCursor()
   }
 
-  function syncInteractions(currentDevice = getDevice(window.innerWidth)) {
+  function syncInteractions() {
     const interactionState = interactionStateRef.current
     const enabled = activeViewRef.current !== 'landing'
-      && supports3D(currentDevice)
       && interactionState.introComplete
       && !interactionState.remoteOpen
       && !interactionState.zoomed
@@ -119,7 +118,14 @@ export default function Landing() {
 
   function handleIntroComplete() {
     interactionStateRef.current.introComplete = true
+    setIntroComplete(true)
     syncInteractions()
+  }
+
+  function beginIntro() {
+    const world = worldRef.current
+    if (!world || interactionStateRef.current.introComplete) return
+    world.startIntro()
   }
 
   function handleZoomChange(zoomed) {
@@ -197,13 +203,13 @@ export default function Landing() {
 
   function selectView(view) {
     if (view === activeViewRef.current) return
-    const startIntro = view === 'room' && !interactionStateRef.current.introComplete
+    const shouldStartIntro = view === 'room' && !interactionStateRef.current.introComplete
     if (view !== 'sky' && celestialAnchorRef.current) closeCelestial()
     activeViewRef.current = view
     setActiveView(view)
     worldRef.current?.setView(view)
     sceneRef.current?.sky.setConstellationsVisible(view === 'sky' && showConstellations)
-    if (startIntro) worldRef.current?.startIntro()
+    if (shouldStartIntro) beginIntro()
     syncInteractions()
   }
 
@@ -225,14 +231,17 @@ export default function Landing() {
   }
 
   useEffect(() => {
-    let currentDevice = getDevice(window.innerWidth)
-    setDevice(currentDevice)
-    mouseInputRef.current = currentDevice === 'desktop'
+    const initialDevice = getDevice(window.innerWidth)
+    setDevice(initialDevice)
+    mouseInputRef.current = initialDevice === 'desktop'
     setMouseInput(mouseInputRef.current)
 
     function onResize() {
-      currentDevice = getDevice(window.innerWidth)
-      setDevice(currentDevice)
+      const nextDevice = getDevice(window.innerWidth)
+      setDevice(nextDevice)
+
+      if (supports3D(nextDevice)) loadWorld()
+
       const anchor = celestialAnchorRef.current
       if (anchor) {
         const screenPoint = anchor.getScreenPoint?.()
@@ -247,7 +256,7 @@ export default function Landing() {
         celestialAnchorRef.current = { ...nextAnchor, getScreenPoint: anchor.getScreenPoint }
         setActiveCelestial((current) => current ? { ...current, anchor: nextAnchor } : current)
       }
-      syncInteractions(currentDevice)
+      syncInteractions()
     }
     window.addEventListener('resize', onResize)
 
@@ -287,17 +296,18 @@ export default function Landing() {
 
     const context = createScene()
     sceneRef.current = context
+    let worldLoading = false
 
-    if (currentDevice === 'mobile') {
-      setLoading(null)
-    } else {
-      async function loadWorld() {
+    async function loadWorld() {
+      if (worldLoading || worldRef.current) return
+      worldLoading = true
+      try {
         const { createWorld } = await import('@/3D/index.js')
         const world = await createWorld({
           ...context,
-          onProgress: setLoading,
+          onProgress: () => {},
           tv: openRemote,
-          lightSign: () => setShowContact(true),
+          lightSign: () => selectView('landing'),
           infoButton: () => setShowAttributions(true),
           remote: openRemote,
           visitorBook: openVisitorBook,
@@ -307,14 +317,21 @@ export default function Landing() {
           onZoomChange: handleZoomChange,
           onEscape: handleEscape,
         })
-        if (!sceneRef.current) {
+        if (sceneRef.current !== context) {
           world.dispose()
           return
         }
         worldRef.current = world
         context.setUpdate(world.update)
-        setLoading(null)
+        setWorldReady(true)
+      } catch (error) {
+        console.error('world load:', error)
+      } finally {
+        worldLoading = false
       }
+    }
+
+    if (supports3D(initialDevice)) {
       loadWorld()
     }
 
@@ -362,31 +379,31 @@ export default function Landing() {
 
   useEffect(() => {
     const active = activeView === 'sky'
-      && supports3D(device)
       && mouseInput
       && !activeCelestial
       && !showVisitorBook
     cursorStateRef.current.active = active
     if (!showVisitorBook) worldRef.current?.setNativeCursorHidden(active)
     drawCursor()
-  }, [activeView, device, mouseInput, activeCelestial, showVisitorBook])
+  }, [activeView, mouseInput, activeCelestial, showVisitorBook])
 
   useEffect(() => {
-    if (showSiteChrome) return
+    if (showNavbar) return
     cursorStateRef.current.overSwitch = false
     drawCursor()
-  }, [showSiteChrome])
+  }, [showNavbar])
 
   return (
     <>
-      {loading !== null && (
-        <div className='loading-screen'>
-          <div className='loading-bar' style={{ width: `${Math.round(loading * 100)}%` }} />
-        </div>
-      )}
-
-      {activeView === 'landing' && loading === null && (
-        <LandingView canEnter={supports3D(device)} />
+      {activeView === 'landing' && device !== null && (
+        <LandingView
+          key={canEnter ? 'enter' : 'no-enter'}
+          canEnter={canEnter}
+          entryEnabled={canEnter && worldReady && !introComplete}
+          showIntro={!introComplete}
+          onLaunch={beginIntro}
+          onEnter={() => selectView('room')}
+        />
       )}
 
       {showRemote && (
@@ -408,7 +425,6 @@ export default function Landing() {
           setNativeCursorHidden={worldRef.current.setNativeCursorHidden}
         />
       )}
-      {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
       {showAttributions && <AttributionsPopup onClose={() => setShowAttributions(false)} />}
       {activeCelestial && (
         <CelestialPopup
@@ -418,10 +434,10 @@ export default function Landing() {
           onPointerInput={updatePointerInput}
         />
       )}
-      {activeView !== 'landing' && supports3D(device) && (mouseInput || activeCelestial) && <Cursor ref={cursorRef} />}
+      {activeView !== 'landing' && (mouseInput || activeCelestial) && <Cursor ref={cursorRef} />}
       {activeView !== 'landing' && <Compass ref={compassRef} />}
-      {showSiteChrome && (
-        <SiteChrome
+      {showNavbar && (
+        <Navbar
           activeView={activeView}
           clock={clock}
           disabled={showRemote}
@@ -430,11 +446,6 @@ export default function Landing() {
           onToggleConstellations={toggleConstellations}
           {...switchHoverHandlers}
         />
-      )}
-      {activeView !== 'landing' && !supports3D(device) && (
-        <div className='orientation-warning'>
-          <span className='landing-prompt'>GET A BIGGER SCREEN</span>
-        </div>
       )}
     </>
   )

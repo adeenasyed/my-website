@@ -3,7 +3,7 @@
   bottom: 2em;
   right: 2em;
   z-index: 30;
-  font-size: var(--sky-ui-base);
+  font-size: var(--ui-scale);
 }
 
 .remote-popup {

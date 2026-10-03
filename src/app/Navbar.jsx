@@ -1,24 +1,24 @@
 const VIEW_OPTIONS = [
-  { id: 'landing', label: 'LANDING VIEW' },
-  { id: 'room', label: 'ROOM VIEW' },
-  { id: 'sky', label: 'SKY VIEW' },
+  { id: 'landing', label: 'ME' },
+  { id: 'room', label: 'MY ROOM' },
+  { id: 'sky', label: 'THE SKY' },
 ]
 
 function ViewOption({ selected, label, ...props }) {
   return (
     <button
-      className='view-switch-option'
+      className='view-option'
       type='button'
       aria-pressed={selected}
       {...props}
     >
-      <span className='view-switch-box'>[{selected ? '■' : '\u00A0'}]</span>
+      <span className='view-option-box'>[{selected ? '■' : '\u00A0'}]</span>
       {label}
     </button>
   )
 }
 
-export default function SiteChrome({
+export default function Navbar({
   activeView,
   clock,
   disabled,
@@ -28,9 +28,9 @@ export default function SiteChrome({
   ...hoverHandlers
 }) {
   return (
-    <div className='sky-overlay'>
-      <div className='sky-caption'>THE SKY ABOVE <br /> TORONTO, ON <br /> {clock.date} <br /> {clock.time}</div>
-      <div className='view-switch' role='group' {...hoverHandlers}>
+    <div className='navbar'>
+      <div className='navbar-caption'>THE SKY ABOVE <br /> TORONTO, ON <br /> {clock.date} <br /> {clock.time}</div>
+      <div className='view-options' role='group' {...hoverHandlers}>
         {VIEW_OPTIONS.map(({ id, label }) => (
           <ViewOption
             key={id}
@@ -43,7 +43,7 @@ export default function SiteChrome({
       </div>
 
       {activeView === 'sky' && (
-        <div className='view-switch' role='group' {...hoverHandlers}>
+        <div className='view-options' role='group' {...hoverHandlers}>
           <ViewOption
             selected={showConstellations}
             label='CONSTELLATIONS'
