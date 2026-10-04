@@ -12,6 +12,15 @@ import {
 import { createCelestialSphere } from './sky/index.js'
 
 const BG_COLOR = new THREE.Color('#050309')
+const DEFAULT_PIXEL_RATIO_CAP = 1.5
+const COMPACT_PIXEL_RATIO_CAP = 2
+
+function getPixelRatio() {
+  const cap = window.innerWidth <= 768
+    ? COMPACT_PIXEL_RATIO_CAP
+    : DEFAULT_PIXEL_RATIO_CAP
+  return Math.min(window.devicePixelRatio, cap)
+}
 
 export function createScene() {
   const scene = new THREE.Scene()
@@ -23,7 +32,7 @@ export function createScene() {
   camera.lookAt(...DEFAULT_CAMERA_LOOK_AT)
 
   const renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+  renderer.setPixelRatio(getPixelRatio())
   renderer.setSize(window.innerWidth, window.innerHeight, false)
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
