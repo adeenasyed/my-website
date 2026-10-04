@@ -3,21 +3,14 @@ import '@/3D/styles.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createScene } from '@/3D/scene.js'
 import { PURPLE } from '@/theme.js'
-import ContactPopup from '@/3D/room/overlays/ContactPopup'
 import AttributionsPopup from '@/3D/room/overlays/AttributionsPopup'
 import RemotePopup from '@/3D/room/overlays/RemotePopup'
 import VisitorBookControls from '@/3D/room/overlays/VisitorBookControls'
 import CelestialPopup from '@/3D/sky/overlays/CelestialPopup'
 import Cursor from '@/3D/sky/overlays/Cursor'
 import Compass from '@/3D/sky/overlays/Compass'
-
-const VIEW_OPTIONS = [
-  { label: 'ROOM VIEW', room: true },
-  { label: 'SKY VIEW', room: false },
-]
-
-const START_GLITCH_MS = 560
-const START_HOLD_MS = 130
+import LandingView from './LandingView'
+import Navbar from './Navbar'
 
 function getDevice(width) {
   if (width < 768) return 'mobile'
@@ -27,20 +20,6 @@ function getDevice(width) {
 
 function supports3D(device) {
   return device === 'desktop' || device === 'tablet'
-}
-
-function ViewOption({ selected, label, ...props }) {
-  return (
-    <button
-      className='view-switch-option'
-      type='button'
-      aria-pressed={selected}
-      {...props}
-    >
-      <span className='view-switch-box'>[{selected ? '■' : '\u00A0'}]</span>
-      {label}
-    </button>
-  )
 }
 
 export default function Landing() {
@@ -67,27 +46,24 @@ export default function Landing() {
     pressed: false,
     overSwitch: false,
   })
-  const modeRef = useRef(null)
-  const startTimeoutRef = useRef(null)
-  const [mode, setMode] = useState(null)
-  const [starting, setStarting] = useState(false)
+  const activeViewRef = useRef('landing')
+  const [activeView, setActiveView] = useState('landing')
   const [showRemote, setShowRemote] = useState(false)
   const [showVisitorBook, setShowVisitorBook] = useState(false)
   const [ledColor, setLEDColor] = useState(PURPLE)
   const [tvSource, setTVSource] = useState('spotify')
-  const [showContact, setShowContact] = useState(false)
   const [showAttributions, setShowAttributions] = useState(false)
   const [activeCelestial, setActiveCelestial] = useState(null)
   const [mouseInput, setMouseInput] = useState(false)
-  const [device, setDevice] = useState('desktop')
-  const [loading, setLoading] = useState(0)
+  const [device, setDevice] = useState(null)
+  const [worldReady, setWorldReady] = useState(false)
   const [introComplete, setIntroComplete] = useState(false)
   const [roomZoomed, setRoomZoomed] = useState(false)
-  const [roomVisible, setRoomVisible] = useState(true)
   const [showConstellations, setShowConstellations] = useState(true)
   const [clock, setClock] = useState({ date: '', time: '' })
 
-  const showSkyOverlay = mode === '3D' && supports3D(device) && introComplete && !roomZoomed
+  const canEnter = supports3D(device)
+  const showNavbar = worldReady && introComplete && !roomZoomed
 
   function drawCursor() {
     const el = cursorRef.current
@@ -131,21 +107,9 @@ export default function Landing() {
     drawCursor()
   }
 
-  function handleStart() {
-    if (modeRef.current !== null || !worldRef.current) return
-    modeRef.current = '3D'
-    setStarting(true)
-    startTimeoutRef.current = setTimeout(() => {
-      setMode('3D')
-      sceneRef.current?.cancelLandingLoop()
-      worldRef.current?.startIntro()
-    }, START_GLITCH_MS + START_HOLD_MS)
-  }
-
-  function syncInteractions(currentDevice = getDevice(window.innerWidth)) {
+  function syncInteractions() {
     const interactionState = interactionStateRef.current
-    const enabled = modeRef.current === '3D'
-      && supports3D(currentDevice)
+    const enabled = activeViewRef.current !== 'landing'
       && interactionState.introComplete
       && !interactionState.remoteOpen
       && !interactionState.zoomed
@@ -156,6 +120,12 @@ export default function Landing() {
     interactionStateRef.current.introComplete = true
     setIntroComplete(true)
     syncInteractions()
+  }
+
+  function beginIntro() {
+    const world = worldRef.current
+    if (!world || interactionStateRef.current.introComplete) return
+    world.startIntro()
   }
 
   function handleZoomChange(zoomed) {
@@ -231,11 +201,16 @@ export default function Landing() {
     worldRef.current?.enableCameraControls()
   }
 
-  function selectView(showRoom) {
-    if (showRoom === roomVisible) return
-    setRoomVisible(showRoom)
-    worldRef.current?.setRoomVisible(showRoom)
-    sceneRef.current?.sky.setConstellationsVisible(!showRoom && showConstellations)
+  function selectView(view) {
+    if (view === activeViewRef.current) return
+    const shouldStartIntro = view === 'room' && !interactionStateRef.current.introComplete
+    if (view !== 'sky' && celestialAnchorRef.current) closeCelestial()
+    activeViewRef.current = view
+    setActiveView(view)
+    worldRef.current?.setView(view)
+    sceneRef.current?.sky.setConstellationsVisible(view === 'sky' && showConstellations)
+    if (shouldStartIntro) beginIntro()
+    syncInteractions()
   }
 
   function toggleConstellations() {
@@ -256,14 +231,17 @@ export default function Landing() {
   }
 
   useEffect(() => {
-    let currentDevice = getDevice(window.innerWidth)
-    setDevice(currentDevice)
-    mouseInputRef.current = currentDevice === 'desktop'
+    const initialDevice = getDevice(window.innerWidth)
+    setDevice(initialDevice)
+    mouseInputRef.current = initialDevice === 'desktop'
     setMouseInput(mouseInputRef.current)
 
     function onResize() {
-      currentDevice = getDevice(window.innerWidth)
-      setDevice(currentDevice)
+      const nextDevice = getDevice(window.innerWidth)
+      setDevice(nextDevice)
+
+      if (supports3D(nextDevice)) loadWorld()
+
       const anchor = celestialAnchorRef.current
       if (anchor) {
         const screenPoint = anchor.getScreenPoint?.()
@@ -278,7 +256,7 @@ export default function Landing() {
         celestialAnchorRef.current = { ...nextAnchor, getScreenPoint: anchor.getScreenPoint }
         setActiveCelestial((current) => current ? { ...current, anchor: nextAnchor } : current)
       }
-      syncInteractions(currentDevice)
+      syncInteractions()
     }
     window.addEventListener('resize', onResize)
 
@@ -286,12 +264,7 @@ export default function Landing() {
       if (e.key === 'Escape' && celestialAnchorRef.current) {
         e.preventDefault()
         closeCelestial()
-        return
       }
-      if (e.code !== 'Space' && e.code !== 'Enter') return
-      if (modeRef.current !== null || !supports3D(currentDevice)) return
-      e.preventDefault()
-      handleStart()
     }
     window.addEventListener('keydown', onKeyDown)
 
@@ -323,17 +296,18 @@ export default function Landing() {
 
     const context = createScene()
     sceneRef.current = context
+    let worldLoading = false
 
-    if (currentDevice === 'mobile') {
-      setLoading(null)
-    } else {
-      async function loadWorld() {
+    async function loadWorld() {
+      if (worldLoading || worldRef.current) return
+      worldLoading = true
+      try {
         const { createWorld } = await import('@/3D/index.js')
         const world = await createWorld({
           ...context,
-          onProgress: setLoading,
+          onProgress: () => {},
           tv: openRemote,
-          lightSign: () => setShowContact(true),
+          lightSign: () => selectView('landing'),
           infoButton: () => setShowAttributions(true),
           remote: openRemote,
           visitorBook: openVisitorBook,
@@ -343,13 +317,21 @@ export default function Landing() {
           onZoomChange: handleZoomChange,
           onEscape: handleEscape,
         })
-        if (!sceneRef.current) {
+        if (sceneRef.current !== context) {
           world.dispose()
           return
         }
         worldRef.current = world
-        setLoading(null)
+        context.setUpdate(world.update)
+        setWorldReady(true)
+      } catch (error) {
+        console.error('world load:', error)
+      } finally {
+        worldLoading = false
       }
+    }
+
+    if (supports3D(initialDevice)) {
       loadWorld()
     }
 
@@ -362,8 +344,6 @@ export default function Landing() {
       window.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mouseup', onMouseUp)
       window.removeEventListener('blur', onMouseUp)
-      clearTimeout(startTimeoutRef.current)
-      context.cancelLandingLoop()
       worldRef.current?.dispose()
       context.dispose()
       sceneRef.current = null
@@ -398,51 +378,32 @@ export default function Landing() {
   }, [])
 
   useEffect(() => {
-    const active = mode === '3D'
-      && supports3D(device)
+    const active = activeView === 'sky'
       && mouseInput
-      && !roomVisible
       && !activeCelestial
       && !showVisitorBook
     cursorStateRef.current.active = active
     if (!showVisitorBook) worldRef.current?.setNativeCursorHidden(active)
     drawCursor()
-  }, [mode, device, mouseInput, roomVisible, activeCelestial, showVisitorBook])
+  }, [activeView, mouseInput, activeCelestial, showVisitorBook])
 
   useEffect(() => {
-    if (showSkyOverlay) return
+    if (showNavbar) return
     cursorStateRef.current.overSwitch = false
     drawCursor()
-  }, [showSkyOverlay])
+  }, [showNavbar])
 
   return (
     <>
-      {loading !== null && (
-        <div className='loading-screen'>
-          <div className='loading-bar' style={{ width: `${Math.round(loading * 100)}%` }} />
-        </div>
-      )}
-
-      {mode === null && loading === null && (
-        <div className='landing'>
-          {supports3D(device) ? (
-            <button
-              className={`landing-prompt landing-start-button${starting ? ' landing-start-button--exiting' : ''}`}
-              type='button'
-              onClick={handleStart}
-            >
-              <span className='landing-start-symbol'>▶</span> START
-              {starting && (
-                <>
-                  <span className='landing-start-ghost landing-start-ghost--red'>▶ START</span>
-                  <span className='landing-start-ghost landing-start-ghost--blue'>▶ START</span>
-                </>
-              )}
-            </button>
-          ) : (
-            <div className='landing-prompt'>GET A BIGGER SCREEN</div>
-          )}
-        </div>
+      {activeView === 'landing' && device !== null && (
+        <LandingView
+          key={canEnter ? 'enter' : 'no-enter'}
+          canEnter={canEnter}
+          entryEnabled={canEnter && worldReady && !introComplete}
+          showIntro={!introComplete}
+          onLaunch={beginIntro}
+          onEnter={() => selectView('room')}
+        />
       )}
 
       {showRemote && (
@@ -464,7 +425,6 @@ export default function Landing() {
           setNativeCursorHidden={worldRef.current.setNativeCursorHidden}
         />
       )}
-      {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
       {showAttributions && <AttributionsPopup onClose={() => setShowAttributions(false)} />}
       {activeCelestial && (
         <CelestialPopup
@@ -474,39 +434,18 @@ export default function Landing() {
           onPointerInput={updatePointerInput}
         />
       )}
-      {mode === '3D' && supports3D(device) && (mouseInput || activeCelestial) && <Cursor ref={cursorRef} />}
-      {mode === '3D' && <Compass ref={compassRef} />}
-      {showSkyOverlay && (
-        <div className='sky-overlay'>
-          <div className='sky-caption'>THE SKY ABOVE <br /> TORONTO, ON <br /> {clock.date} <br /> {clock.time}</div>
-          <div className='view-switch' role='group' {...switchHoverHandlers}>
-            {VIEW_OPTIONS.map(({ label, room }) => (
-              <ViewOption
-                key={label}
-                selected={roomVisible === room}
-                label={label}
-                disabled={showRemote}
-                onClick={() => selectView(room)}
-              />
-            ))}
-          </div>
-
-          {!roomVisible && (
-            <div className='view-switch' role='group' {...switchHoverHandlers}>
-              <ViewOption
-                selected={showConstellations}
-                label='CONSTELLATIONS'
-                disabled={showRemote}
-                onClick={toggleConstellations}
-              />
-            </div>
-          )}
-        </div>
-      )}
-      {mode === '3D' && !supports3D(device) && (
-        <div className='orientation-warning'>
-          <span className='landing-prompt'>GET A BIGGER SCREEN</span>
-        </div>
+      {activeView !== 'landing' && (mouseInput || activeCelestial) && <Cursor ref={cursorRef} />}
+      {activeView !== 'landing' && <Compass ref={compassRef} />}
+      {showNavbar && (
+        <Navbar
+          activeView={activeView}
+          clock={clock}
+          disabled={showRemote}
+          showConstellations={showConstellations}
+          onSelectView={selectView}
+          onToggleConstellations={toggleConstellations}
+          {...switchHoverHandlers}
+        />
       )}
     </>
   )

@@ -11,7 +11,7 @@ export const COLOR_SATURATION = 1.2
 const STAR_SIZE_SCALE = 1.15
 
 const INTRO_STARS = {
-  count: 800,
+  count: 850,
   sizeScale: 1.4,
   startClearance: 1200,
   endClearance: 50,

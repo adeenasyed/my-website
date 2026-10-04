@@ -7,7 +7,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.125em;
-  font-size: var(--sky-ui-base);
+  font-size: var(--ui-scale);
   color: #00CCFF;
   opacity: 0;
   pointer-events: none;
